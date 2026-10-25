@@ -126,3 +126,43 @@ func TestPythonSpecific(t *testing.T) {
 		}
 	}
 }
+
+// The C++ variants in datastore/cpp/<db>/ are exactly what is built from the templates (go run ./cli/dsgen),
+// and each has only what its database can do.
+func TestCppVariants(t *testing.T) {
+	cases := map[string]struct{ has, hasNot []string }{
+		"pg":     {[]string{`"QPSQL"`, "select lastval()", "setHostName"}, []string{"query.lastInsertId()"}},
+		"mysql":  {[]string{`"QMYSQL"`, "lastInsertId", "setHostName"}, []string{"lastval"}},
+		"sqlite": {[]string{`"QSQLITE"`, "lastInsertId", "open(const QString &file)"}, []string{"lastval", "setHostName"}},
+	}
+	for _, db := range DBs {
+		want, err := GenerateCpp(db)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := CppText(db)
+		if err != nil {
+			t.Fatal(err)
+		}
+		all := ""
+		for _, name := range CppFiles {
+			if got[name] != string(want[name]) {
+				t.Errorf("cpp/%s/%s is out of date: go run ./cli/dsgen", db, name)
+			}
+			if strings.Contains(got[name], "{{") || strings.Contains(got[name], "//sdm:") {
+				t.Errorf("cpp/%s/%s: a variable or a marker is left", db, name)
+			}
+			all += got[name]
+		}
+		for _, s := range cases[db].has {
+			if !strings.Contains(all, s) {
+				t.Errorf("%s: %q expected", db, s)
+			}
+		}
+		for _, s := range cases[db].hasNot {
+			if strings.Contains(all, s) {
+				t.Errorf("%s: %q not expected", db, s)
+			}
+		}
+	}
+}

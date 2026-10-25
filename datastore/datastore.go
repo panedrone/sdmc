@@ -14,6 +14,9 @@
 // Python has no ORM: one variant per database, python/<db>/data_store_no_orm.py, from
 // templates/data_store_no_orm.py.txt (src/resources/data_store_no_orm.py of sdm-plugins) with the markers
 // "#sdm:if", "#sdm:else", "#sdm:end".
+//
+// C++ (Qt) has no ORM either: cpp/<db>/DataStore.h and DataStore.cpp, from templates/DataStore.*.txt
+// (DataStore_Qt5 of sdm-plugins) with the markers of Go.
 package datastore
 
 import (
@@ -24,7 +27,7 @@ import (
 	"strings"
 )
 
-//go:embed templates/*.go.txt templates/*.py.txt pg/*/*.go mysql/*/*.go sqlite/*/*.go python/*/*.py
+//go:embed templates/*.go.txt templates/*.py.txt templates/DataStore.*.txt pg/*/*.go mysql/*/*.go sqlite/*/*.go python/*/*.py cpp/*/*
 var fs embed.FS
 
 // Variants are the values of sdm init -orm, the first is the default.
@@ -209,4 +212,62 @@ func GeneratePython(db string) ([]byte, error) {
 	}
 	vars := append([]string{"{{db}}", db, "{{DB}}", dbNames[db]}, pyVars[db]...)
 	return []byte(strings.NewReplacer(vars...).Replace(text)), nil
+}
+
+// C++ -------------------------------------------------------------
+
+// CppFiles are the data store of a C++ DAO folder: no ORM, no "_ex".
+var CppFiles = []string{"DataStore.h", "DataStore.cpp"}
+
+// cppVars are what the templates of the C++ data store say about each database.
+var cppVars = map[string][]string{
+	"pg": {"{{qt_driver}}", "QPSQL",
+		"{{open_params}}", "const QString &host, int port, const QString &database, const QString &user, const QString &password",
+		"{{open_args}}", `"localhost", 5432, "postgres", "postgres", ""`,
+		"{{open_doc}}", "the connection to the server; yours, as everything but the adapter"},
+	"mysql": {"{{qt_driver}}", "QMYSQL",
+		"{{open_params}}", "const QString &host, int port, const QString &database, const QString &user, const QString &password",
+		"{{open_args}}", `"localhost", 3306, "mysql", "root", ""`,
+		"{{open_doc}}", "the connection to the server; yours, as everything but the adapter"},
+	"sqlite": {"{{qt_driver}}", "QSQLITE",
+		"{{open_params}}", "const QString &file",
+		"{{open_args}}", `"app.sqlite3"`,
+		"{{open_doc}}", "the SQLite file; yours, as everything but the adapter"},
+}
+
+// CppText is the C++ data store of db as it goes to the DAO folder: file name -> text, with LF.
+func CppText(db string) (map[string]string, error) {
+	if err := check(Variants[0], db); err != nil {
+		return nil, err
+	}
+	res := map[string]string{}
+	for _, name := range CppFiles {
+		data, err := fs.ReadFile("cpp/" + db + "/" + name)
+		if err != nil {
+			return nil, err
+		}
+		res[name] = strings.ReplaceAll(string(data), "\r\n", "\n")
+	}
+	return res, nil
+}
+
+// GenerateCpp returns the C++ data store of db from its templates: file name -> text.
+func GenerateCpp(db string) (map[string][]byte, error) {
+	if err := check(Variants[0], db); err != nil {
+		return nil, err
+	}
+	vars := strings.NewReplacer(append([]string{"{{db}}", db, "{{DB}}", dbNames[db]}, cppVars[db]...)...)
+	res := map[string][]byte{}
+	for _, name := range CppFiles {
+		tmpl, err := fs.ReadFile("templates/" + name + ".txt")
+		if err != nil {
+			return nil, err
+		}
+		text, err := specialize(string(tmpl), db, "//")
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", name, err)
+		}
+		res[name] = []byte(vars.Replace(text))
+	}
+	return res, nil
 }

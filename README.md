@@ -2,8 +2,8 @@
 
 SQL DAL Maker for Go generates the data access layer — models and DAO — from an XML manifest
 and the metadata of a **live database**. One static binary, no runtime dependencies.
-PostgreSQL, MySQL and SQLite. The same binary generates Python too, without ORM (see
-[Python](#python)).
+PostgreSQL, MySQL and SQLite. The same binary generates Python and C++ (Qt) too, without ORM
+(see [Python](#python) and [C++](#c-qt)).
 
 It works like the [SQL DAL Maker IDE plug-ins](https://sqldalmaker.sourceforge.net/):
 
@@ -241,7 +241,7 @@ Without a console (CI, a pipe) the table is all, exit 2: copy the command you ne
 `.sdm` (or no `.sdm`) means `-dir go-sdm`, as before. `-dir` wins over `.sdm`; `-dir` together
 with `-c` is an error. `go.dal` is the root file of the plug-in, `sdm` needs only its folder.
 The language of a folder is its root file, as in the plug-in: `python.dal` there means Python,
-any other folder is Go.
+`cpp.dal` C++, any other folder is Go.
 
 ## database/sql, sqlx or gorm
 
@@ -401,6 +401,52 @@ where you like. Each database has its own data store, with only what it can do, 
 
 `sdm ds` rewrites `data_store_no_orm.py` as a whole: if you changed it, look at the diff and bring
 your changes back.
+
+## C++ (Qt)
+
+The same again for C++ and Qt 5/6 (QtSql): what the C++ target of the IDE plug-ins generates, byte
+for byte. Run `sdm` in the project folder:
+
+```bash
+sdm init -lang cpp -dir sdm -dao dal -db sqlite
+```
+
+`-dir`, `-dao` and `-db` are required, `-orm` is not for C++. `init` creates `sdm/sdm.xml`,
+`sdm/settings.xml`, `sdm/cpp.dal` (the root file of the plug-in), the XSD and the data store
+`dal/DataStore.h` and `dal/DataStore.cpp`, and prints the line for `.sdm`: `sdm/cpp.dal`. The models
+and the DAO are headers `<Class>.h` in `<folders target>` (`dal`), next to the data store. The names
+are as in `sdm.xml` and the database; `sdm xml` needs no `-orm`.
+
+```cpp
+CDataStore ds;
+ds.open("app.sqlite3");
+TasksDao dao(ds);
+Task t;
+t.t_subject.Value = "subject";
+dao.createTask(t);                 // t.t_id is the generated value
+CListReader2<Task> tasks;
+dao.getTasksByGroup(t.g_id, tasks);
+```
+
+`target` of the type map is a value class of `DataStore.h`: `CInteger` (`qint64`), `CDouble`,
+`CText` (`QString`), `CBlob` (`QByteArray`), and `CValue`, which holds anything in a `QVariant`
+(`unknown`, JSON, arrays). `default` is for a type without a key; a type that is mapped already is
+not mapped to `default` once more.
+
+The data store: do not change its adapter, the value classes, `CRowProcessor`, `CListReader`,
+`DL_STR`/`DL_T` and the methods `insert`, `execDML`, `queryRow`, `queryRowList` of `CDataStore`;
+everything else is yours (`open`, transactions, your value classes). Each database has its own, from
+[`datastore/templates/DataStore.h.txt`](datastore/templates/DataStore.h.txt) and
+[`DataStore.cpp.txt`](datastore/templates/DataStore.cpp.txt) by `go run ./cli/dsgen`:
+
+|                | PostgreSQL                    | MySQL                               | SQLite                                |
+|----------------|-------------------------------|-------------------------------------|---------------------------------------|
+| files          | [cpp/pg](datastore/cpp/pg)    | [cpp/mysql](datastore/cpp/mysql)    | [cpp/sqlite](datastore/cpp/sqlite)    |
+| Qt driver      | `QPSQL`                       | `QMYSQL`                            | `QSQLITE`                             |
+| generated keys | `select lastval()`            | `lastInsertId`                      | `lastInsertId`                        |
+| `open`         | host, port, database, user, password | host, port, database, user, password | the file                        |
+
+`sdm ds` rewrites both files as a whole.
 
 ## Syntax of XML manifest
 

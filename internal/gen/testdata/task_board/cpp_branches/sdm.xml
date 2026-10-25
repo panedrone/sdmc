@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="sdm.xsd">
+
+    <!-- The branches of cpp.vm that task_board does not reach. -->
+
+    <dto-class name="Task" ref="tasks"/>
+
+    <dto-class name="NoAiPk" ref="_no_ai_pk"/>
+
+    <dao-class name="BranchesDao">
+
+        <!-- create without generated values: dao_exec_dml with the DTO -->
+        <crud dto="NoAiPk" table="_no_ai_pk">
+            <create/>
+        </crud>
+
+        <query-list method="get_subjects(b_id)" ref="select t_subject from tasks where b_id = ?"/>
+
+        <!-- external-sql of a query: the SQL is a parameter of the method -->
+        <query-list method="get_subjects_ext(b_id)" external-sql="true" ref="select t_subject from tasks where b_id = ?"/>
+
+        <query method="get_count" ref="select count(*) from tasks"/>
+
+        <query method="get_count_by_board(b_id)" ref="select count(*) from tasks where b_id = ?"/>
+
+        <query-dto dto="Task" method="get_task(t_id)" ref="select * from tasks where t_id = ?"/>
+
+        <query-dto dto="Task" method="get_task_ext(t_id)" external-sql="true" ref="select * from tasks where t_id = ?"/>
+
+        <query method="get_odd" ref="select 'a\c &quot;q&quot; é ∑' as v from tasks"/>
+
+        <exec-dml method="set_status(t_id, t_status)" ref="update tasks set t_status = ? where t_id = ?"/>
+
+        <exec-dml method="set_status_ext(t_id, t_status)" external-sql="true" ref="update tasks set t_status = ? where t_id = ?"/>
+
+        <exec-dml method="set_status_ext_no_params" external-sql="true" ref="update tasks set t_status = 0"/>
+
+        <!-- no parameters: no array of them, a zero-size array is not C++ -->
+        <exec-dml method="reset_all" ref="update tasks set t_status = 0"/>
+
+    </dao-class>
+
+</sdm>

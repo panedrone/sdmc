@@ -17,6 +17,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/panedrone/go-sdm/datastore"
@@ -37,7 +38,13 @@ type Options struct {
 }
 
 // Langs are the values of sdm init -lang, the first is the default.
-var Langs = []string{string(gen.Go), string(gen.Python)}
+var Langs = func() []string {
+	var res []string
+	for _, l := range gen.Langs {
+		res = append(res, string(l))
+	}
+	return res
+}()
 
 var xsds = []string{"sdm.xsd", "dao.xsd", "settings.xsd"}
 
@@ -56,8 +63,8 @@ var dbConf = map[string]struct{ name, url, user, jar, class, jdbcURL string }{
 
 // Init creates the configuration and the data store. It returns the created files.
 func Init(o Options) ([]string, error) {
-	if o.Lang == gen.Python {
-		return initPython(o)
+	if o.Lang.OneFolder() {
+		return initOneFolder(o)
 	}
 	module, err := readModule(filepath.Join(o.ProjectDir, "go.mod"))
 	if err != nil {
@@ -120,15 +127,18 @@ func Init(o Options) ([]string, error) {
 	return write(steps, vars, sdmDir, daoDir)
 }
 
-// initPython is Init of a Python project: no go.mod, the models and DAO in one package DaoDir, the data
-// store without ORM, python.dal: the folder is Python for sdm and for the IDE plug-in.
-func initPython(o Options) ([]string, error) {
+// initOneFolder is Init of a Python or C++ project: no go.mod, the models and DAO in one folder DaoDir
+// (Python: a package), the data store without ORM there, the root file python.dal or cpp.dal: the folder
+// is of that language for sdm and for the IDE plug-in.
+func initOneFolder(o Options) ([]string, error) {
 	if o.ORM != "" {
-		return nil, errors.New("Python has no ORM in go-sdm: no -orm")
+		return nil, fmt.Errorf("%s has no ORM in go-sdm: no -orm", langNames[o.Lang])
 	}
-	for _, p := range strings.Split(o.DaoDir, "/") {
-		if !isPythonIdentifier(p) {
-			return nil, fmt.Errorf("each element of the DAO folder must be a Python package name: %q", o.DaoDir)
+	if o.Lang == gen.Python {
+		for _, p := range strings.Split(o.DaoDir, "/") {
+			if !isPythonIdentifier(p) {
+				return nil, fmt.Errorf("each element of the DAO folder must be a Python package name: %q", o.DaoDir)
+			}
 		}
 	}
 	db := o.DB
@@ -139,11 +149,11 @@ func initPython(o Options) ([]string, error) {
 	if !ok {
 		return nil, fmt.Errorf("unknown database %q, expected one of: %s", db, strings.Join(DBs, ", "))
 	}
-	ds, err := datastore.PythonText(db)
+	ds, err := dataStoreOf(o.Lang, db)
 	if err != nil {
 		return nil, err
 	}
-	tm, err := files.ReadFile("files/typemap_python_" + db + ".xml")
+	tm, err := files.ReadFile("files/typemap_" + string(o.Lang) + "_" + db + ".xml")
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +161,7 @@ func initPython(o Options) ([]string, error) {
 		"{{sql}}", path.Join(o.SdmDir, "sql"),
 		"{{dao}}", o.DaoDir,
 		"{{db}}", dc.name,
-		"{{driver}}", pyDrivers[db],
+		"{{driver}}", drivers[o.Lang][db],
 		"{{url}}", dc.url,
 		"{{user}}", dc.user,
 		"{{jdbc-jar}}", dc.jar,
@@ -163,9 +173,11 @@ func initPython(o Options) ([]string, error) {
 	daoDir := filepath.Join(o.ProjectDir, filepath.FromSlash(o.DaoDir))
 	steps := []step{
 		{src: "sdm.xml", dst: filepath.Join(sdmDir, "sdm.xml")},
-		{src: "settings_python.xml", dst: filepath.Join(sdmDir, "settings.xml")},
-		{dst: filepath.Join(sdmDir, gen.Python.RootFile())}, // empty, as the plug-in makes it
-		{text: ds, dst: filepath.Join(daoDir, datastore.PythonFile)},
+		{src: "settings_" + string(o.Lang) + ".xml", dst: filepath.Join(sdmDir, "settings.xml")},
+		{dst: filepath.Join(sdmDir, o.Lang.RootFile())}, // empty, as the plug-in makes it
+	}
+	for _, name := range sortedKeys(ds) {
+		steps = append(steps, step{text: ds[name], dst: filepath.Join(daoDir, name)})
 	}
 	for _, x := range xsds {
 		steps = append(steps, step{src: x, dst: filepath.Join(sdmDir, x)})
@@ -173,8 +185,32 @@ func initPython(o Options) ([]string, error) {
 	return write(steps, vars, sdmDir, daoDir)
 }
 
-// pyDrivers are the drivers the Python type map describes.
-var pyDrivers = map[string]string{"pg": "psycopg2, psycopg", "mysql": "mysql-connector-python", "sqlite": "sqlite3"}
+var langNames = map[gen.Lang]string{gen.Go: "Go", gen.Python: "Python", gen.Cpp: "C++"}
+
+// drivers are the drivers the type map of the language describes.
+var drivers = map[gen.Lang]map[string]string{
+	gen.Python: {"pg": "psycopg2, psycopg", "mysql": "mysql-connector-python", "sqlite": "sqlite3"},
+	gen.Cpp:    {"pg": "QPSQL", "mysql": "QMYSQL", "sqlite": "QSQLITE"},
+}
+
+// dataStoreOf is the data store of a Python or C++ DAO folder: file name -> text.
+func dataStoreOf(lang gen.Lang, db string) (map[string]string, error) {
+	if lang == gen.Cpp {
+		return datastore.CppText(db)
+	}
+	text, err := datastore.PythonText(db)
+	return map[string]string{datastore.PythonFile: text}, err
+}
+
+// sortedKeys: the data store files in a stable order (DataStore.cpp, DataStore.h).
+func sortedKeys(m map[string]string) []string {
+	res := make([]string, 0, len(m))
+	for k := range m {
+		res = append(res, k)
+	}
+	sort.Strings(res)
+	return res
+}
 
 func isPythonIdentifier(s string) bool {
 	for i, r := range s {
@@ -258,7 +294,8 @@ type DataStoreFile struct {
 // RefreshDataStore rewrites data_store_<orm>.go in the DAO folder of settings.xml with the one of this
 // sdm version, for each data store found there. data_store_<orm>_ex.go (connection) is yours, it is not
 // touched. db "" means the database of <db url>. It returns the data stores found; the matching ones
-// are not touched. Python: data_store_no_orm.py in <folders target>.
+// are not touched. Python: data_store_no_orm.py in <folders target>; C++: DataStore.h and DataStore.cpp
+// there.
 func RefreshDataStore(projectDir, sdmDir, db string) ([]DataStoreFile, error) {
 	dir := filepath.Join(projectDir, filepath.FromSlash(sdmDir))
 	lang, err := gen.LangOf(dir)
@@ -280,8 +317,8 @@ func RefreshDataStore(projectDir, sdmDir, db string) ([]DataStoreFile, error) {
 			return nil, err
 		}
 	}
-	if lang == gen.Python {
-		return refreshPython(filepath.Join(projectDir, filepath.FromSlash(s.Folders.Target)), db)
+	if lang.OneFolder() {
+		return refreshOneFolder(lang, filepath.Join(projectDir, filepath.FromSlash(s.Folders.Target)), db)
 	}
 	daoDir := filepath.Join(projectDir, filepath.FromSlash(s.Dao.Scope))
 	var res []DataStoreFile
@@ -320,27 +357,37 @@ func RefreshDataStore(projectDir, sdmDir, db string) ([]DataStoreFile, error) {
 	return res, nil
 }
 
-func refreshPython(daoDir, db string) ([]DataStoreFile, error) {
-	dst := filepath.Join(daoDir, datastore.PythonFile)
-	got, err := os.ReadFile(dst)
-	if errors.Is(err, os.ErrNotExist) {
-		return nil, fmt.Errorf("no %s in %s (sdm init -lang python creates it)", datastore.PythonFile, daoDir)
-	}
+// refreshOneFolder rewrites the data store of a Python or C++ DAO folder: each of its files has to be
+// there (sdm init made them), a missing one is an error and nothing is written.
+func refreshOneFolder(lang gen.Lang, daoDir, db string) ([]DataStoreFile, error) {
+	want, err := dataStoreOf(lang, db)
 	if err != nil {
 		return nil, err
 	}
-	want, err := datastore.PythonText(db)
-	if err != nil {
-		return nil, err
-	}
-	f := DataStoreFile{Path: dst, ORM: datastore.Variants[0], DB: db}
-	if strings.ReplaceAll(string(got), "\r\n", "\n") != want {
-		if err := os.WriteFile(dst, []byte(want), 0o644); err != nil {
+	names := sortedKeys(want)
+	got := map[string]string{}
+	for _, name := range names {
+		b, err := os.ReadFile(filepath.Join(daoDir, name))
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, fmt.Errorf("no %s in %s (sdm init -lang %s creates it)", name, daoDir, lang)
+		}
+		if err != nil {
 			return nil, err
 		}
-		f.Updated = true
+		got[name] = strings.ReplaceAll(string(b), "\r\n", "\n")
 	}
-	return []DataStoreFile{f}, nil
+	var res []DataStoreFile
+	for _, name := range names {
+		f := DataStoreFile{Path: filepath.Join(daoDir, name), ORM: datastore.Variants[0], DB: db}
+		if got[name] != want[name] {
+			if err := os.WriteFile(f.Path, []byte(want[name]), 0o644); err != nil {
+				return res, err
+			}
+			f.Updated = true
+		}
+		res = append(res, f)
+	}
+	return res, nil
 }
 
 // dbOf maps <db url> to pg, mysql or sqlite.

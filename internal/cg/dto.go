@@ -150,7 +150,7 @@ func (c *Core) refineByFieldXML(ignoreModel bool, dto *sdmxml.DtoClass, fields [
 		if ok && c.tm.Unmapped(xt) {
 			xt = res[i].originalType // a Java name without a key: the column type from metadata
 		}
-		fi, err := c.refineByTypeMapAndMacros(res[i], xt)
+		fi, err := c.refineByTypeMapAndMacros(res[i], xt, false)
 		if err != nil {
 			return nil, err
 		}
@@ -164,8 +164,9 @@ func (c *Core) refineByFieldXML(ignoreModel bool, dto *sdmxml.DtoClass, fields [
 		}
 		if !refined[fi.columnName] {
 			var err error
-			// Type() exactly, not OriginalType()
-			if fi, err = c.refineByTypeMapAndMacros(fi, strings.TrimSpace(fi.renderedType)); err != nil {
+			// Type() exactly, not OriginalType(); a type mapped already is not mapped to "default" once more
+			typ := strings.TrimSpace(fi.renderedType)
+			if fi, err = c.refineByTypeMapAndMacros(fi, typ, typ != strings.TrimSpace(fi.originalType)); err != nil {
 				return nil, err
 			}
 		}
@@ -174,17 +175,21 @@ func (c *Core) refineByFieldXML(ignoreModel bool, dto *sdmxml.DtoClass, fields [
 	return out, nil
 }
 
-func (c *Core) refineByTypeMapAndMacros(fi FieldInfo, typeName string) (FieldInfo, error) {
+// refineByTypeMapAndMacros: mapped is a type that is a target already (TypeMap.TargetMapped).
+func (c *Core) refineByTypeMapAndMacros(fi FieldInfo, typeName string, mapped bool) (FieldInfo, error) {
 	typeName = strings.TrimSpace(typeName)
 	var target string
 	var err error
 	switch start := strings.IndexByte(typeName, '|'); {
 	case start == -1: // type only: "int64"
-		mapped := c.tm.Target(typeName)
-		if typeName == strings.TrimSpace(fi.originalType) { // first pass: the type from metadata
-			mapped = c.tm.TargetRaw(typeName, fi.rawKey(""))
+		t := c.tm.Target(typeName)
+		switch {
+		case mapped:
+			t = c.tm.TargetMapped(typeName)
+		case typeName == strings.TrimSpace(fi.originalType): // first pass: the type from metadata
+			t = c.tm.TargetRaw(typeName, fi.rawKey(""))
 		}
-		target, err = c.mc.ParseTargetType(mapped, fi)
+		target, err = c.mc.ParseTargetType(t, fi)
 	case start == 0: // "|0: hello0|1:hello1": to the type from metadata
 		target, err = c.mc.ParseTargetType(c.tm.TargetRaw(fi.originalType, fi.rawKey(""))+typeName, fi)
 	default: // "{type}|0:Integer|1:hello1"

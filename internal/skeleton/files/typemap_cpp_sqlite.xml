@@ -1,0 +1,42 @@
+    <type-map default="">
+
+        <type detected="INTEGER" target="CInteger"/>
+        <type detected="INT" target="CInteger"/>
+        <type detected="BIGINT" target="CInteger"/>
+        <type detected="SMALLINT" target="CInteger"/>
+        <type detected="TINYINT" target="CInteger"/>
+        <type detected="MEDIUMINT" target="CInteger"/>
+        <type detected="UNSIGNED BIG INT" target="CInteger"/>
+        <type detected="INT2" target="CInteger"/>
+        <type detected="INT8" target="CInteger"/>
+        <type detected="STRING" target="CText"/>
+        <type detected="VARYING CHARACTER" target="CText"/>
+        <type detected="NATIVE CHARACTER" target="CText"/>
+        <type detected="REAL" target="CDouble"/>
+        <type detected="DOUBLE" target="CDouble"/>
+        <type detected="FLOAT" target="CDouble"/>
+        <type detected="NUMERIC" target="CDouble"/>
+        <type detected="DECIMAL" target="CDouble"/>
+        <type detected="TEXT" target="CText"/>
+        <type detected="VARCHAR" target="CText"/>
+        <type detected="CHAR" target="CText"/>
+        <type detected="CHARACTER" target="CText"/>
+        <type detected="NVARCHAR" target="CText"/>
+        <type detected="NCHAR" target="CText"/>
+        <type detected="CLOB" target="CText"/>
+        <type detected="BLOB" target="CBlob"/>
+        <type detected="DOUBLE PRECISION" target="CDouble"/>
+        <type detected="MONEY" target="CDouble"/>
+        <type detected="NTEXT" target="CText"/>
+        <type detected="BINARY" target="CBlob"/>
+        <type detected="VARBINARY" target="CBlob"/>
+        <type detected="IMAGE" target="CBlob"/>
+        <type detected="BIT" target="CInteger"/>
+
+        <type detected="BOOLEAN" target="CInteger"/>
+        <type detected="DATE" target="CText"/>
+        <type detected="DATETIME" target="CText"/>
+        <type detected="TIMESTAMP" target="CText"/>
+        <type detected="unknown" target="CValue"/>
+
+    </type-map>

@@ -85,11 +85,7 @@ func (c *Core) QueryInfo(ref string, descriptors []string, dtoOrReturnType strin
 	}
 	res := make([]FieldInfo, len(fields))
 	for i, fi := range fields {
-		raw := "" // the raw name goes only to a type not mapped yet
-		if fi.renderedType == fi.originalType {
-			raw = fi.rawKey("")
-		}
-		res[i] = fi.WithRenderedType(c.tm.TargetRaw(fi.renderedType, raw))
+		res[i] = fi.WithRenderedType(c.tm.TargetOf(fi))
 	}
 	return &DaoSqlInfo{SQL: jdbcSQL, HasSQL: true, Fields: res, Params: params}, nil
 }
@@ -117,10 +113,12 @@ func refineDaoRef(dtoOrReturnType string, returnTypeIsDto bool, dtos []sdmxml.Dt
 
 func (c *Core) returnedFieldInfo(explicitRetType string, daoFields []FieldInfo) (FieldInfo, error) {
 	col, typ := "ret_value", meta.JavaObject
+	// a Java name of the plug-in without a key in type-map gives way to the type of the column
+	replaced := c.tm.Unmapped(explicitRetType) && len(daoFields) > 0
 	switch {
-	case strings.TrimSpace(explicitRetType) != "" && !(c.tm.Unmapped(explicitRetType) && len(daoFields) > 0):
+	case strings.TrimSpace(explicitRetType) != "" && !replaced:
 		typ = explicitRetType
-	case len(daoFields) > 0: // and a Java name without a key in type-map
+	case len(daoFields) > 0: // no return-type, or a replaced one
 		col, typ = daoFields[0].columnName, daoFields[0].renderedType
 	}
 	fi, err := NewFieldInfo(c.dtoMode, typ, col, "returned-value")

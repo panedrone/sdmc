@@ -14,7 +14,7 @@ import (
 )
 
 // sdmFile is the root file of the IDE plug-ins in the folder of go.mod: their tool window shows its
-// lines. sdm takes the configurations from it: the lines <dir>/go.dal and <dir>/python.dal.
+// lines. sdm takes the configurations from it: the lines <dir>/go.dal, <dir>/python.dal, <dir>/cpp.dal.
 const sdmFile = ".sdm"
 
 // stdin and stdinIsTerminal serve the choice of a configuration in the console; tests replace them.
@@ -22,7 +22,7 @@ var stdin io.Reader = os.Stdin
 
 var stdinIsTerminal = func() bool { return isTerminal(os.Stdin) }
 
-// dalFiles returns the paths <dir>/go.dal and <dir>/python.dal of .sdm in their order. "# comment",
+// dalFiles returns the paths <dir>/go.dal, python.dal and cpp.dal of .sdm in their order. "# comment",
 // "--- separator" and the other files are skipped; "path|title" is path.
 func dalFiles(text string) []string {
 	var res []string
@@ -33,7 +33,7 @@ func dalFiles(text string) []string {
 		}
 		p, _, _ := strings.Cut(line, "|")
 		p = cleanRel(strings.TrimSpace(p))
-		if b := path.Base(p); b == "go.dal" || b == "python.dal" {
+		if b := path.Base(p); b == "go.dal" || b == "python.dal" || b == "cpp.dal" {
 			res = append(res, p)
 		}
 	}
@@ -42,7 +42,7 @@ func dalFiles(text string) []string {
 
 // configFlag adds -c to a command that reads a configuration: a number of .sdm or "all".
 func configFlag(fs *flag.FlagSet) *string {
-	return fs.String("c", "", "number of the configuration (go.dal, python.dal) in "+sdmFile+", or all")
+	return fs.String("c", "", "number of the configuration (go.dal, python.dal, cpp.dal) in "+sdmFile+", or all")
 }
 
 // allConfigs is the value of -c for every configuration of .sdm, one after another.
@@ -74,7 +74,7 @@ func configDirs(fs *flag.FlagSet, dir, c, cmdline string, stderr io.Writer) ([]c
 	dals := dalFiles(string(text))
 	switch {
 	case len(dals) == 0 && c != "":
-		return nil, fmt.Errorf("-c %s: no <dir>/go.dal or <dir>/python.dal in %s", c, sdmFile)
+		return nil, fmt.Errorf("-c %s: no <dir>/go.dal, <dir>/python.dal or <dir>/cpp.dal in %s", c, sdmFile)
 	case len(dals) == 0:
 		return []config{{dir: cleanRel(dir)}}, nil
 	case c != "":

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/panedrone/go-sdm/internal/cg"
 	"github.com/panedrone/go-sdm/internal/meta"
 )
 
@@ -56,7 +57,7 @@ func TestDtoClasses(t *testing.T) {
 }
 
 func TestDaoClasses(t *testing.T) {
-	got, err := DaoClasses(shop, "gorm", false, map[string]bool{"Category": true}, map[string]bool{"OrdersDao": true})
+	got, err := DaoClasses(shop, "gorm", cg.LowerCamelCase, map[string]bool{"Category": true}, map[string]bool{"OrdersDao": true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +77,7 @@ func TestDaoClasses(t *testing.T) {
 
 // Python: the FK access in snake_case, the DTO classes without a model.
 func TestDaoClassesPython(t *testing.T) {
-	got, err := DaoClasses(shop, "", true, map[string]bool{"Category": true}, map[string]bool{"OrdersDao": true, "VSalesDao": true})
+	got, err := DaoClasses(shop, "", cg.SnakeCase, map[string]bool{"Category": true}, map[string]bool{"OrdersDao": true, "VSalesDao": true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,6 +85,23 @@ func TestDaoClassesPython(t *testing.T) {
     <crud dto="OrderItem" table="order_items"/>
     <query-dto-list dto="OrderItem" method="get_order_items_by_order(order_id)" ref="order_items(order_id)"/>
     <query-dto-list dto="OrderItem" method="get_order_items_by_product(product_id, alt_product_id)" ref="order_items(product_id, alt_product_id)"/>
+</dao-class>
+`
+	if got != want {
+		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+// C++: the FK access as is, the names of the columns.
+func TestDaoClassesCpp(t *testing.T) {
+	got, err := DaoClasses(shop, "", cg.AsIs, map[string]bool{"Category": true}, map[string]bool{"OrdersDao": true, "VSalesDao": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `<dao-class name="OrderItemsDao">
+    <crud dto="OrderItem" table="order_items"/>
+    <query-dto-list dto="OrderItem" method="getOrderItemsByOrder(order_id)" ref="order_items(order_id)"/>
+    <query-dto-list dto="OrderItem" method="getOrderItemsByProduct(product_id, alt_product_id)" ref="order_items(product_id, alt_product_id)"/>
 </dao-class>
 `
 	if got != want {

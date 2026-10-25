@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="settings.xsd">
+
+    <!-- Paths are relative to the project root (the folder sdm runs in). -->
+
+    <!-- target: the folder of the generated headers, models and DAO (<Class>.h), next to
+            DataStore.h and DataStore.cpp
+         sql: base folder of SQL files -->
+
+    <folders target="{{dao}}" sql="{{sql}}"/>
+
+    <!-- scope, field-names-mode, field-assign-mode: the IDE plug-in only; go-sdm ignores them
+         for C++. The names are as in sdm.xml and the database. -->
+
+    <dto scope="" inheritance="" field-names-mode="0" macro=""/>
+
+    <dao scope="" field-assign-mode="0" macro=""/>
+
+    <ide event-log="true"/>
+
+    <!-- One "settings.xml" for the IDE plug-in and for go-sdm:
+            jdbc  - the IDE plug-in (jar, class and url of JDBC); go-sdm does not read it.
+            db    - go-sdm (url: postgres://host:port/db, mysql://host:port/db or sqlite:<file>);
+                    the IDE plug-in ignores it. SDM_PWD, if set, overrides "pwd" of db. -->
+
+    <jdbc jar="{{jdbc-jar}}" class="{{jdbc-class}}"
+          url="{{jdbc-url}}" user="{{user}}" pwd=""/>
+
+    <db url="{{url}}" user="{{user}}" pwd=""/>
+
+    <!-- detected: the type of a column as the driver names it. The keys below are {{db}}
+         (sdm init -db pg, mysql or sqlite). PostgreSQL says int4, varchar, timestamptz, ...;
+         MySQL says INT, VARCHAR, DATETIME, UNSIGNED BIGINT, ...;
+         SQLite says what the column is declared with: INTEGER, VARCHAR, ...
+
+         target: a value class of DataStore.h (Qt, the driver {{driver}}): CInteger (qint64),
+         CDouble, CText (QString), CBlob (QByteArray); CValue holds anything in a QVariant.
+         Add your own classes to DataStore.h and use them here.
+
+         To see which names your database gives, empty the type-map: <type-map default=""/>
+         and generate. The code then has the raw names of the driver instead of C++ classes.
+         unknown - the driver said nothing about the type (MySQL parameters, SQLite expressions). -->
+
+{{type-map}}
+
+    <macros>
+    </macros>
+
+</settings>

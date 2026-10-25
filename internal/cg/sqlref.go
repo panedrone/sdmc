@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"unicode/utf16"
 )
 
 // The grammar of 'ref' (SqlUtils.java). The branches and the order of checks are as in Java,
@@ -291,12 +290,12 @@ func FormatJdbcSQLForGo(sql string) string {
 }
 
 // FormatJdbcSQLForPython is the SQL inside """...""" (SqlUtils.jdbc_sql_to_python_string): each line is
-// escaped as by StringEscapeUtils.escapeJava, lines joined by " \n" and 16 spaces.
+// escaped by escapeSQLLine, lines joined by " \n" and 16 spaces.
 func FormatJdbcSQLForPython(sql string) string {
 	var b strings.Builder
 	lines := sqlLines(sql)
 	for i, line := range lines {
-		b.WriteString(strings.ReplaceAll(escapeJava(line), `\/`, "/"))
+		b.WriteString(escapeSQLLine(line))
 		if i < len(lines)-1 {
 			b.WriteString(" \n                ")
 		}
@@ -304,12 +303,34 @@ func FormatJdbcSQLForPython(sql string) string {
 	return b.String()
 }
 
-// escapeJava is StringEscapeUtils.escapeJava of commons-lang 2.4 (the one in the Velocity jar of the
-// plug-in): UTF-16 units, the escapes in upper case, '/' escaped too.
-func escapeJava(s string) string {
+// FormatJdbcSQLForCpp is the SQL as a C++ string literal with its quotes (SqlUtils.jdbc_sql_to_cpp_str):
+// each line escaped by escapeSQLLine, lines joined by ` \n\` and a line break. No lines: only `"`, as in
+// Java.
+func FormatJdbcSQLForCpp(sql string) string {
 	var b strings.Builder
-	for _, ch := range utf16.Encode([]rune(s)) {
+	b.WriteString(`"`)
+	lines := sqlLines(sql)
+	for i, line := range lines {
+		b.WriteString(escapeSQLLine(line))
+		if i < len(lines)-1 {
+			b.WriteString(" \\n\\\n")
+		} else {
+			b.WriteString(`"`)
+		}
+	}
+	return b.String()
+}
+
+// escapeSQLLine is a line of SQL in Python and C++ code (SqlUtils.escape_sql_line): StringEscapeUtils.escapeJava
+// of commons-lang 2.4 (the one in the Velocity jar of the plug-in) for each character, the escapes in upper
+// case, '/' as is; a character beyond the BMP is one \UXXXXXXXX, not the two halves of UTF-16 (two lone
+// surrogates in Python, an error in C++).
+func escapeSQLLine(s string) string {
+	var b strings.Builder
+	for _, ch := range s {
 		switch {
+		case ch > 0xffff:
+			fmt.Fprintf(&b, `\U%08X`, ch)
 		case ch > 0xfff:
 			fmt.Fprintf(&b, `\u%X`, ch)
 		case ch > 0xff:
@@ -337,10 +358,8 @@ func escapeJava(s string) string {
 			b.WriteString(`\"`)
 		case ch == '\\':
 			b.WriteString(`\\`)
-		case ch == '/':
-			b.WriteString(`\/`)
 		default:
-			b.WriteRune(rune(ch))
+			b.WriteRune(ch)
 		}
 	}
 	return b.String()

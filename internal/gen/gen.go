@@ -1,6 +1,6 @@
 // Package gen is a generation run for one project: settings.xml and sdm.xml from the sdm folder,
-// metadata from the database <jdbc url>, the result is the texts of DTO and DAO files, in Go or in
-// Python (see LangOf).
+// metadata from the database <jdbc url>, the result is the texts of DTO and DAO files, in Go, Python
+// or C++ (see LangOf).
 package gen
 
 import (
@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/panedrone/go-sdm/internal/cg"
+	"github.com/panedrone/go-sdm/internal/cppgen"
 	"github.com/panedrone/go-sdm/internal/gogen"
 	"github.com/panedrone/go-sdm/internal/meta"
 	"github.com/panedrone/go-sdm/internal/meta/mysql"
@@ -29,23 +30,34 @@ type Lang string
 const (
 	Go     Lang = "go"
 	Python Lang = "python"
+	Cpp    Lang = "cpp"
 )
 
-// RootFile is the root file of the IDE plug-in in the sdm folder: go.dal, python.dal.
+// Langs are the languages; the first is the default.
+var Langs = []Lang{Go, Python, Cpp}
+
+// RootFile is the root file of the IDE plug-in in the sdm folder: go.dal, python.dal, cpp.dal.
 func (l Lang) RootFile() string { return string(l) + ".dal" }
 
-// LangOf is the language of the sdm folder: python.dal there means Python, as in the IDE plug-ins.
-// Without it the folder is Go: go-sdm never needed go.dal.
+// LangOf is the language of the sdm folder by its root file, as in the IDE plug-ins: python.dal is
+// Python, cpp.dal is C++. Without them the folder is Go: go-sdm never needed go.dal.
 func LangOf(sdmDir string) (Lang, error) {
-	py := exists(filepath.Join(sdmDir, Python.RootFile()))
-	if py && exists(filepath.Join(sdmDir, Go.RootFile())) {
-		return "", fmt.Errorf("%s: both go.dal and python.dal, one folder is one language", sdmDir)
+	var found []string
+	res := Go
+	for _, l := range Langs {
+		if exists(filepath.Join(sdmDir, l.RootFile())) {
+			found = append(found, l.RootFile())
+			res = l
+		}
 	}
-	if py {
-		return Python, nil
+	if len(found) > 1 {
+		return "", fmt.Errorf("%s: %s, one folder is one language", sdmDir, strings.Join(found, " and "))
 	}
-	return Go, nil
+	return res, nil
 }
+
+// OneFolder: the models and DAO of the language are in one folder, <folders target>.
+func (l Lang) OneFolder() bool { return l == Python || l == Cpp }
 
 func exists(path string) bool {
 	_, err := os.Stat(path)
@@ -67,6 +79,18 @@ func newTranslator(lang Lang, md meta.Metadata, s *sdmxml.Settings, sdm *sdmxml.
 			return nil, err
 		}
 		daoGen, err := pygen.NewDAO(cg.NewCore(md, s, cg.SnakeCase, cg.SnakeCase, sqlRoot), s, sdm)
+		if err != nil {
+			return nil, err
+		}
+		return &translator{dto: dtoGen.Translate, dao: daoGen.Translate}, nil
+	}
+	if lang == Cpp {
+		// CppCG: the names as they are, <dto field-names-mode> is ignored
+		dtoGen, err := cppgen.NewDTO(cg.NewCore(md, s, cg.AsIs, cg.AsIs, sqlRoot), s, sdm)
+		if err != nil {
+			return nil, err
+		}
+		daoGen, err := cppgen.NewDAO(cg.NewCore(md, s, cg.AsIs, cg.AsIs, sqlRoot), s, sdm)
 		if err != nil {
 			return nil, err
 		}
@@ -185,14 +209,11 @@ func Run(projectDir, sdmDir string, md meta.Metadata, only map[string]bool, prog
 	return res, nil
 }
 
-// scopes are the folders of DTO and DAO, relative to the project. Python has both in <folders target>,
-// "" is the project folder.
+// scopes are the folders of DTO and DAO, relative to the project. Python and C++ have both in
+// <folders target>, "" is the project folder.
 func scopes(lang Lang, s *sdmxml.Settings) (dto, dao string, err error) {
-	if lang == Python {
+	if lang.OneFolder() {
 		dir := strings.Trim(strings.TrimSpace(strings.ReplaceAll(s.Folders.Target, `\`, "/")), "/")
-		if dir == "" {
-			dir = "."
-		}
 		return dir, dir, nil
 	}
 	dto = strings.TrimSpace(strings.ReplaceAll(s.Dto.Scope, `\`, "/"))
@@ -299,16 +320,18 @@ func List(projectDir, sdmDir string) ([]Entry, error) {
 }
 
 func relPath(dir, name string) string {
-	if dir == "." {
+	if dir == "" || dir == "." {
 		return name
 	}
 	return strings.TrimSuffix(dir, "/") + "/" + name
 }
 
 func fileName(lang Lang, className string) string {
-	ext := "go"
-	if lang == Python {
-		ext = "py"
+	switch lang {
+	case Python:
+		return cg.FileNameSnakeCase(cg.ClassNameWithoutModel(className), "py")
+	case Cpp:
+		return cg.ClassNameWithoutModel(className) + ".h" // as in the plug-in: the class name as is
 	}
-	return cg.FileNameSnakeCase(cg.ClassNameWithoutModel(className), ext)
+	return cg.FileNameSnakeCase(cg.ClassNameWithoutModel(className), "go")
 }

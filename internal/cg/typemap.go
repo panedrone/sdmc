@@ -95,6 +95,24 @@ func (m *TypeMap) TargetRaw(detected, raw string) string {
 	return detected
 }
 
+// TargetMapped maps a type that is a target already: only by its key, "default" is not for it (a
+// non-empty "default" made every mapped field the default; JaxbTypeMap.get_target_type_name_no_default).
+func (m *TypeMap) TargetMapped(target string) string {
+	if t, ok := m.detected[target]; ok {
+		return t
+	}
+	return target
+}
+
+// TargetOf maps the type of a field (JaxbTypeMap.get_target_type_name(FieldInfo)): one from metadata as
+// usual, with the raw name of the driver; a mapped one by TargetMapped.
+func (m *TypeMap) TargetOf(fi FieldInfo) string {
+	if fi.renderedType == fi.originalType {
+		return m.TargetRaw(fi.renderedType, fi.rawKey(""))
+	}
+	return m.TargetMapped(fi.renderedType)
+}
+
 // Macros are <macros> (JaxbMacros.java). <vm-xml> is executed (vmxml.go), text
 // Velocity (<vm>) is not in the Go version.
 type Macros struct {

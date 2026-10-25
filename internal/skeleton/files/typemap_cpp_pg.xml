@@ -1,0 +1,25 @@
+    <type-map default="">
+
+        <type detected="int2" target="CInteger"/>
+        <type detected="int4" target="CInteger"/>
+        <type detected="int8" target="CInteger"/>
+        <type detected="float4" target="CDouble"/>
+        <type detected="float8" target="CDouble"/>
+        <type detected="numeric" target="CDouble"/>
+        <type detected="varchar" target="CText"/>
+        <type detected="text" target="CText"/>
+        <type detected="bpchar" target="CText"/>
+        <type detected="json" target="CValue"/>
+        <type detected="jsonb" target="CValue"/>
+        <type detected="bytea" target="CBlob"/>
+        <type detected="bool" target="CInteger"/>
+        <type detected="date" target="CText"/>
+        <type detected="timestamp" target="CText"/>
+        <type detected="timestamptz" target="CText"/>
+        <type detected="uuid" target="CText"/>
+        <type detected="_text" target="CValue"/>
+        <type detected="_varchar" target="CValue"/>
+        <type detected="refcursor" target="CText"/>
+        <type detected="unknown" target="CValue"/>
+
+    </type-map>

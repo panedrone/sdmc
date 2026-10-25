@@ -151,7 +151,8 @@ func (g *DAO) Translate(dao sdmxml.DaoClass) (string, error) {
 		if err != nil {
 			return "", errors.New(m.ErrorContext + " " + err.Error())
 		}
-		methods = append(methods, strings.ReplaceAll(strings.ReplaceAll(text, "\t", "    "), "//", "#"))
+		// the warnings "    // INFO:" are Python comments; any other "//" stays, SQL has them
+		methods = append(methods, strings.ReplaceAll(strings.ReplaceAll(text, "\t", "    "), "    // INFO:", "    # INFO:"))
 	}
 	imports := make([]importItem, 0, len(g.imports))
 	for _, it := range g.imports {

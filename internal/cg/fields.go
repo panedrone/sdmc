@@ -298,12 +298,8 @@ func createParamInfo(tm *TypeMap, mc *Macros, mode FieldNamesMode, descriptor st
 		if base == nil {
 			target = tm.TargetRaw(meta.JavaObject, meta.RawUnknown)
 		} else {
-			raw := "" // the raw name goes only to a type from metadata, not to an already mapped one
-			if base.renderedType == base.originalType {
-				raw = base.rawKey("")
-			}
 			var err error
-			target, err = mc.ParseTargetType(tm.TargetRaw(base.renderedType, raw), *base)
+			target, err = mc.ParseTargetType(tm.TargetOf(*base), *base)
 			if err != nil {
 				return ParamInfo{}, err
 			}

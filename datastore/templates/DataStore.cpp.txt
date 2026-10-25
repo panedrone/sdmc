@@ -1,0 +1,218 @@
+#include "DataStore.h"
+
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlQuery>
+
+CDataStore::CDataStore(const QString &connectionName) : connectionName(connectionName), transaction(false) {
+}
+
+//sdm:if sqlite
+bool CDataStore::open(const QString &file) {
+    errors.clear();
+    QSqlDatabase db = QSqlDatabase::addDatabase("{{qt_driver}}", connectionName);
+    db.setDatabaseName(file);
+//sdm:else
+bool CDataStore::open(const QString &host, int port, const QString &database, const QString &user, const QString &password) {
+    errors.clear();
+    QSqlDatabase db = QSqlDatabase::addDatabase("{{qt_driver}}", connectionName);
+    db.setHostName(host);
+    db.setPort(port);
+    db.setDatabaseName(database);
+    db.setUserName(user);
+    db.setPassword(password);
+//sdm:end
+    if (!db.open()) {
+        errors = db.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+void CDataStore::close() {
+    errors.clear();
+    transaction = false;
+    QSqlDatabase::database(connectionName, false).close();
+}
+
+bool CDataStore::begin() {
+    errors.clear();
+    QSqlDatabase db = QSqlDatabase::database(connectionName, false);
+    if (!db.transaction()) {
+        errors = db.lastError().text();
+        return false;
+    }
+    transaction = true;
+    return true;
+}
+
+bool CDataStore::commit() {
+    errors.clear();
+    QSqlDatabase db = QSqlDatabase::database(connectionName, false);
+    if (!db.commit()) {
+        errors = db.lastError().text();
+        return false;
+    }
+    transaction = false;
+    return true;
+}
+
+bool CDataStore::rollback() {
+    errors.clear();
+    QSqlDatabase db = QSqlDatabase::database(connectionName, false);
+    transaction = false;
+    if (!db.rollback()) {
+        errors = db.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+// exec prepares the query, binds the parameters by position and runs it.
+bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *params[]) {
+    errors.clear();
+    if (!query.prepare(QString::fromUtf8(sql))) {
+        errors = query.lastError().text();
+        return false;
+    }
+    for (int i = 0; i < params_count; i++) {
+        CValue *p = params[i];
+        QVariant val; // null
+        if (!p->IsNull) {
+            switch (p->getType()) {
+                case VALUE_TYPE_VARIANT:
+                    val = p->Variant;
+                    break;
+                case VALUE_TYPE_INTEGER:
+                    val = static_cast<CInteger *> (p)->Value;
+                    break;
+                case VALUE_TYPE_DOUBLE:
+                    val = static_cast<CDouble *> (p)->Value;
+                    break;
+                case VALUE_TYPE_TEXT:
+                    val = static_cast<CText *> (p)->Value;
+                    break;
+                case VALUE_TYPE_BLOB:
+                    val = static_cast<CBlob *> (p)->Value;
+                    break;
+                default:
+                    errors = QString("parameter %1: unexpected value type %2").arg(i + 1).arg(p->getType());
+                    return false;
+            }
+        }
+        query.addBindValue(val);
+    }
+    if (!query.exec()) {
+        errors = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool CDataStore::readRow(QSqlQuery &query, int ret_values_count, CValue *ret_values[], DL_STR col_names[]) {
+    for (int i = 0; i < ret_values_count; i++) {
+        CValue *v = ret_values[i];
+        QVariant value = query.value(QString::fromUtf8(col_names[i]));
+        v->IsNull = value.isNull();
+        switch (v->getType()) {
+            case VALUE_TYPE_VARIANT:
+                v->Variant = value;
+                break;
+            case VALUE_TYPE_INTEGER:
+                static_cast<CInteger *> (v)->Value = v->IsNull ? 0 : value.toLongLong();
+                break;
+            case VALUE_TYPE_DOUBLE:
+                static_cast<CDouble *> (v)->Value = v->IsNull ? 0 : value.toDouble();
+                break;
+            case VALUE_TYPE_TEXT:
+                static_cast<CText *> (v)->Value = v->IsNull ? QString() : value.toString();
+                break;
+            case VALUE_TYPE_BLOB:
+                static_cast<CBlob *> (v)->Value = v->IsNull ? QByteArray() : value.toByteArray();
+                break;
+            default:
+                errors = QString("%1: unexpected value type %2").arg(col_names[i]).arg(v->getType());
+                return false;
+        }
+    }
+    return true;
+}
+
+int CDataStore::insert(DL_STR sql, int params_count, CValue *params[], int AI_values_count, CValue *AI_values[]) {
+    QSqlQuery query(QSqlDatabase::database(connectionName, false));
+    if (!exec(sql, query, params_count, params)) {
+        return -1;
+    }
+    int rows = query.numRowsAffected();
+    if (AI_values_count < 1) {
+        return rows;
+    }
+//sdm:if pg
+    // the value of the sequence of the insert, in this session: lastInsertId of QPSQL is an OID
+    QSqlQuery last(QSqlDatabase::database(connectionName, false));
+    if (!last.exec("select lastval()") || !last.next()) {
+        errors = last.lastError().text();
+        return -1;
+    }
+    QVariant id = last.value(0);
+//sdm:else
+    QVariant id = query.lastInsertId();
+//sdm:end
+    CValue *ai = AI_values[0];
+    ai->IsNull = id.isNull();
+    switch (ai->getType()) {
+        case VALUE_TYPE_VARIANT:
+            ai->Variant = id;
+            break;
+        case VALUE_TYPE_INTEGER:
+            static_cast<CInteger *> (ai)->Value = id.toLongLong();
+            break;
+        default:
+            errors = QString("generated value: unexpected value type %1").arg(ai->getType());
+            return -1;
+    }
+    return rows;
+}
+
+int CDataStore::execDML(DL_STR sql, int params_count, CValue *params[]) {
+    QSqlQuery query(QSqlDatabase::database(connectionName, false));
+    if (!exec(sql, query, params_count, params)) {
+        return -1;
+    }
+    return query.numRowsAffected();
+}
+
+int CDataStore::queryRow(DL_STR sql, int params_count, CValue *params[], int ret_values_count, CValue *ret_values[], DL_STR col_names[]) {
+    QSqlQuery query(QSqlDatabase::database(connectionName, false));
+    query.setForwardOnly(true);
+    if (!exec(sql, query, params_count, params)) {
+        return -1;
+    }
+    int rows = 0;
+    while (query.next()) {
+        if (!readRow(query, ret_values_count, ret_values, col_names)) {
+            return -1;
+        }
+        rows++;
+    }
+    if (rows > 1) {
+        errors = "The query returned more than 1 row";
+    }
+    return rows;
+}
+
+int CDataStore::queryRowList(DL_STR sql, int params_count, CValue *params[], int ret_values_count, CValue *ret_values[], DL_STR col_names[], CRowProcessor *rowProcessor) {
+    QSqlQuery query(QSqlDatabase::database(connectionName, false));
+    query.setForwardOnly(true);
+    if (!exec(sql, query, params_count, params)) {
+        return -1;
+    }
+    int rows = 0;
+    while (query.next()) {
+        if (!readRow(query, ret_values_count, ret_values, col_names)) {
+            return -1;
+        }
+        rows++;
+        rowProcessor->processRow();
+    }
+    return rows;
+}

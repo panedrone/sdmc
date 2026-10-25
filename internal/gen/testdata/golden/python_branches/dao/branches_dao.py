@@ -255,7 +255,7 @@ class BranchesDao:
         :return: object
         :raises Exception: if amount of returned rows != 1.
         """
-        sql = """select 'a\\c \"q\" \u00E9 \u2211 \uD83D\uDE00 tab' as v from tasks"""
+        sql = """select 'a\\c \"q\" \u00E9 \u2211 \U0001F600 tab' as v from tasks"""
 
         return self.ds.query_scalar(sql, [])
 
@@ -283,6 +283,6 @@ class BranchesDao:
         """
         :return: int (the number of affected rows)
         """
-        sql = """delete from tasks where t_subject = 'http:#x#y'"""
+        sql = """delete from tasks where t_subject = 'http://x//y'"""
 
         return self.ds.exec_dml(sql, [])

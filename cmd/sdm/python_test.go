@@ -139,7 +139,7 @@ func TestInitPythonErrors(t *testing.T) {
 		code int
 		want string
 	}{
-		{[]string{"init", "-lang", "python", "-dir", "sdm", "-dao", "dbal", "-orm", "no_orm", "-db", "pg"}, 2, "-orm: not for Python"},
+		{[]string{"init", "-lang", "python", "-dir", "sdm", "-dao", "dbal", "-orm", "no_orm", "-db", "pg"}, 2, "-orm: not for -lang python"},
 		{[]string{"init", "-lang", "python", "-dir", "sdm", "-dao", "dbal"}, 2, "missing -db"},
 		{[]string{"init", "-lang", "ruby", "-dir", "sdm", "-dao", "dbal", "-db", "pg"}, 2, "-lang ruby: expected go, python"},
 		{[]string{"init", "-lang", "python", "-dir", "sdm", "-dao", "my-dbal", "-db", "pg"}, 1, "must be a Python package name"},
