@@ -135,7 +135,7 @@ func (g *DAO) Translate(dao sdmxml.DaoClass) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := checkNames(plan); err != nil {
+	if err := errors.Join(checkNames(plan), g.checkJavaTypes(plan)); err != nil {
 		return "", err
 	}
 	var methods []string
@@ -198,6 +198,43 @@ func checkNames(plan []cg.DaoMethod) error {
 			if f := strings.Fields(d); len(f) > 0 && cppKeywords[f[len(f)-1]] {
 				errs = append(errs, fmt.Errorf("%s parameter %q of %s is a C++ keyword: rename it", m.ErrorContext, f[len(f)-1], m.MethodName))
 			}
+		}
+	}
+	return errors.Join(errs...)
+}
+
+// javaShortNames are the Java types old XML of the plug-in declares by the short name, with the value
+// class of DataStore.h for each.
+var javaShortNames = map[string]string{
+	"String": "CText", "Character": "CText",
+	"Integer": "CInteger", "Long": "CInteger", "Short": "CInteger", "Byte": "CInteger", "Boolean": "CInteger",
+	"BigInteger": "CInteger",
+	"Double":     "CDouble", "Float": "CDouble", "BigDecimal": "CDouble",
+	"Date": "CValue", "Timestamp": "CValue", "Time": "CValue", "Object": "CValue",
+}
+
+// checkJavaTypes catches a short Java name (String country_code, return-type="Integer") that the type
+// map leaves as is (no key, empty "default"): C++ does not know such a type. A full name (java.lang.String)
+// is not here: without a key it is taken in the words of the driver.
+func (g *DAO) checkJavaTypes(plan []cg.DaoMethod) error {
+	var errs []error
+	check := func(m cg.DaoMethod, typ, what string) {
+		cpp, ok := javaShortNames[typ]
+		if !ok || g.core.TargetTypeByTypeMap(typ) != typ {
+			return
+		}
+		errs = append(errs, fmt.Errorf("%s %s: %q is a Java type, the type map has no key for it: "+
+			"remove the type (it comes from the metadata), write a C++ one (%s) or add <type detected=%q target=%q/>",
+			m.ErrorContext, what, typ, cpp, typ, cpp))
+	}
+	for _, m := range plan {
+		for _, d := range m.ParamDescriptors {
+			if f := strings.Fields(d); len(f) > 1 {
+				check(m, strings.Join(f[:len(f)-1], " "), "parameter "+f[len(f)-1])
+			}
+		}
+		if !m.ReturnTypeIsDto && m.DtoOrReturnType != "" {
+			check(m, strings.TrimSpace(m.DtoOrReturnType), "return-type")
 		}
 	}
 	return errors.Join(errs...)

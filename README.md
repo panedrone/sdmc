@@ -427,7 +427,10 @@ needs no `-orm`. `<dto field-names-mode>` names the fields and the CRUD methods 
 An XML written for Go may have names a C++ compiler rejects; `gen` reports all of them for a DAO class
 instead of writing it: a keyword as a method or a parameter (`register`, `delete`, `class`), and a
 method named as the model class it returns (`OrdersByMonth` returning `CListReader<OrdersByMonth>`:
-inside the DAO the method hides the class). Rename them in the XML.
+inside the DAO the method hides the class). Rename them in the XML. The same for a short Java type
+of old XML, `get_city_by_country(String country_code)` or `return-type="Long"`, that the type map
+leaves as is (no key, empty `default`): remove the type, and it comes from the metadata, or write the
+C++ one (`CText`).
 
 ```cpp
 CDataStore ds;

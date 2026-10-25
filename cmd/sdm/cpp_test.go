@@ -142,6 +142,9 @@ func TestCppNames(t *testing.T) {
     <exec-dml method="delete(t_id)" ref="delete from tasks where t_id=?"/>
     <query method="count_tasks(class)" ref="select count(*) from tasks where g_id=?"/>
     <query-dto-list dto="Task" method="getTasksByGroup(g_id)" ref="tasks(g_id)"/>
+    <query-dto-list dto="Task" method="getByGroup(Integer g_id)" ref="tasks(g_id)"/>
+    <query method="countAll" ref="select count(*) from tasks" return-type="Long"/>
+    <query-dto-list dto="Task" method="getByGroup2(CInteger g_id)" ref="tasks(g_id)"/>
 </dao-class>
 </sdm>`
 	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
@@ -156,12 +159,14 @@ func TestCppNames(t *testing.T) {
 		`method "Task" has the name of the class Task`,
 		`method "delete" is a C++ keyword`,
 		`parameter "class" of count_tasks is a C++ keyword`,
+		`parameter g_id: "Integer" is a Java type`,
+		`return-type: "Long" is a Java type`,
 	} {
 		if !strings.Contains(errOut.String(), want) {
 			t.Errorf("no %q in\n%s", want, errOut.String())
 		}
 	}
-	if strings.Contains(errOut.String(), "getTasksByGroup") {
+	if strings.Contains(errOut.String(), "getTasksByGroup") || strings.Contains(errOut.String(), "getByGroup2") {
 		t.Errorf("a fine method is reported:\n%s", errOut.String())
 	}
 }
