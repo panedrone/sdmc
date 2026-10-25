@@ -1,0 +1,37 @@
+name: CI
+
+# No database server: the tests generate from SQLite databases they create (in memory or in a
+# temporary folder); the PostgreSQL and MySQL code is tested without a connection.
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        if: runner.os == 'Linux'
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - run: go vet ./...
+      - name: test (race)
+        if: runner.os == 'Linux'
+        run: go test -race ./...
+      - name: test
+        if: runner.os == 'Windows'
+        run: go test ./...
+      # the C++ and Python data stores in datastore/ are what the templates give (go run ./cli/dsgen)
+      - name: generated data stores are up to date
+        if: runner.os == 'Linux'
+        run: go run ./cli/dsgen && git diff --exit-code -- datastore

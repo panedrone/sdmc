@@ -24,7 +24,8 @@ import (
 	"github.com/panedrone/go-sdm/internal/skeleton"
 )
 
-const version = "1.0.10"
+// version: a release build sets it from the tag (goreleaser, -ldflags "-X main.version=...")
+var version = "1.0.10"
 
 const usage = `sdm %s — SQL DAL Maker for Go, Python and C++
 

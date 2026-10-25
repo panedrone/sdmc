@@ -1,0 +1,15 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/go:1
+    volumes:
+      - ..:/workspaces/go-sdm:cached
+    command: sleep infinity
+    network_mode: service:db # PostgreSQL is localhost:5432 in the app container
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./demo.sql:/docker-entrypoint-initdb.d/demo.sql:ro
