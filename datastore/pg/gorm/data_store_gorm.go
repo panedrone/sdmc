@@ -1,7 +1,7 @@
 //go:build ignore
 
 // The data store for gorm and PostgreSQL, used by the generated DAO.
-// "sdm init -orm gorm -db pg" writes it to the DAO folder. A copy by hand: this file and
+// "sdmc init -orm gorm -db pg" writes it to the DAO folder. A copy by hand: this file and
 // data_store_gorm_ex.go from the same folder, without the line "//go:build ignore" and with
 // the package name of the DAO folder.
 

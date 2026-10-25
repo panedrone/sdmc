@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/meta"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/meta"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 // DaoSqlInfo is the SQL of a method, the returned fields and the parameters (JdbcUtils.DaoSqlInfo).

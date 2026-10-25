@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 // FieldInfo is a table column, a result column or a DTO field (FieldInfo.java).

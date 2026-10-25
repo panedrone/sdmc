@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 type pgType struct {

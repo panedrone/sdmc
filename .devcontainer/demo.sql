@@ -37,5 +37,5 @@ values ('home'),
 insert into tasks (g_id, t_priority, t_subject, t_comments)
 values (1, 1, 'buy milk', null),
        (1, 3, 'fix the tap', 'the kitchen one'),
-       (2, 5, 'release go-sdm', 'tag v1.0.10'),
+       (2, 5, 'release sdmc', 'tag v1.0.10'),
        (2, 2, 'answer the issues', null);

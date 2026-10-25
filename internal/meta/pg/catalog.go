@@ -3,7 +3,7 @@ package pg
 import (
 	"github.com/jackc/pgx/v5"
 
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 var _ meta.Catalog = (*DB)(nil)

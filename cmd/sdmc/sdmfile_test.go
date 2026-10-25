@@ -23,7 +23,7 @@ func TestGoDals(t *testing.T) {
 	}
 }
 
-// configDirs with the flags of a command: args as on the command line, typed as "sdm gen";
+// configDirs with the flags of a command: args as on the command line, typed as "sdmc gen";
 // the folders are joined by commas.
 func resolve(t *testing.T, sdm string, args ...string) (string, string, error) {
 	t.Helper()
@@ -40,7 +40,7 @@ func resolve(t *testing.T, sdm string, args ...string) (string, string, error) {
 		t.Fatal(err)
 	}
 	var errOut bytes.Buffer
-	cfgs, err := configDirs(fs, *dir, *c, "sdm gen", &errOut)
+	cfgs, err := configDirs(fs, *dir, *c, "sdmc gen", &errOut)
 	var dirs []string
 	for _, c := range cfgs {
 		dirs = append(dirs, c.dir)
@@ -65,9 +65,9 @@ func squeeze(s string) string {
 // hasTable: the table of configurations with the ready commands.
 func hasTable(out string) bool {
 	return strings.Contains(squeeze(out), "# configuration command "+
-		"1 a/go.dal sdm gen -c 1 "+
-		"2 b/sdm/go.dal sdm gen -c 2 "+
-		"all (one after another) sdm gen -c all")
+		"1 a/go.dal sdmc gen -c 1 "+
+		"2 b/sdm/go.dal sdmc gen -c 2 "+
+		"all (one after another) sdmc gen -c all")
 }
 
 func TestConfigDir(t *testing.T) {
@@ -136,7 +136,7 @@ func TestConfigDir(t *testing.T) {
 
 func TestCommandLine(t *testing.T) {
 	got := commandLine("ls", []string{"-l", "-c", "7", "-c=8", "-dir=my cfg", "1,3"})
-	if want := `sdm ls -l "-dir=my cfg" 1,3`; got != want {
+	if want := `sdmc ls -l "-dir=my cfg" 1,3`; got != want {
 		t.Errorf("got %s, want %s", got, want)
 	}
 }
@@ -162,7 +162,7 @@ func TestListByConfig(t *testing.T) {
 	}
 	errOut.Reset()
 	if code := run([]string{"ls", "-l"}, &out, &errOut); code != 2 ||
-		!strings.Contains(squeeze(errOut.String()), "2 two/sdm/go.dal sdm ls -l -c 2") {
+		!strings.Contains(squeeze(errOut.String()), "2 two/sdm/go.dal sdmc ls -l -c 2") {
 		t.Errorf("ls, several: %d\n%s", code, errOut.String())
 	}
 	out.Reset()
@@ -189,7 +189,7 @@ func TestListByConfig(t *testing.T) {
 	out.Reset()
 	errOut.Reset()
 	if code := run([]string{"ds", "-c", "all"}, &out, &errOut); code != 1 ||
-		!strings.Contains(errOut.String(), "sdm init") || !strings.HasSuffix(out.String(), "--- 2:two/sdm/go.dal\nup to date: "+filepath.Join("two", "dbal", "data_store_no_orm.go")+" (no_orm for sqlite)\n") {
+		!strings.Contains(errOut.String(), "sdmc init") || !strings.HasSuffix(out.String(), "--- 2:two/sdm/go.dal\nup to date: "+filepath.Join("two", "dbal", "data_store_no_orm.go")+" (no_orm for sqlite)\n") {
 		t.Errorf("ds -c all, one fails: %d %q %q", code, out.String(), errOut.String())
 	}
 	errOut.Reset()
@@ -214,7 +214,7 @@ func TestConfigWithoutSettings(t *testing.T) {
 	}
 	errOut.Reset()
 	if code := run([]string{"ds"}, &out, &errOut); code != 1 ||
-		!strings.Contains(errOut.String(), "1:huy/sdm/go.dal in .sdm: no settings.xml in huy/sdm; fix the line (<folder of settings.xml>/go.dal) or run sdm init with -dir huy/sdm") {
+		!strings.Contains(errOut.String(), "1:huy/sdm/go.dal in .sdm: no settings.xml in huy/sdm; fix the line (<folder of settings.xml>/go.dal) or run sdmc init with -dir huy/sdm") {
 		t.Errorf("ds: %d %q", code, errOut.String())
 	}
 	if err := os.WriteFile(sdmFile, []byte("huy/go.dal\n"), 0o644); err != nil {

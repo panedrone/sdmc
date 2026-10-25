@@ -1,4 +1,4 @@
-// sdm is a DAO generator for Go and Python from sdm.xml and the metadata of a live database (PostgreSQL,
+// sdmc is a DAO generator for Go, Python and C++ (Qt) from sdm.xml and the metadata of a live database (PostgreSQL,
 // MySQL, SQLite).
 package main
 
@@ -14,48 +14,48 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/panedrone/go-sdm/datastore"
-	"github.com/panedrone/go-sdm/internal/assist"
-	"github.com/panedrone/go-sdm/internal/cg"
-	"github.com/panedrone/go-sdm/internal/cppgen"
-	"github.com/panedrone/go-sdm/internal/gen"
-	"github.com/panedrone/go-sdm/internal/meta"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
-	"github.com/panedrone/go-sdm/internal/skeleton"
+	"github.com/panedrone/sdmc/datastore"
+	"github.com/panedrone/sdmc/internal/assist"
+	"github.com/panedrone/sdmc/internal/cg"
+	"github.com/panedrone/sdmc/internal/cppgen"
+	"github.com/panedrone/sdmc/internal/gen"
+	"github.com/panedrone/sdmc/internal/meta"
+	"github.com/panedrone/sdmc/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/skeleton"
 )
 
 // version: a release build sets it from the tag (goreleaser, -ldflags "-X main.version=...")
 var version = "1.0.10"
 
-const usage = `sdm %s — SQL DAL Maker for Go, Python and C++
+const usage = `sdmc %s — SQL DAL Maker for Go, Python and C++
 
 usage:
-  sdm init -dir <folder> -dao <folder> -orm no_orm|sqlx|gorm -db pg|mysql|sqlite
-  sdm init -lang python|cpp -dir <folder> -dao <folder> -db pg|mysql|sqlite
+  sdmc init -dir <folder> -dao <folder> -orm no_orm|sqlx|gorm -db pg|mysql|sqlite
+  sdmc init -lang python|cpp -dir <folder> -dao <folder> -db pg|mysql|sqlite
                                   create sdm.xml, settings.xml, XSD and the data store;
-                                  all options are required, see sdm help init
-  sdm generate|gen [-dir go-sdm|-c N|all] [-m] [-d] [class ...]
+                                  all options are required, see sdmc help init
+  sdmc generate|gen [-dir go-sdm|-c N|all] [-m] [-d] [class ...]
                                   generate models and DAO into the folders of settings.xml
-  sdm validate|val [-dir go-sdm|-c N|all] [-m] [-d] [class ...]
+  sdmc validate|val [-dir go-sdm|-c N|all] [-m] [-d] [class ...]
                                   exit 1 if the generated code is out of date (for CI)
-  sdm list|ls [-dir go-sdm|-c N|all] [-m] [-d] [-l] [class ...]
+  sdmc list|ls [-dir go-sdm|-c N|all] [-m] [-d] [-l] [class ...]
                                   numbered classes of sdm.xml in the order of declaration,
                                   -l: a table with files and dates
-  sdm xml -orm no_orm|sqlx|gorm [-dir go-sdm|-c N] [-m] [-d] [-force]
+  sdmc xml -orm no_orm|sqlx|gorm [-dir go-sdm|-c N] [-m] [-d] [-force]
                                   starting XML from the database schema, to the console:
                                   -m <dto-class> for each table and view, -d <dao-class>
                                   for each, named by the table, with <crud/> and FK access;
                                   -orm (required for Go, not for Python and C++): DTO
                                   classes Task, sqlx-Task or gorm-Task;
                                   classes already in sdm.xml are skipped, -force: not;
-                                  to a file: sdm xml -orm gorm -m > models.xml
-  sdm datastore|ds [-dir go-sdm|-c N|all] [-db pg|mysql|sqlite]
+                                  to a file: sdmc xml -orm gorm -m > models.xml
+  sdmc datastore|ds [-dir go-sdm|-c N|all] [-db pg|mysql|sqlite]
                                   update data_store_<orm>.go (Python: data_store_no_orm.py,
                                   C++: DataStore.h and DataStore.cpp) in the DAO folder to this
-                                  sdm version (the database of <db url>, or -db);
+                                  sdmc version (the database of <db url>, or -db);
                                   data_store_<orm>_ex.go is not touched
-  sdm version|-v|--version
-  sdm help [init]
+  sdmc version|-v|--version
+  sdmc help [init]
 
 -m: models only, -d: DAO only.
 
@@ -65,10 +65,10 @@ usage:
 the command for each, and the console asks for the number; none in .sdm (or no .sdm):
 -dir go-sdm.
 
-A folder with python.dal is Python, with cpp.dal C++ (sdm init -lang python|cpp creates them),
+A folder with python.dal is Python, with cpp.dal C++ (sdmc init -lang python|cpp creates them),
 any other is Go.
 
-class: a number of sdm ls or a name; several, by spaces or commas: sdm gen 1,3 5 TasksDao.
+class: a number of sdmc ls or a name; several, by spaces or commas: sdmc gen 1,3 5 TasksDao.
 None: all classes.
 
 Run it in the folder of go.mod (Python, C++: the project folder). The database is
@@ -133,12 +133,12 @@ func newFlags(name string, stderr io.Writer) (*flag.FlagSet, *string) {
 
 // printInitUsage is the help of init: an example first, then the options; all of them are required.
 func printInitUsage(w io.Writer) {
-	_, _ = io.WriteString(w, `sdm init: create sdm.xml, settings.xml, XSD and the data store; nothing is overwritten
+	_, _ = io.WriteString(w, `sdmc init: create sdm.xml, settings.xml, XSD and the data store; nothing is overwritten
 
 example:
-  sdm init -dir huy/sdm -dao huy/internal/dbal -orm gorm -db pg
-  sdm init -lang python -dir sdm -dao dbal -db sqlite
-  sdm init -lang cpp -dir sdm -dao dal -db sqlite
+  sdmc init -dir huy/sdm -dao huy/internal/dbal -orm gorm -db pg
+  sdmc init -lang python -dir sdm -dao dbal -db sqlite
+  sdmc init -lang cpp -dir sdm -dao dal -db sqlite
 
 all options are required, but -lang (go by default); Python and C++ have no -orm:
 
@@ -147,7 +147,7 @@ all options are required, but -lang (go by default); Python and C++ have no -orm
 		"  option\tvalue\tmeaning",
 		"  -lang\t" + strings.Join(skeleton.Langs, " | ") + "\tthe language of the generated code",
 		"  -dir\t<folder>\tthe folder of sdm.xml and settings.xml, relative to the project (go.mod);",
-		"  \t\tits line in .sdm (IDE plug-ins, sdm -c N): <folder>/go.dal, python.dal, cpp.dal",
+		"  \t\tits line in .sdm (IDE plug-ins, sdmc -c N): <folder>/go.dal, python.dal, cpp.dal",
 		"  -dao\t<folder>\tthe folder of the generated DAO, relative to the project; Go: models go to",
 		"  \t\t<folder>/models, the last element is the Go package name; Python: models",
 		"  \t\tgo there too, the folder is the package (dbal/x -> from dbal.x.task import Task);",
@@ -211,7 +211,7 @@ func parseInit(name string, args []string, stderr io.Writer) (skeleton.Options, 
 	return skeleton.Options{ProjectDir: ".", Lang: gen.Lang(*lang), SdmDir: cleanRel(*dir), DaoDir: cleanRel(*dao), ORM: *orm, DB: *db}, true
 }
 
-// parse allows flags mixed with classes: sdm gen 1,3 -dir x 5 (the flag package stops
+// parse allows flags mixed with classes: sdmc gen 1,3 -dir x 5 (the flag package stops
 // at the first non-flag).
 func parse(fs *flag.FlagSet, args []string) ([]string, error) {
 	var rest []string
@@ -236,17 +236,17 @@ func runInit(o skeleton.Options, stdout, stderr io.Writer) int {
 		printErr(stderr, err)
 		return 1
 	}
-	fmt.Fprintf(stdout, "next: describe classes in %s/sdm.xml, set <db url> in %s/settings.xml, then sdm gen\n",
+	fmt.Fprintf(stdout, "next: describe classes in %s/sdm.xml, set <db url> in %s/settings.xml, then sdmc gen\n",
 		o.SdmDir, o.SdmDir)
 	lang := o.Lang
 	if lang == "" {
 		lang = gen.Go
 	}
-	fmt.Fprintf(stdout, "%s (IDE plug-ins, sdm -c N): the line %s/%s\n", sdmFile, o.SdmDir, lang.RootFile())
+	fmt.Fprintf(stdout, "%s (IDE plug-ins, sdmc -c N): the line %s/%s\n", sdmFile, o.SdmDir, lang.RootFile())
 	return 0
 }
 
-// runDataStore updates the data store of the DAO folder to this sdm version.
+// runDataStore updates the data store of the DAO folder to this sdmc version.
 func runDataStore(cmd string, args []string, stdout, stderr io.Writer) int {
 	fs, dir := newFlags("datastore", stderr)
 	db := fs.String("db", "", "database of the data store, by <db url> if not given: "+strings.Join(skeleton.DBs, ", "))
@@ -580,7 +580,7 @@ func runXML(cmd string, args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
-// fkNames is the naming of the FK access of sdm xml, as the field names of the language; C++ by
+// fkNames is the naming of the FK access of sdmc xml, as the field names of the language; C++ by
 // <dto field-names-mode>.
 var fkNames = map[gen.Lang]cg.FieldNamesMode{gen.Go: cg.LowerCamelCase, gen.Python: cg.SnakeCase, gen.Cpp: cg.AsIs}
 

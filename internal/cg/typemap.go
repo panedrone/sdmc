@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/meta"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/meta"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 // SplitTargetType splits "type->assign_func" of type-map. ok == false if there is no function.
@@ -203,7 +203,7 @@ func (m *Macros) substituteVM(target string, fi FieldInfo) (string, bool, error)
 	}
 	for n := range m.vmText {
 		if strings.Contains(target, n) {
-			return "", false, errors.New("Velocity macros (<vm>) are not supported by go-sdm, use <vm-xml>: " + n)
+			return "", false, errors.New("Velocity macros (<vm>) are not supported by sdmc, use <vm-xml>: " + n)
 		}
 	}
 	return target, false, nil

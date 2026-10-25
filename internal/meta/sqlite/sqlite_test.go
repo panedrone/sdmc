@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/meta/metadump"
+	"github.com/panedrone/sdmc/internal/meta/metadump"
 )
 
 // TestGolden is a full run on in-memory SQLite: schema and queries from testdata/sqlite.txt,

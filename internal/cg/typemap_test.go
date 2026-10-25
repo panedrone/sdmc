@@ -3,7 +3,7 @@ package cg
 import (
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 func TestTypeMapRaw(t *testing.T) {

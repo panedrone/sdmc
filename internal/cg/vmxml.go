@@ -55,7 +55,7 @@ func parseVMChildren(d *xml.Decoder, parent string) ([]vmNode, error) {
 			switch n.kind {
 			case "if", "elseif", "else", "print", "br":
 			default:
-				return nil, fmt.Errorf("<vm-xml>: <%s> is not supported by go-sdm", n.kind)
+				return nil, fmt.Errorf("<vm-xml>: <%s> is not supported by sdmc", n.kind)
 			}
 			children, err := parseVMChildren(d, n.kind)
 			if err != nil {

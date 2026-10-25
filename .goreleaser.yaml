@@ -1,17 +1,17 @@
-# Release binaries of sdm: a tag v1.2.3 pushed to GitHub runs .github/workflows/release.yml.
+# Release binaries of sdmc: a tag v1.2.3 pushed to GitHub runs .github/workflows/release.yml.
 # Locally, without publishing: goreleaser release --snapshot --clean
 version: 2
 
-project_name: sdm
+project_name: sdmc
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - id: sdm
-    main: ./cmd/sdm
-    binary: sdm
+  - id: sdmc
+    main: ./cmd/sdmc
+    binary: sdmc
     env:
       - CGO_ENABLED=0 # all the drivers are pure Go (SQLite too): one static binary per platform
     goos: [windows, linux, darwin]
@@ -21,12 +21,12 @@ builds:
       - -s -w -X main.version={{.Version}}
 
 archives:
-  - id: sdm
+  - id: sdmc
     formats: [tar.gz]
     format_overrides:
       - goos: windows
         formats: [zip]
-    name_template: "sdm_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "sdmc_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
       - README.md
@@ -44,4 +44,4 @@ changelog:
 release:
   github:
     owner: panedrone
-    name: go-sdm
+    name: sdmc

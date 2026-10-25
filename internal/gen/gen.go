@@ -13,15 +13,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/panedrone/go-sdm/internal/cg"
-	"github.com/panedrone/go-sdm/internal/cppgen"
-	"github.com/panedrone/go-sdm/internal/gogen"
-	"github.com/panedrone/go-sdm/internal/meta"
-	"github.com/panedrone/go-sdm/internal/meta/mysql"
-	"github.com/panedrone/go-sdm/internal/meta/pg"
-	"github.com/panedrone/go-sdm/internal/meta/sqlite"
-	"github.com/panedrone/go-sdm/internal/pygen"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/cg"
+	"github.com/panedrone/sdmc/internal/cppgen"
+	"github.com/panedrone/sdmc/internal/gogen"
+	"github.com/panedrone/sdmc/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta/mysql"
+	"github.com/panedrone/sdmc/internal/meta/pg"
+	"github.com/panedrone/sdmc/internal/meta/sqlite"
+	"github.com/panedrone/sdmc/internal/pygen"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 // Lang is the target language of a configuration.
@@ -40,7 +40,7 @@ var Langs = []Lang{Go, Python, Cpp}
 func (l Lang) RootFile() string { return string(l) + ".dal" }
 
 // LangOf is the language of the sdm folder by its root file, as in the IDE plug-ins: python.dal is
-// Python, cpp.dal is C++. Without them the folder is Go: go-sdm never needed go.dal.
+// Python, cpp.dal is C++. Without them the folder is Go: sdmc never needed go.dal.
 func LangOf(sdmDir string) (Lang, error) {
 	var found []string
 	res := Go
@@ -225,7 +225,7 @@ func scopes(lang Lang, s *sdmxml.Settings) (dto, dao string, err error) {
 	return dto, dao, nil
 }
 
-// Select returns class names by numbers (from 1, in the order of declaration, as in sdm ls) and by
+// Select returns class names by numbers (from 1, in the order of declaration, as in sdmc ls) and by
 // names; one argument may hold several, separated by commas. models/daos: models only
 // or DAO only; both or neither mean both kinds. No arguments and no
 // models/daos: nil, all of them.

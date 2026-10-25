@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 // Fields from metadata: ColumnFields.java, TableFields.java, ParamFields.java.

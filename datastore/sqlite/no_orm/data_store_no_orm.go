@@ -1,7 +1,7 @@
 //go:build ignore
 
 // The data store for database/sql (no ORM) and SQLite, used by the generated DAO.
-// "sdm init -orm no_orm -db sqlite" writes it to the DAO folder. A copy by hand: this file and
+// "sdmc init -orm no_orm -db sqlite" writes it to the DAO folder. A copy by hand: this file and
 // data_store_no_orm_ex.go from the same folder, without the line "//go:build ignore" and with
 // the package name of the DAO folder.
 

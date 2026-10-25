@@ -1,4 +1,4 @@
-{{- /* Port of src/com/sqldalmaker/cg/python/python.vm, without the ORM branches (sa, django): go-sdm
+{{- /* Port of src/com/sqldalmaker/cg/python/python.vm, without the ORM branches (sa, django): sdmc
      generates Python for no ORM only. The output is compared with the Java plug-in byte for byte. */ -}}
 
 {{define "param_decls"}}self{{if .IsExternalSQL}}, sql{{end}}{{range .Params}}, {{.Name}}{{end}}{{end}}

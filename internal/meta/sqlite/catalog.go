@@ -3,7 +3,7 @@ package sqlite
 import (
 	"github.com/ncruces/go-sqlite3"
 
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 var _ meta.Catalog = (*DB)(nil)

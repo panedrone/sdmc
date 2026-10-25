@@ -2,13 +2,13 @@
   "name": "go-sdm",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
-  "workspaceFolder": "/workspaces/go-sdm",
-  // the default <db url> of "sdm init -db pg" is postgres://localhost:5432/postgres, user postgres:
+  "workspaceFolder": "/workspaces/sdmc",
+  // the default <db url> of "sdmc init -db pg" is postgres://localhost:5432/postgres, user postgres:
   // the db service answers on localhost here, SDM_PWD gives its password
   "containerEnv": {
     "SDM_PWD": "postgres"
   },
-  "postCreateCommand": "go install ./cmd/sdm",
+  "postCreateCommand": "go install ./cmd/sdmc",
   "customizations": {
     "vscode": {
       "extensions": ["golang.go", "redhat.vscode-xml"]

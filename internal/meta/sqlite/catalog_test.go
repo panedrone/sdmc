@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 func TestCatalog(t *testing.T) {

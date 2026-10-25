@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/cg"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/cg"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 // Alignment of DTO struct fields (GoStructFormatter.java): names, types and tags

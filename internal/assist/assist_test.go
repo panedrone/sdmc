@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/cg"
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/cg"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 type fakeCatalog struct {

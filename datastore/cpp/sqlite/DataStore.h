@@ -3,7 +3,7 @@
 
 /*
     The data store for C++, Qt 5/6 and SQLite (QtSql, the driver QSQLITE), used by the generated DAO.
-    "sdm init -lang cpp -db sqlite" writes it next to the DAO, "sdm ds" updates it to the sdm version.
+    "sdmc init -lang cpp -db sqlite" writes it next to the DAO, "sdmc ds" updates it to the sdmc version.
 
     The generated DAO use only the adapter: CValue and the value classes, CRowProcessor, CListReader,
     DL_STR and DL_T, the methods of CDataStore under "the adapter of the generated DAO". Keep their

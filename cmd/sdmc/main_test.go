@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/panedrone/go-sdm/internal/meta/sqlite"
+	"github.com/panedrone/sdmc/internal/meta/sqlite"
 )
 
 // init, then gen and val. t.Chdir: no t.Parallel.
@@ -432,7 +432,7 @@ func TestDbLabel(t *testing.T) {
 	}
 }
 
-// without <db>: an error with a hint; go-sdm does not read <jdbc> (settings.xml has it). <go-db>, the
+// without <db>: an error with a hint; sdmc does not read <jdbc> (settings.xml has it). <go-db>, the
 // former name of <db>: an error that asks to rename it.
 func TestNoDB(t *testing.T) {
 	dir := t.TempDir()
@@ -529,9 +529,9 @@ func TestInitRequiresAll(t *testing.T) {
 		var out, errOut bytes.Buffer
 		if code := run(c.args, &out, &errOut); code != 2 ||
 			!strings.Contains(errOut.String(), c.want) ||
-			!strings.Contains(errOut.String(), "sdm init -dir huy/sdm -dao huy/internal/dbal -orm gorm -db pg") ||
+			!strings.Contains(errOut.String(), "sdmc init -dir huy/sdm -dao huy/internal/dbal -orm gorm -db pg") ||
 			!strings.Contains(errOut.String(), "-orm     no_orm | sqlx | gorm") ||
-			strings.Contains(errOut.String(), "sdm generate") {
+			strings.Contains(errOut.String(), "sdmc generate") {
 			t.Errorf("%v: %d %q", c.args, code, errOut.String())
 		}
 	}
@@ -539,11 +539,11 @@ func TestInitRequiresAll(t *testing.T) {
 		t.Errorf("init wrote files: %v %v", entries, err)
 	}
 	var out, errOut bytes.Buffer
-	if code := run([]string{"help", "init"}, &out, &errOut); code != 0 || !strings.HasPrefix(out.String(), "sdm init: ") {
+	if code := run([]string{"help", "init"}, &out, &errOut); code != 0 || !strings.HasPrefix(out.String(), "sdmc init: ") {
 		t.Errorf("help init: %d %q", code, out.String())
 	}
 	if code := run([]string{"init", "-dir", "x/sdm", "-dao", "x/dbal", "-orm", "gorm", "-db", "pg"}, &out, &errOut); code != 0 ||
-		!strings.Contains(out.String(), ".sdm (IDE plug-ins, sdm -c N): the line x/sdm/go.dal") {
+		!strings.Contains(out.String(), ".sdm (IDE plug-ins, sdmc -c N): the line x/sdm/go.dal") {
 		t.Errorf("init: %d %q %q", code, out.String(), errOut.String())
 	}
 }

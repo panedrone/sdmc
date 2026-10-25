@@ -1,7 +1,7 @@
 // Package datastore holds the data store sources the generated DAO rely on:
 // one variant per database (pg, mysql, sqlite) and framework (no_orm, sqlx, gorm), datastore/<db>/<orm>/.
-// They are in the repository as is, so that they can be downloaded by hand; sdm init takes them from here too.
-// Under "//go:build ignore": the go-sdm module needs no drivers, sqlx or gorm.
+// They are in the repository as is, so that they can be downloaded by hand; sdmc init takes them from here too.
+// Under "//go:build ignore": the sdmc module needs no drivers, sqlx or gorm.
 //
 // The variants are built from the shared templates templates/*.go.txt (Generate, cli/dsgen):
 // lines between "//sdm:if pg mysql" and "//sdm:end" stay only for the listed databases,
@@ -30,7 +30,7 @@ import (
 //go:embed templates/*.go.txt templates/*.py.txt templates/DataStore.*.txt pg/*/*.go mysql/*/*.go sqlite/*/*.go python/*/*.py cpp/*/*
 var fs embed.FS
 
-// Variants are the values of sdm init -orm, the first is the default.
+// Variants are the values of sdmc init -orm, the first is the default.
 var Variants = []string{"no_orm", "sqlx", "gorm"}
 
 // DBs are the databases, the first is the default.

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/panedrone/go-sdm/internal/cg"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/cg"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 //go:embed python.tmpl
@@ -30,15 +30,15 @@ func render(name string, data any) (string, error) {
 
 func checkSettings(s *sdmxml.Settings) error {
 	if strings.TrimSpace(s.Dto.Macro) != "" || strings.TrimSpace(s.Dao.Macro) != "" {
-		return errors.New("custom Velocity templates (<dto macro=...>, <dao macro=...>) are not supported by go-sdm")
+		return errors.New("custom Velocity templates (<dto macro=...>, <dao macro=...>) are not supported by sdmc")
 	}
 	return nil
 }
 
-// checkNoModel: a model of a class (sa-Task, dj-Task, ...) is an ORM, Python has no ORM in go-sdm.
+// checkNoModel: a model of a class (sa-Task, dj-Task, ...) is an ORM, Python has no ORM in sdmc.
 func checkNoModel(className string) error {
 	if m := cg.Model(className); m != "" {
-		return fmt.Errorf("%s: the model %q is an ORM; go-sdm generates Python without ORM, use %s",
+		return fmt.Errorf("%s: the model %q is an ORM; sdmc generates Python without ORM, use %s",
 			className, m, cg.ClassNameWithoutModel(className))
 	}
 	return nil

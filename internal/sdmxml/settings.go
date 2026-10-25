@@ -9,8 +9,8 @@ type Settings struct {
 	Folders Folders `xml:"folders"`
 	Dto     Dto     `xml:"dto"`
 	Dao     Dao     `xml:"dao"`
-	Jdbc    DB      `xml:"jdbc"`  // IDE plug-ins; go-sdm does not read it (cli/genharness does)
-	DB      *DB     `xml:"db"`    // the database of go-sdm
+	Jdbc    DB      `xml:"jdbc"`  // IDE plug-ins; sdmc does not read it (cli/genharness does)
+	DB      *DB     `xml:"db"`    // the database of sdmc
 	GoDB    *DB     `xml:"go-db"` // the former name of <db>: only for RenamedGoDB
 	TypeMap TypeMap `xml:"type-map"`
 	Macros  []Macro `xml:"macros>macro"`
@@ -25,7 +25,7 @@ type Folders struct {
 type Dto struct {
 	Scope          string `xml:"scope,attr"`
 	Inheritance    string `xml:"inheritance,attr"`
-	FieldNamesMode int    `xml:"field-names-mode,attr"` // IDE plug-ins; go-sdm ignores it: Go naming only
+	FieldNamesMode int    `xml:"field-names-mode,attr"` // IDE plug-ins; sdmc ignores it: Go naming only
 	Macro          string `xml:"macro,attr"`
 }
 

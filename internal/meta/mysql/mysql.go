@@ -18,7 +18,7 @@ import (
 	"github.com/go-mysql-org/go-mysql/client"
 	gm "github.com/go-mysql-org/go-mysql/mysql"
 
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 const noMetaData = "Cannot detect Prepared Statement MetaData"

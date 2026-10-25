@@ -1,6 +1,6 @@
 package mysql
 
-import "github.com/panedrone/go-sdm/internal/meta"
+import "github.com/panedrone/sdmc/internal/meta"
 
 var _ meta.Catalog = (*DB)(nil)
 

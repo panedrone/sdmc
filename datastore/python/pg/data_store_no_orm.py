@@ -1,6 +1,6 @@
 """
 The data store for Python and PostgreSQL (no ORM, DB-API 2.0, psycopg2 or psycopg), used by the generated DAO.
-"sdm init -lang python -db pg" writes it to the DAO folder, "sdm ds" updates it to the sdm version.
+"sdmc init -lang python -db pg" writes it to the DAO folder, "sdmc ds" updates it to the sdmc version.
 
 The generated DAO call only the adapter: the methods of DataStore below and OutParam. Keep their
 names and parameters; everything else is yours: the connection, logging, retries, whatever you need.

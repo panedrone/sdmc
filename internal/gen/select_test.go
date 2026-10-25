@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 func TestSelect(t *testing.T) {

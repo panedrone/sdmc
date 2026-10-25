@@ -1,9 +1,9 @@
-// Package skeleton is what `sdm init` puts into a project.
+// Package skeleton is what `sdmc init` puts into a project.
 //
 // Init overwrites nothing: if any of its files already exists, it is an error,
 // and nothing is created (running it by mistake in a ready project is harmless). The XSD belong
-// to the sdm version, RefreshXSD updates them on every generation. The data store too, but only on
-// request (sdm datastore): RefreshDataStore.
+// to the sdmc version, RefreshXSD updates them on every generation. The data store too, but only on
+// request (sdmc datastore): RefreshDataStore.
 package skeleton
 
 import (
@@ -20,9 +20,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/panedrone/go-sdm/datastore"
-	"github.com/panedrone/go-sdm/internal/gen"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/datastore"
+	"github.com/panedrone/sdmc/internal/gen"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 //go:embed files
@@ -37,7 +37,7 @@ type Options struct {
 	DB         string   // type-map and url: pg, mysql, sqlite; "" means pg
 }
 
-// Langs are the values of sdm init -lang, the first is the default.
+// Langs are the values of sdmc init -lang, the first is the default.
 var Langs = func() []string {
 	var res []string
 	for _, l := range gen.Langs {
@@ -48,10 +48,10 @@ var Langs = func() []string {
 
 var xsds = []string{"sdm.xsd", "dao.xsd", "settings.xsd"}
 
-// DBs are the values of sdm init -db, the first is the default.
+// DBs are the values of sdmc init -db, the first is the default.
 var DBs = datastore.DBs
 
-// dbConf holds <db> and the plug-in's <jdbc>: one settings.xml for both sdm and the IDE.
+// dbConf holds <db> and the plug-in's <jdbc>: one settings.xml for both sdmc and the IDE.
 var dbConf = map[string]struct{ name, url, user, jar, class, jdbcURL string }{
 	"pg": {"PostgreSQL", "postgres://localhost:5432/postgres", "postgres",
 		"postgresql-42.7.3.jar", "org.postgresql.Driver", "jdbc:postgresql://localhost:5432/postgres"},
@@ -129,10 +129,10 @@ func Init(o Options) ([]string, error) {
 
 // initOneFolder is Init of a Python or C++ project: no go.mod, the models and DAO in one folder DaoDir
 // (Python: a package), the data store without ORM there, the root file python.dal or cpp.dal: the folder
-// is of that language for sdm and for the IDE plug-in.
+// is of that language for sdmc and for the IDE plug-in.
 func initOneFolder(o Options) ([]string, error) {
 	if o.ORM != "" {
-		return nil, fmt.Errorf("%s has no ORM in go-sdm: no -orm", langNames[o.Lang])
+		return nil, fmt.Errorf("%s has no ORM in sdmc: no -orm", langNames[o.Lang])
 	}
 	if o.Lang == gen.Python {
 		for _, p := range strings.Split(o.DaoDir, "/") {
@@ -261,7 +261,7 @@ func write(steps []step, vars *strings.Replacer, sdmDir, daoDir string) ([]strin
 	return written, nil
 }
 
-// RefreshXSD writes the XSD of this sdm version: IDE hints must match the generator.
+// RefreshXSD writes the XSD of this sdmc version: IDE hints must match the generator.
 // It returns the updated (created) files; it does not touch the matching ones.
 func RefreshXSD(projectDir, sdmDir string) ([]string, error) {
 	dir := filepath.Join(projectDir, filepath.FromSlash(sdmDir))
@@ -288,11 +288,11 @@ func RefreshXSD(projectDir, sdmDir string) ([]string, error) {
 type DataStoreFile struct {
 	Path    string
 	ORM, DB string
-	Updated bool // false: it matched this sdm version
+	Updated bool // false: it matched this sdmc version
 }
 
 // RefreshDataStore rewrites data_store_<orm>.go in the DAO folder of settings.xml with the one of this
-// sdm version, for each data store found there. data_store_<orm>_ex.go (connection) is yours, it is not
+// sdmc version, for each data store found there. data_store_<orm>_ex.go (connection) is yours, it is not
 // touched. db "" means the database of <db url>. It returns the data stores found; the matching ones
 // are not touched. Python: data_store_no_orm.py in <folders target>; C++: DataStore.h and DataStore.cpp
 // there.
@@ -352,13 +352,13 @@ func RefreshDataStore(projectDir, sdmDir, db string) ([]DataStoreFile, error) {
 		res = append(res, f)
 	}
 	if !found {
-		return nil, fmt.Errorf("no data_store_{%s}.go in %s (sdm init creates it)", strings.Join(datastore.Variants, ","), daoDir)
+		return nil, fmt.Errorf("no data_store_{%s}.go in %s (sdmc init creates it)", strings.Join(datastore.Variants, ","), daoDir)
 	}
 	return res, nil
 }
 
 // refreshOneFolder rewrites the data store of a Python or C++ DAO folder: each of its files has to be
-// there (sdm init made them), a missing one is an error and nothing is written.
+// there (sdmc init made them), a missing one is an error and nothing is written.
 func refreshOneFolder(lang gen.Lang, daoDir, db string) ([]DataStoreFile, error) {
 	want, err := dataStoreOf(lang, db)
 	if err != nil {
@@ -373,7 +373,7 @@ func refreshOneFolder(lang gen.Lang, daoDir, db string) ([]DataStoreFile, error)
 	for _, name := range names {
 		b, err := os.ReadFile(filepath.Join(daoDir, name))
 		if errors.Is(err, os.ErrNotExist) {
-			return nil, fmt.Errorf("no %s in %s (sdm init -lang %s creates it)", name, daoDir, lang)
+			return nil, fmt.Errorf("no %s in %s (sdmc init -lang %s creates it)", name, daoDir, lang)
 		}
 		if err != nil {
 			return nil, err
@@ -421,7 +421,7 @@ func packageName(file string, src []byte) (string, error) {
 func readModule(goMod string) (string, error) {
 	data, err := os.ReadFile(goMod)
 	if errors.Is(err, os.ErrNotExist) {
-		return "", fmt.Errorf("%s not found: run sdm in the folder of go.mod (or 'go mod init' first)", goMod)
+		return "", fmt.Errorf("%s not found: run sdmc in the folder of go.mod (or 'go mod init' first)", goMod)
 	}
 	if err != nil {
 		return "", err

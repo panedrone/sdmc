@@ -14,8 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/gen"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/gen"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 func main() {

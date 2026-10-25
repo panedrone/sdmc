@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/meta/sqlite"
+	"github.com/panedrone/sdmc/internal/meta/sqlite"
 )
 
 // Raw driver names in type-map are on a par with the Java names of the plug-in.

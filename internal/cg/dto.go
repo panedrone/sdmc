@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/meta"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/meta"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 // Core is what the Java plug-in keeps in JdbcUtils for one generation run:

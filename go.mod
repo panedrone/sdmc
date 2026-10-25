@@ -1,4 +1,4 @@
-module github.com/panedrone/go-sdm
+module github.com/panedrone/sdmc
 
 go 1.26.8
 

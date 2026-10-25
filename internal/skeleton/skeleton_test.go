@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/panedrone/go-sdm/datastore"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/datastore"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 func newProject(t *testing.T) string {
@@ -211,7 +211,7 @@ func TestRefreshDataStore(t *testing.T) {
 	if err := os.Remove(ds); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := RefreshDataStore(dir, "go-sdm", ""); err == nil || !strings.Contains(err.Error(), "sdm init") {
+	if _, err := RefreshDataStore(dir, "go-sdm", ""); err == nil || !strings.Contains(err.Error(), "sdmc init") {
 		t.Fatalf("no data store: %v", err)
 	}
 }

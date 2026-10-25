@@ -14,7 +14,7 @@ import (
 )
 
 // sdmFile is the root file of the IDE plug-ins in the folder of go.mod: their tool window shows its
-// lines. sdm takes the configurations from it: the lines <dir>/go.dal, <dir>/python.dal, <dir>/cpp.dal.
+// lines. sdmc takes the configurations from it: the lines <dir>/go.dal, <dir>/python.dal, <dir>/cpp.dal.
 const sdmFile = ".sdm"
 
 // stdin and stdinIsTerminal serve the choice of a configuration in the console; tests replace them.
@@ -57,7 +57,7 @@ type config struct{ label, dir string }
 // configDirs are the configurations to run: -dir, if given; otherwise from .sdm: -c N, -c all, the
 // only go.dal, or the choice in the console (a number or all). Without go.dal in .sdm (or without
 // .sdm) it is -dir by default. When several are left to choose from, it prints them with the
-// command for each: cmdline is the command as typed (sdm ls -l), -c N is added to it.
+// command for each: cmdline is the command as typed (sdmc ls -l), -c N is added to it.
 func configDirs(fs *flag.FlagSet, dir, c, cmdline string, stderr io.Writer) ([]config, error) {
 	dirSet := false
 	fs.Visit(func(f *flag.Flag) { dirSet = dirSet || f.Name == "dir" })
@@ -87,7 +87,7 @@ func configDirs(fs *flag.FlagSet, dir, c, cmdline string, stderr io.Writer) ([]c
 	case len(dals) == 1:
 		return pick1(dals, 1), nil
 	}
-	// stderr: stdout may go to a file (sdm xml > models.xml)
+	// stderr: stdout may go to a file (sdmc xml > models.xml)
 	fmt.Fprintf(stderr, "%s has %d configurations:\n\n", sdmFile, len(dals))
 	printConfigs(stderr, dals, cmdline)
 	if !stdinIsTerminal() {
@@ -144,9 +144,9 @@ func printConfigs(w io.Writer, dals []string, cmdline string) {
 	_ = tw.Flush()
 }
 
-// commandLine is the command as typed, without -c: "sdm ls -l"; an argument with a space is quoted.
+// commandLine is the command as typed, without -c: "sdmc ls -l"; an argument with a space is quoted.
 func commandLine(cmd string, args []string) string {
-	parts := []string{"sdm", cmd}
+	parts := []string{"sdmc", cmd}
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		if a == "-c" || a == "--c" {
@@ -173,7 +173,7 @@ func checkConfig(cfg config) error {
 	if _, err := os.Stat(path.Join(cfg.dir, "settings.xml")); err == nil || !errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
-	return fmt.Errorf("%s in %s: no settings.xml in %s; fix the line (<folder of settings.xml>/%s) or run sdm init with -dir %s",
+	return fmt.Errorf("%s in %s: no settings.xml in %s; fix the line (<folder of settings.xml>/%s) or run sdmc init with -dir %s",
 		cfg.label, sdmFile, cfg.dir, path.Base(cfg.label), cfg.dir)
 }
 

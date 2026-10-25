@@ -11,8 +11,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/panedrone/go-sdm/internal/cg"
-	"github.com/panedrone/go-sdm/internal/meta"
+	"github.com/panedrone/sdmc/internal/cg"
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 // DtoClasses returns a <dto-class> for each table and view, except the classes of inUse (names

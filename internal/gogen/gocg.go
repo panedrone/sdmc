@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/panedrone/go-sdm/internal/cg"
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/cg"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 //go:embed go.tmpl
@@ -29,7 +29,7 @@ func render(name string, data any) (string, error) {
 // Settings is what the generator needs from settings.xml.
 func checkNoVelocity(s *sdmxml.Settings) error {
 	if strings.TrimSpace(s.Dto.Macro) != "" || strings.TrimSpace(s.Dao.Macro) != "" {
-		return errors.New("custom Velocity templates (<dto macro=...>, <dao macro=...>) are not supported by go-sdm")
+		return errors.New("custom Velocity templates (<dto macro=...>, <dao macro=...>) are not supported by sdmc")
 	}
 	return nil
 }

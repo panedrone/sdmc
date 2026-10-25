@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/sdmxml"
+	"github.com/panedrone/sdmc/internal/sdmxml"
 )
 
 // The method plan of a DAO class (JaxbUtils.plan_dao_methods): everything that does not depend on the target

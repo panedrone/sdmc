@@ -2,7 +2,7 @@ services:
   app:
     image: mcr.microsoft.com/devcontainers/go:1
     volumes:
-      - ..:/workspaces/go-sdm:cached
+      - ..:/workspaces/sdmc:cached
     command: sleep infinity
     network_mode: service:db # PostgreSQL is localhost:5432 in the app container
 

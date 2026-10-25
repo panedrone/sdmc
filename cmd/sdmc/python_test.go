@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/meta/sqlite"
+	"github.com/panedrone/sdmc/internal/meta/sqlite"
 )
 
 // Python: init without go.mod, xml, gen, val, ls, ds, .sdm with python.dal.
@@ -29,7 +29,7 @@ func TestPython(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if !strings.Contains(got, ".sdm (IDE plug-ins, sdm -c N): the line sdm/python.dal") {
+	if !strings.Contains(got, ".sdm (IDE plug-ins, sdmc -c N): the line sdm/python.dal") {
 		t.Errorf("init: %s", got)
 	}
 	settings, err := os.ReadFile(filepath.Join("sdm", "settings.xml"))

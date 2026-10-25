@@ -1,7 +1,7 @@
 //go:build ignore
 
 // The data store for sqlx and PostgreSQL, used by the generated DAO.
-// "sdm init -orm sqlx -db pg" writes it to the DAO folder. A copy by hand: this file and
+// "sdmc init -orm sqlx -db pg" writes it to the DAO folder. A copy by hand: this file and
 // data_store_sqlx_ex.go from the same folder, without the line "//go:build ignore" and with
 // the package name of the DAO folder.
 

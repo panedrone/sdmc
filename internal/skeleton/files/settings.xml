@@ -11,7 +11,7 @@
 
     <!-- scope: folder of generated models
 
-         field-names-mode: the IDE plug-in only; go-sdm ignores it. The names always follow
+         field-names-mode: the IDE plug-in only; sdmc ignores it. The names always follow
             the Go conventions: TitleCase fields (task_id -> TaskID), camelCase parameters (taskID). -->
 
     <dto scope="{{dto}}" inheritance="" field-names-mode="0" macro=""/>
@@ -28,9 +28,9 @@
 
     <ide event-log="true"/>
 
-    <!-- One "settings.xml" for the IDE plug-in and for go-sdm:
-            jdbc  - the IDE plug-in (jar, class and url of JDBC); go-sdm does not read it.
-            db    - go-sdm (url: postgres://host:port/db, mysql://host:port/db or sqlite:<file>);
+    <!-- One "settings.xml" for the IDE plug-in and for sdmc:
+            jdbc  - the IDE plug-in (jar, class and url of JDBC); sdmc does not read it.
+            db    - sdmc (url: postgres://host:port/db, mysql://host:port/db or sqlite:<file>);
                     the IDE plug-in ignores it. SDM_PWD, if set, overrides "pwd" of db. -->
 
     <jdbc jar="{{jdbc-jar}}" class="{{jdbc-class}}"
@@ -39,7 +39,7 @@
     <db url="{{url}}" user="{{user}}" pwd=""/>
 
     <!-- detected: the type of a column as the driver names it. The keys below are {{db}}
-         (sdm init -db pg, mysql or sqlite). PostgreSQL says int4, varchar, timestamptz, ...;
+         (sdmc init -db pg, mysql or sqlite). PostgreSQL says int4, varchar, timestamptz, ...;
          MySQL says INT, VARCHAR, DATETIME, UNSIGNED BIGINT, ...;
          SQLite says what the column is declared with: INTEGER, VARCHAR, ...
 
@@ -51,7 +51,7 @@
             <dto-class name="Task" ...>       - the keys without prefix
             <dto-class name="sqlx-Task" ...>  - the keys with "sqlx-"
             <dto-class name="gorm-Task" ...>  - the keys with "gorm-" ("+auto" - auto="..." column)
-         The data store in the DAO folder has to match: sdm init -orm no_orm, sqlx or gorm.
+         The data store in the DAO folder has to match: sdmc init -orm no_orm, sqlx or gorm.
          The sets you don't use can be removed or commented out. -->
 
 {{type-map}}

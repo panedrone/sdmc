@@ -2,7 +2,7 @@
 <settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="settings.xsd">
 
-    <!-- Paths are relative to the project root (the folder sdm runs in). -->
+    <!-- Paths are relative to the project root (the folder sdmc runs in). -->
 
     <!-- target: the folder of the generated models and DAO, one Python package:
             target="dbal" -> from dbal.task import Task
@@ -10,7 +10,7 @@
 
     <folders target="{{dao}}" sql="{{sql}}"/>
 
-    <!-- scope, field-names-mode, field-assign-mode: the IDE plug-in only; go-sdm ignores them
+    <!-- scope, field-names-mode, field-assign-mode: the IDE plug-in only; sdmc ignores them
          for Python. The names always follow the Python conventions: snake_case fields,
          parameters and methods (task_id, get_tasks_by_group). -->
 
@@ -20,9 +20,9 @@
 
     <ide event-log="true"/>
 
-    <!-- One "settings.xml" for the IDE plug-in and for go-sdm:
-            jdbc  - the IDE plug-in (jar, class and url of JDBC); go-sdm does not read it.
-            db    - go-sdm (url: postgres://host:port/db, mysql://host:port/db or sqlite:<file>);
+    <!-- One "settings.xml" for the IDE plug-in and for sdmc:
+            jdbc  - the IDE plug-in (jar, class and url of JDBC); sdmc does not read it.
+            db    - sdmc (url: postgres://host:port/db, mysql://host:port/db or sqlite:<file>);
                     the IDE plug-in ignores it. SDM_PWD, if set, overrides "pwd" of db. -->
 
     <jdbc jar="{{jdbc-jar}}" class="{{jdbc-class}}"
@@ -31,12 +31,12 @@
     <db url="{{url}}" user="{{user}}" pwd=""/>
 
     <!-- detected: the type of a column as the driver names it. The keys below are {{db}}
-         (sdm init -db pg, mysql or sqlite). PostgreSQL says int4, varchar, timestamptz, ...;
+         (sdmc init -db pg, mysql or sqlite). PostgreSQL says int4, varchar, timestamptz, ...;
          MySQL says INT, VARCHAR, DATETIME, UNSIGNED BIGINT, ...;
          SQLite says what the column is declared with: INTEGER, VARCHAR, ...
 
          target: the Python type of the field in the docstrings of the models and DAO, what the
-         driver returns ({{driver}}). go-sdm generates Python without ORM: no class models
+         driver returns ({{driver}}). sdmc generates Python without ORM: no class models
          (sa-Task, dj-Task) in sdm.xml.
 
          To see which names your database gives, empty the type-map: <type-map default=""/>

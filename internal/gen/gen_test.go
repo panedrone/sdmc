@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/panedrone/go-sdm/internal/meta/sqlite"
+	"github.com/panedrone/sdmc/internal/meta/sqlite"
 )
 
 // TestGolden is a full cycle on in-memory SQLite: the schema (DDL only, metadata needs no
@@ -16,7 +16,7 @@ import (
 //
 // The reference is retaken in sdm-plugins: harness with these projects, then the output
 // build/<out>/<label>/ is copied to testdata/golden/<label>/. The templates of sdm-plugins are LF
-// (.gitattributes there), as is the output of go-sdm.
+// (.gitattributes there), as is the output of sdmc.
 //
 // task_board/refcursors_python, python_branches, cpp, cpp_branches, cpp_camel and cpp_snake are the
 // plug-in project of qt6_sqlite3_task_board with this XML (the sdm folder of the Java harness is an absolute path to them).

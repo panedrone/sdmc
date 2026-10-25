@@ -17,11 +17,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/panedrone/go-sdm/internal/meta"
-	"github.com/panedrone/go-sdm/internal/meta/metadump"
-	"github.com/panedrone/go-sdm/internal/meta/mysql"
-	"github.com/panedrone/go-sdm/internal/meta/pg"
-	"github.com/panedrone/go-sdm/internal/meta/sqlite"
+	"github.com/panedrone/sdmc/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta/metadump"
+	"github.com/panedrone/sdmc/internal/meta/mysql"
+	"github.com/panedrone/sdmc/internal/meta/pg"
+	"github.com/panedrone/sdmc/internal/meta/sqlite"
 )
 
 func main() {

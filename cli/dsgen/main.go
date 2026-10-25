@@ -1,6 +1,6 @@
 // dsgen is design-time: it builds the data store for each database from the templates datastore/templates
 // into datastore/<db>/<orm>/ (Go), datastore/python/<db>/ (Python) and datastore/cpp/<db>/ (C++). Run it
-// from the go-sdm root after editing the templates:
+// from the sdmc root after editing the templates:
 //
 //	go run ./cli/dsgen
 //
@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/panedrone/go-sdm/datastore"
+	"github.com/panedrone/sdmc/datastore"
 )
 
 func main() {
