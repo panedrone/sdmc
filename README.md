@@ -92,16 +92,6 @@ go install github.com/panedrone/sdmc/cmd/sdmc@latest
 Or open the repository in a [dev container](#try-it-in-a-dev-container) (VS Code, GitHub Codespaces):
 Go, `sdmc` and PostgreSQL with a demo schema are ready in it.
 
-```xml
-
-<dto-class name="Test" ref="tests"/>
-
-<dao-class name="TestsDao">
-  <crud dto="Test"/>
-  <query-dto-list dto="Test" method="GetTestsByRating(t_rating)" ref="tests_by_rating.sql"/>
-  <exec-dml method="SetTestRating(t_id, t_rating)" ref="call set_test_rating(?, ?)"/>
-</dao-class>
-```
 
 ## Quick start
 
