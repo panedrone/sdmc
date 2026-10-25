@@ -413,7 +413,7 @@ is replaced by the type of the column from the database, or by `unknown` if ther
 The XML files are meant to be edited in an IDE with XML Schema support:
 GoLand out of the box, VS Code with the "XML" extension by Red Hat.
 
-## Python
+## Python DB-API 2.0
 
 The same `sdm`, the same manifest and the same reverse engineering of the live database; the
 output is Python without ORM: plain DB-API 2.0 (sqlite3, psycopg2/psycopg, mysql-connector-python)
