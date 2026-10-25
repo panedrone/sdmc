@@ -27,7 +27,7 @@ import (
 // version: a release build sets it from the tag (goreleaser, -ldflags "-X main.version=...")
 var version = "1.0.10"
 
-const usage = `sdmc %s — SQL DAL Maker for Go, Python and C++
+const usage = `sdmc %s — SQL DAL Maker CLI for Go, Python and C++
 
 usage:
   sdmc init -dir <folder> -dao <folder> -orm no_orm|sqlx|gorm -db pg|mysql|sqlite

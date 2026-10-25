@@ -5,13 +5,19 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/panedrone/sdmc)](https://goreportcard.com/report/github.com/panedrone/sdmc)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](LICENSE)
 
-SQL DAL Maker for Go generates the data access layer — models and DAO — from an XML manifest
-and the metadata of a **live database**. One static binary, no runtime dependencies.
-PostgreSQL, MySQL and SQLite. The same binary generates Python and C++ (Qt) too, without ORM
-(see [Python](#python) and [C++](#c-qt)).
+SQL DAL Maker CLI generates the data access layer — models and DAO — from an XML manifest and
+the metadata of a **live database**: Go (database/sql, sqlx, gorm), Python and C++ (Qt), see
+[Python](#python) and [C++](#c-qt). PostgreSQL, MySQL and SQLite. One static binary, no runtime
+dependencies.
 
 **SQL first, no ORM, no reflection at run time:** you write SQL or point at a table, the
-database says what the columns and parameters are, and you get plain Go functions to call.
+database says what the columns and parameters are, and you get plain functions to call.
+
+**Why sdmc:** *SQL DAL Maker CLI*, the command-line twin of the
+[SQL DAL Maker IDE plug-ins](https://sqldalmaker.sourceforge.net/): the same `sdm.xml`, the same
+`settings.xml`, the same generated code. It started as go-sdm, for Go only; with Python and C++ the
+"go-" stopped being true. The configuration folder of Go projects keeps its old default name,
+`go-sdm`.
 
 ## A minute with it
 

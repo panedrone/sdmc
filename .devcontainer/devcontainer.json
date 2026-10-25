@@ -1,5 +1,5 @@
 {
-  "name": "go-sdm",
+  "name": "sdmc",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces/sdmc",
