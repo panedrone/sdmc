@@ -2,6 +2,7 @@
 
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
+#include <QtSql/QSqlRecord>
 
 CDataStore::CDataStore(const QString &connectionName) : connectionName(connectionName), transaction(false) {
 }
@@ -68,31 +69,7 @@ bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *pa
         return false;
     }
     for (int i = 0; i < params_count; i++) {
-        CValue *p = params[i];
-        QVariant val; // null
-        if (!p->IsNull) {
-            switch (p->getType()) {
-                case VALUE_TYPE_VARIANT:
-                    val = p->Variant;
-                    break;
-                case VALUE_TYPE_INTEGER:
-                    val = static_cast<CInteger *> (p)->Value;
-                    break;
-                case VALUE_TYPE_DOUBLE:
-                    val = static_cast<CDouble *> (p)->Value;
-                    break;
-                case VALUE_TYPE_TEXT:
-                    val = static_cast<CText *> (p)->Value;
-                    break;
-                case VALUE_TYPE_BLOB:
-                    val = static_cast<CBlob *> (p)->Value;
-                    break;
-                default:
-                    errors = QString("parameter %1: unexpected value type %2").arg(i + 1).arg(p->getType());
-                    return false;
-            }
-        }
-        query.addBindValue(val);
+        query.addBindValue(params[i]->IsNull ? QVariant() : params[i]->toVariant());
     }
     if (!query.exec()) {
         errors = query.lastError().text();
@@ -103,29 +80,14 @@ bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *pa
 
 bool CDataStore::readRow(QSqlQuery &query, int ret_values_count, CValue *ret_values[], DL_STR col_names[]) {
     for (int i = 0; i < ret_values_count; i++) {
-        CValue *v = ret_values[i];
-        QVariant value = query.value(QString::fromUtf8(col_names[i]));
-        v->IsNull = value.isNull();
-        switch (v->getType()) {
-            case VALUE_TYPE_VARIANT:
-                v->Variant = value;
-                break;
-            case VALUE_TYPE_INTEGER:
-                static_cast<CInteger *> (v)->Value = v->IsNull ? 0 : value.toLongLong();
-                break;
-            case VALUE_TYPE_DOUBLE:
-                static_cast<CDouble *> (v)->Value = v->IsNull ? 0 : value.toDouble();
-                break;
-            case VALUE_TYPE_TEXT:
-                static_cast<CText *> (v)->Value = v->IsNull ? QString() : value.toString();
-                break;
-            case VALUE_TYPE_BLOB:
-                static_cast<CBlob *> (v)->Value = v->IsNull ? QByteArray() : value.toByteArray();
-                break;
-            default:
-                errors = QString("%1: unexpected value type %2").arg(col_names[i]).arg(v->getType());
-                return false;
+        int index = query.record().indexOf(QString::fromUtf8(col_names[i]));
+        if (index < 0) {
+            errors = QString("no column %1 in the result").arg(col_names[i]);
+            return false;
         }
+        QVariant value = query.value(index);
+        ret_values[i]->IsNull = value.isNull();
+        ret_values[i]->fromVariant(value); // a null QVariant gives 0, "" or an empty array
     }
     return true;
 }
@@ -146,19 +108,8 @@ int CDataStore::insert(DL_STR sql, int params_count, CValue *params[], int AI_va
         return -1;
     }
     QVariant id = last.value(0);
-    CValue *ai = AI_values[0];
-    ai->IsNull = id.isNull();
-    switch (ai->getType()) {
-        case VALUE_TYPE_VARIANT:
-            ai->Variant = id;
-            break;
-        case VALUE_TYPE_INTEGER:
-            static_cast<CInteger *> (ai)->Value = id.toLongLong();
-            break;
-        default:
-            errors = QString("generated value: unexpected value type %1").arg(ai->getType());
-            return -1;
-    }
+    AI_values[0]->IsNull = id.isNull();
+    AI_values[0]->fromVariant(id);
     return rows;
 }
 

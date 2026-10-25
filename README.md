@@ -438,7 +438,9 @@ dao.getTasksByGroup(t.g_id, tasks);
 `target` of the type map is a value class of `DataStore.h`: `CInteger` (`qint64`), `CDouble`,
 `CText` (`QString`), `CBlob` (`QByteArray`), and `CValue`, which holds anything in a `QVariant`
 (`unknown`, JSON, arrays). `default` is for a type without a key; a type that is mapped already is
-not mapped to `default` once more.
+not mapped to `default` once more. A value class is a `Value` and two conversions, `toVariant()` for
+a parameter and `fromVariant()` for a fetched column: a class of your own (`QDateTime`, `QUuid`, ...)
+needs nothing else, the data store has no list of types to extend.
 
 The data store: do not change its adapter, the value classes, `CRowProcessor`, `CListReader`,
 `DL_STR`/`DL_T` and the methods `insert`, `execDML`, `queryRow`, `queryRowList` of `CDataStore`;

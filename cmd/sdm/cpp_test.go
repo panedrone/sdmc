@@ -90,13 +90,13 @@ func TestCpp(t *testing.T) {
 	}
 
 	h, cpp := filepath.Join("dal", "DataStore.h"), filepath.Join("dal", "DataStore.cpp")
-	if got := run1(0, "ds", "-dir", "sdm"); got != "up to date: "+cpp+" (no_orm for sqlite)\nup to date: "+h+" (no_orm for sqlite)\n" {
+	if got := run1(0, "ds", "-dir", "sdm"); got != "up to date: "+cpp+" (qt for sqlite)\nup to date: "+h+" (qt for sqlite)\n" {
 		t.Errorf("ds: %q", got)
 	}
 	if err := os.WriteFile(cpp, []byte("// mine\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if got := run1(0, "ds", "-dir", "sdm"); got != "updated: "+cpp+" (no_orm for sqlite)\nup to date: "+h+" (no_orm for sqlite)\n" {
+	if got := run1(0, "ds", "-dir", "sdm"); got != "updated: "+cpp+" (qt for sqlite)\nup to date: "+h+" (qt for sqlite)\n" {
 		t.Errorf("ds, changed: %q", got)
 	}
 	if err := os.Remove(h); err != nil {

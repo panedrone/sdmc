@@ -364,6 +364,10 @@ func refreshOneFolder(lang gen.Lang, daoDir, db string) ([]DataStoreFile, error)
 	if err != nil {
 		return nil, err
 	}
+	kind := datastore.Variants[0] // Python: data_store_no_orm.py, database/sql style
+	if lang == gen.Cpp {
+		kind = "qt" // C++: QtSql, there is no ORM to name
+	}
 	names := sortedKeys(want)
 	got := map[string]string{}
 	for _, name := range names {
@@ -378,7 +382,7 @@ func refreshOneFolder(lang gen.Lang, daoDir, db string) ([]DataStoreFile, error)
 	}
 	var res []DataStoreFile
 	for _, name := range names {
-		f := DataStoreFile{Path: filepath.Join(daoDir, name), ORM: datastore.Variants[0], DB: db}
+		f := DataStoreFile{Path: filepath.Join(daoDir, name), ORM: kind, DB: db}
 		if got[name] != want[name] {
 			if err := os.WriteFile(f.Path, []byte(want[name]), 0o644); err != nil {
 				return res, err

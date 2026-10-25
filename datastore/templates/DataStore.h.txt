@@ -26,80 +26,106 @@
 
 #include <list>
 
-enum ValueType {
-    VALUE_TYPE_VARIANT = 0,
-    VALUE_TYPE_INTEGER = 1,
-    VALUE_TYPE_DOUBLE = 2,
-    VALUE_TYPE_TEXT = 3,
-    VALUE_TYPE_BLOB = 4
-};
-
 /*
-    CValue is a nullable value of a column or a parameter. As is, it holds anything in Variant: it is
-    the type of the fields the type map has no class for (<type-map default="CValue">). The classes
-    below hold one kind of value each; add your own with a new ValueType on demand.
+    CValue is a nullable value of a column or a parameter. QtSql passes values as QVariant, and each
+    value class converts its Value to and from it: toVariant() for a parameter, fromVariant() for a
+    fetched column (IsNull is set by the data store). As is, CValue holds anything in Variant: it is
+    the type of the fields the type map has no class for (<type-map default="CValue">). Add your own
+    class the same way: a Value and the two conversions.
  */
 class CValue {
 public:
 
     bool IsNull;
 
-    QVariant Variant; // VALUE_TYPE_VARIANT only
+    QVariant Variant; // CValue itself only
 
-    CValue() : IsNull(true), type(VALUE_TYPE_VARIANT) {
+    CValue() : IsNull(true) {
     }
 
     virtual ~CValue() {
     }
 
-    ValueType getType() const {
-        return type;
+    virtual QVariant toVariant() const {
+        return Variant;
+    }
+
+    virtual void fromVariant(const QVariant &v) {
+        Variant = v;
     }
 
 protected:
 
-    explicit CValue(ValueType t) : IsNull(false), type(t) {
+    explicit CValue(bool isNull) : IsNull(isNull) {
     }
-
-private:
-
-    ValueType type; // C++ RTTI may be off
 };
 
 class CInteger : public CValue {
 public:
 
-    CInteger() : CValue(VALUE_TYPE_INTEGER), Value(0) {
+    CInteger() : CValue(false), Value(0) {
     }
 
     qint64 Value;
+
+    QVariant toVariant() const override {
+        return Value;
+    }
+
+    void fromVariant(const QVariant &v) override {
+        Value = v.toLongLong();
+    }
 };
 
 class CDouble : public CValue {
 public:
 
-    CDouble() : CValue(VALUE_TYPE_DOUBLE), Value(0) {
+    CDouble() : CValue(false), Value(0) {
     }
 
     double Value;
+
+    QVariant toVariant() const override {
+        return Value;
+    }
+
+    void fromVariant(const QVariant &v) override {
+        Value = v.toDouble();
+    }
 };
 
 class CText : public CValue {
 public:
 
-    CText() : CValue(VALUE_TYPE_TEXT) {
+    CText() : CValue(false) {
     }
 
     QString Value;
+
+    QVariant toVariant() const override {
+        return Value;
+    }
+
+    void fromVariant(const QVariant &v) override {
+        Value = v.toString();
+    }
 };
 
 class CBlob : public CValue {
 public:
 
-    CBlob() : CValue(VALUE_TYPE_BLOB) {
+    CBlob() : CValue(false) {
     }
 
     QByteArray Value;
+
+    QVariant toVariant() const override {
+        return Value;
+    }
+
+    void fromVariant(const QVariant &v) override {
+        Value = v.toByteArray();
+    }
 };
 
 class CRowProcessor {
