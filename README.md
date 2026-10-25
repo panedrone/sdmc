@@ -83,9 +83,9 @@ It works like the [SQL DAL Maker IDE plug-ins](https://sqldalmaker.sourceforge.n
 <dto-class name="Test" ref="tests"/>
 
 <dao-class name="TestsDao">
-<crud dto="Test"/>
-<query-dto-list dto="Test" method="GetTestsByRating(t_rating)" ref="tests_by_rating.sql"/>
-<exec-dml method="SetTestRating(t_id, t_rating)" ref="call set_test_rating(?, ?)"/>
+  <crud dto="Test"/>
+  <query-dto-list dto="Test" method="GetTestsByRating(t_rating)" ref="tests_by_rating.sql"/>
+  <exec-dml method="SetTestRating(t_id, t_rating)" ref="call set_test_rating(?, ?)"/>
 </dao-class>
 ```
 
