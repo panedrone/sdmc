@@ -424,6 +424,11 @@ needs no `-orm`. `<dto field-names-mode>` names the fields and the CRUD methods 
 | `1`                | `taskID`                  | `createTask`, `readTaskList`    |
 | `2`                | `task_id`                 | `create_task`, `read_task_list` |
 
+An XML written for Go may have names a C++ compiler rejects; `gen` reports all of them for a DAO class
+instead of writing it: a keyword as a method or a parameter (`register`, `delete`, `class`), and a
+method named as the model class it returns (`OrdersByMonth` returning `CListReader<OrdersByMonth>`:
+inside the DAO the method hides the class). Rename them in the XML.
+
 ```cpp
 CDataStore ds;
 ds.open("app.sqlite3");

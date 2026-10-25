@@ -118,3 +118,50 @@ func TestCpp(t *testing.T) {
 		t.Errorf("init -lang cpp -orm: %s", errOut.String())
 	}
 }
+
+// C++ names: a keyword or a method named as its model class is reported by gen, all of them at once,
+// not left to the compiler.
+func TestCppNames(t *testing.T) {
+	t.Chdir(t.TempDir())
+	var out, errOut bytes.Buffer
+	if code := run([]string{"init", "-lang", "cpp", "-dir", "sdm", "-dao", "dal", "-db", "sqlite"}, &out, &errOut); code != 0 {
+		t.Fatalf("init: %d %s", code, errOut.String())
+	}
+	db, err := sqlite.Open("app.sqlite3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Exec("create table tasks (t_id integer primary key autoincrement, g_id integer, t_subject text)"); err != nil {
+		t.Fatal(err)
+	}
+	_ = db.Close()
+	sdmXML := `<sdm>
+<dto-class name="Task" ref="tasks"/>
+<dao-class name="TasksDao">
+    <query-dto-list dto="Task" method="Task(g_id)" ref="tasks(g_id)"/>
+    <exec-dml method="delete(t_id)" ref="delete from tasks where t_id=?"/>
+    <query method="count_tasks(class)" ref="select count(*) from tasks where g_id=?"/>
+    <query-dto-list dto="Task" method="getTasksByGroup(g_id)" ref="tasks(g_id)"/>
+</dao-class>
+</sdm>`
+	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out.Reset()
+	errOut.Reset()
+	if code := run([]string{"gen", "-dir", "sdm"}, &out, &errOut); code != 1 {
+		t.Fatalf("gen: %d\n%s%s", code, out.String(), errOut.String())
+	}
+	for _, want := range []string{
+		`method "Task" has the name of the class Task`,
+		`method "delete" is a C++ keyword`,
+		`parameter "class" of count_tasks is a C++ keyword`,
+	} {
+		if !strings.Contains(errOut.String(), want) {
+			t.Errorf("no %q in\n%s", want, errOut.String())
+		}
+	}
+	if strings.Contains(errOut.String(), "getTasksByGroup") {
+		t.Errorf("a fine method is reported:\n%s", errOut.String())
+	}
+}

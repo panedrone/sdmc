@@ -135,6 +135,9 @@ func (g *DAO) Translate(dao sdmxml.DaoClass) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if err := checkNames(plan); err != nil {
+		return "", err
+	}
 	var methods []string
 	for _, m := range plan {
 		text, err := g.render(m)
@@ -150,6 +153,54 @@ func (g *DAO) Translate(dao sdmxml.DaoClass) (string, error) {
 	sort.Strings(imports)
 	text, err := render("dao_class", daoData{ClassName: dao.Name, Imports: imports, Methods: methods})
 	return strings.ReplaceAll(text, "\r\n", "\n"), err
+}
+
+// cppKeywords are the names a C++ compiler rejects as a method or a parameter.
+var cppKeywords = map[string]bool{}
+
+func init() {
+	for _, k := range strings.Fields(`alignas alignof and and_eq asm auto bitand bitor bool break case catch
+		char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast
+		continue co_await co_return co_yield decltype default delete do double dynamic_cast else enum
+		explicit export extern false float for friend goto if inline int long mutable namespace new
+		noexcept not not_eq nullptr operator or or_eq private protected public register reinterpret_cast
+		requires return short signed sizeof static static_assert static_cast struct switch template this
+		thread_local throw true try typedef typeid typename union unsigned using virtual void volatile
+		wchar_t while xor xor_eq`) {
+		cppKeywords[k] = true
+	}
+}
+
+// checkNames catches the names that are fine in the XML of Go or Java, but not in C++, before the
+// compiler does it with a page of errors: a keyword (register, delete, ...) as a method or a parameter,
+// and a method named as a model class of the same DAO (OrdersByMonth returning CListReader<OrdersByMonth>):
+// inside the class the method hides the type. The plug-in generates such code as is.
+func checkNames(plan []cg.DaoMethod) error {
+	models := map[string]bool{}
+	for _, m := range plan {
+		if m.DtoClassName != "" {
+			models[m.DtoClassName] = true
+		}
+		if m.ReturnTypeIsDto && m.DtoOrReturnType != "" {
+			models[m.DtoOrReturnType] = true
+		}
+	}
+	var errs []error // all of them at once: one round of renaming in the XML
+	for _, m := range plan {
+		if cppKeywords[m.MethodName] {
+			errs = append(errs, fmt.Errorf("%s method %q is a C++ keyword: rename it", m.ErrorContext, m.MethodName))
+		}
+		if models[m.MethodName] {
+			errs = append(errs, fmt.Errorf("%s method %q has the name of the class %s: in C++ it hides the class inside the DAO, rename the method",
+				m.ErrorContext, m.MethodName, m.MethodName))
+		}
+		for _, d := range m.ParamDescriptors {
+			if f := strings.Fields(d); len(f) > 0 && cppKeywords[f[len(f)-1]] {
+				errs = append(errs, fmt.Errorf("%s parameter %q of %s is a C++ keyword: rename it", m.ErrorContext, f[len(f)-1], m.MethodName))
+			}
+		}
+	}
+	return errors.Join(errs...)
 }
 
 func (g *DAO) render(m cg.DaoMethod) (string, error) {
