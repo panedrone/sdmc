@@ -414,8 +414,15 @@ sdm init -lang cpp -dir sdm -dao dal -db sqlite
 `-dir`, `-dao` and `-db` are required, `-orm` is not for C++. `init` creates `sdm/sdm.xml`,
 `sdm/settings.xml`, `sdm/cpp.dal` (the root file of the plug-in), the XSD and the data store
 `dal/DataStore.h` and `dal/DataStore.cpp`, and prints the line for `.sdm`: `sdm/cpp.dal`. The models
-and the DAO are headers `<Class>.h` in `<folders target>` (`dal`), next to the data store. The names
-are as in `sdm.xml` and the database; `sdm xml` needs no `-orm`.
+and the DAO are headers `<Class>.h` in `<folders target>` (`dal`), next to the data store; `sdm xml`
+needs no `-orm`. `<dto field-names-mode>` names the fields and the CRUD methods (the names of
+`<query>` and `<exec-dml>` stay as written):
+
+| `field-names-mode` | fields                    | CRUD methods                    |
+|--------------------|---------------------------|---------------------------------|
+| `0`                | as the columns: `task_id` | `createTask`, `readTaskList`    |
+| `1`                | `taskID`                  | `createTask`, `readTaskList`    |
+| `2`                | `task_id`                 | `create_task`, `read_task_list` |
 
 ```cpp
 CDataStore ds;

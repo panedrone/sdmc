@@ -10,8 +10,11 @@
 
     <folders target="{{dao}}" sql="{{sql}}"/>
 
-    <!-- scope, field-names-mode, field-assign-mode: the IDE plug-in only; go-sdm ignores them
-         for C++. The names are as in sdm.xml and the database. -->
+    <!-- field-names-mode: the fields of models and the names of CRUD methods
+            0 - as is: the column names (create + Task: createTask)
+            1 - lowerCamelCase (taskId, createTask)
+            2 - snake_case (task_id, create_task)
+         scope, field-assign-mode: the IDE plug-in only; go-sdm ignores them for C++. -->
 
     <dto scope="" inheritance="" field-names-mode="0" macro=""/>
 

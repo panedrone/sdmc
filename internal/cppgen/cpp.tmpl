@@ -8,7 +8,7 @@
 
 {{define "dto_refs"}}{{range $i, $p := .}}{{if $i}}, {{end}}&p.{{$p.Name}}{{end}}{{end}}
 
-{{define "col_names"}}{{range $i, $f := .}}{{if $i}}, {{end}}DL_T("{{$f.Name}}"){{end}}{{end}}
+{{define "col_names"}}{{range $i, $f := .}}{{if $i}}, {{end}}DL_T("{{$f.ColumnName}}"){{end}}{{end}}
 
 {{define "sql_var"}}{{if not .ExternalSQL}}        DL_STR sql = DL_T({{.SQL}});
 {{end}}{{end}}
@@ -65,7 +65,7 @@ public:
     int {{.MethodName}}({{.DtoParam}} &p) {
         DL_STR sql = DL_T({{.SQL}});
         CValue *params[] = { {{- template "dto_refs" .Params}}};
-        CValue *ai_values[]= { {{- range $i, $k := .Keys}}{{if $i}}, {{end}}&p.{{$k.ColumnName}}{{end}}};
+        CValue *ai_values[]= { {{- range $i, $k := .Keys}}{{if $i}}, {{end}}&p.{{$k.Name}}{{end}}};
         return m_ds.insert(sql,	{{len .Params}}, params, {{len .Keys}}, ai_values);
     }
 {{end}}

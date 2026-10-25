@@ -1,6 +1,6 @@
 // Package cppgen is the C++ generator: the port of CppCG.java and cpp.vm. The DTO and DAO of a C++ project
-// are headers <Class>.h in one folder, <folders target> of settings.xml; the names are as in sdm.xml and the
-// database (AS_IS).
+// are headers <Class>.h in one folder, <folders target> of settings.xml; the names of fields and CRUD
+// methods follow <dto field-names-mode> (FieldNamesMode).
 package cppgen
 
 import (
@@ -27,6 +27,18 @@ func render(name string, data any) (string, error) {
 		return "", err
 	}
 	return b.String(), nil
+}
+
+// FieldNamesMode is <dto field-names-mode> of C++ (CppCG.field_names_mode): 0 - as is (the column names),
+// 1 - lowerCamelCase, 2 - snake_case. Not the one of Go: 0 is TitleCase there.
+func FieldNamesMode(fnm int) cg.FieldNamesMode {
+	switch fnm {
+	case 0:
+		return cg.AsIs
+	case 1:
+		return cg.LowerCamelCase
+	}
+	return cg.SnakeCase
 }
 
 func checkSettings(s *sdmxml.Settings) error {

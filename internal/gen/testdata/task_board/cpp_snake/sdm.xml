@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="sdm.xsd">
+
+    <!-- field-names-mode="2": the fields and the default names of CRUD methods; the column names stay
+         in col_names, the fields go to ai_values. -->
+
+    <dto-class name="TaskUser" ref="task_users"/>
+
+    <dto-class name="Board" ref="boards"/>
+
+    <dao-class name="TaskUsersDao">
+        <crud dto="TaskUser" table="task_users"/>
+        <query-dto-list dto="TaskUser" method="getTaskUsersByTask(t_id)" ref="task_users(t_id)"/>
+    </dao-class>
+
+    <dao-class name="BoardsDao">
+        <crud dto="Board" table="boards">
+            <create/>
+            <read/>
+        </crud>
+        <crud dto="Board" table="boards">
+            <create method="insertBoard"/>
+        </crud>
+    </dao-class>
+
+</sdm>

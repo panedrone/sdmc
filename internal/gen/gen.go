@@ -85,12 +85,13 @@ func newTranslator(lang Lang, md meta.Metadata, s *sdmxml.Settings, sdm *sdmxml.
 		return &translator{dto: dtoGen.Translate, dao: daoGen.Translate}, nil
 	}
 	if lang == Cpp {
-		// CppCG: the names as they are, <dto field-names-mode> is ignored
-		dtoGen, err := cppgen.NewDTO(cg.NewCore(md, s, cg.AsIs, cg.AsIs, sqlRoot), s, sdm)
+		// CppCG: <dto field-names-mode> for the fields and the CRUD methods, the parameters as they are
+		mode := cppgen.FieldNamesMode(s.Dto.FieldNamesMode)
+		dtoGen, err := cppgen.NewDTO(cg.NewCore(md, s, mode, cg.AsIs, sqlRoot), s, sdm)
 		if err != nil {
 			return nil, err
 		}
-		daoGen, err := cppgen.NewDAO(cg.NewCore(md, s, cg.AsIs, cg.AsIs, sqlRoot), s, sdm)
+		daoGen, err := cppgen.NewDAO(cg.NewCore(md, s, mode, cg.AsIs, sqlRoot), s, sdm)
 		if err != nil {
 			return nil, err
 		}

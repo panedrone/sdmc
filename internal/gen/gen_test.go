@@ -18,8 +18,8 @@ import (
 // build/<out>/<label>/ is copied to testdata/golden/<label>/. The templates of sdm-plugins are LF
 // (.gitattributes there), as is the output of go-sdm.
 //
-// task_board/refcursors_python, python_branches, cpp and cpp_branches are the plug-in project of
-// qt6_sqlite3_task_board with this XML (the sdm folder of the Java harness is an absolute path to them).
+// task_board/refcursors_python, python_branches, cpp, cpp_branches, cpp_camel and cpp_snake are the
+// plug-in project of qt6_sqlite3_task_board with this XML (the sdm folder of the Java harness is an absolute path to them).
 var goldenCases = []struct {
 	label, project, sdm string
 }{
@@ -36,6 +36,8 @@ var goldenCases = []struct {
 	{"python_branches", "task_board", "python_branches"},
 	{"cpp_task_board", "task_board", "cpp"},
 	{"cpp_branches", "task_board", "cpp_branches"},
+	{"cpp_camel", "task_board", "cpp_camel"},
+	{"cpp_snake", "task_board", "cpp_snake"},
 }
 
 func TestGolden(t *testing.T) {

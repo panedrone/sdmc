@@ -17,6 +17,7 @@ import (
 	"github.com/panedrone/go-sdm/datastore"
 	"github.com/panedrone/go-sdm/internal/assist"
 	"github.com/panedrone/go-sdm/internal/cg"
+	"github.com/panedrone/go-sdm/internal/cppgen"
 	"github.com/panedrone/go-sdm/internal/gen"
 	"github.com/panedrone/go-sdm/internal/meta"
 	"github.com/panedrone/go-sdm/internal/sdmxml"
@@ -544,7 +545,11 @@ func runXML(cmd string, args []string, stdout, stderr io.Writer) int {
 		}
 	}
 	if *daos {
-		x, err := assist.DaoClasses(cat, model, fkNames[lang], crudDtos(sdm), daoClasses(sdm))
+		names := fkNames[lang]
+		if lang == gen.Cpp {
+			names = cppgen.FieldNamesMode(s.Dto.FieldNamesMode) // as the fields and CRUD methods
+		}
+		x, err := assist.DaoClasses(cat, model, names, crudDtos(sdm), daoClasses(sdm))
 		if err != nil {
 			st.clear()
 			printErr(stderr, err)
@@ -574,7 +579,8 @@ func runXML(cmd string, args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
-// fkNames is the naming of the FK access of sdm xml, as the field names of the language.
+// fkNames is the naming of the FK access of sdm xml, as the field names of the language; C++ by
+// <dto field-names-mode>.
 var fkNames = map[gen.Lang]cg.FieldNamesMode{gen.Go: cg.LowerCamelCase, gen.Python: cg.SnakeCase, gen.Cpp: cg.AsIs}
 
 // dtoClasses: the names of <dto-class> in sdm.xml, without the model (sqlx-Task -> Task): one
