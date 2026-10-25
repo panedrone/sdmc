@@ -16,8 +16,7 @@ database says what the columns and parameters are, and you get plain functions t
 **Why sdmc:** *SQL DAL Maker CLI*, the command-line twin of the
 [SQL DAL Maker IDE plug-ins](https://sqldalmaker.sourceforge.net/): the same `sdm.xml`, the same
 `settings.xml`, the same generated code. It started as go-sdm, for Go only; with Python and C++ the
-"go-" stopped being true. The configuration folder of Go projects keeps its old default name,
-`go-sdm`.
+"go-" stopped being true ))
 
 ## A minute with it
 
