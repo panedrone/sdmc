@@ -416,8 +416,10 @@ where you like. Template:
 
 ## C++ (Qt)
 
-C++ and Qt 5/6 (QtSql): byte for byte what the C++ target of the IDE plug-ins generates. Run `sdmc`
-in the project folder:
+C++ and Qt 5/6 (QtSql): byte for byte what the C++ target of the IDE plug-ins generates.
+A working example: [sdm_thesaurus_qt6](https://github.com/panedrone/sdm_thesaurus_qt6) (Qt 6, a
+thesaurus), with `.sdm`, `sdm/cpp.dal` and the generated models, DAO and data store. Run `sdmc` in
+the project folder:
 
 ```bash
 sdmc init -lang cpp -dir sdm -dao dal -db sqlite
