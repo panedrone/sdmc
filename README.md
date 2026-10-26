@@ -362,8 +362,10 @@ is replaced by the type of the column from the database, or by `unknown` if ther
 ## Python DB-API 2.0
 
 Python without ORM: plain DB-API 2.0 (sqlite3, psycopg2/psycopg, mysql-connector-python) behind a
-data store, byte for byte what the Python target of the IDE plug-ins generates for no ORM. Run
-`sdmc` in the project folder, no `go.mod` is needed:
+data store, byte for byte what the Python target of the IDE plug-ins generates for no ORM.
+A working example: [sdm_todolist_fastapi_no_orm](https://github.com/panedrone/sdm_todolist_fastapi_no_orm)
+(FastAPI + SQLite, a Vue front-end); `sdmc val` there says its `dbal` is up to date. Run `sdmc` in
+the project folder, no `go.mod` is needed:
 
 ```bash
 sdmc init -lang python -dir sdm -dao dbal -db sqlite
