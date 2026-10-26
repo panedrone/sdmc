@@ -118,6 +118,11 @@ func (c *Core) returnedFieldInfo(explicitRetType string, daoFields []FieldInfo) 
 	switch {
 	case strings.TrimSpace(explicitRetType) != "" && !replaced:
 		typ = explicitRetType
+		// the type is the XML's, the column is the query's: the plug-in names it "ret_value" here, and
+		// a data store that reads columns by name (C++) finds nothing, the value is always NULL
+		if len(daoFields) > 0 {
+			col = daoFields[0].columnName
+		}
 	case len(daoFields) > 0: // no return-type, or a replaced one
 		col, typ = daoFields[0].columnName, daoFields[0].renderedType
 	}

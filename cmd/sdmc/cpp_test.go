@@ -170,3 +170,40 @@ func TestCppNames(t *testing.T) {
 		t.Errorf("a fine method is reported:\n%s", errOut.String())
 	}
 }
+
+// A scalar query with return-type: the C++ data store reads the column by its name, so the name is the
+// one of the query ("count(*)"), not "ret_value" of the plug-in, which gave NULL.
+func TestCppScalarColumn(t *testing.T) {
+	t.Chdir(t.TempDir())
+	var out, errOut bytes.Buffer
+	if code := run([]string{"init", "-lang", "cpp", "-dir", "sdm", "-dao", "dal", "-db", "sqlite"}, &out, &errOut); code != 0 {
+		t.Fatalf("init: %d %s", code, errOut.String())
+	}
+	db, err := sqlite.Open("app.sqlite3")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Exec("create table tasks (t_id integer primary key autoincrement, t_subject text)"); err != nil {
+		t.Fatal(err)
+	}
+	_ = db.Close()
+	sdmXML := `<sdm>
+<dao-class name="TasksDao">
+    <query method="countTasks" ref="select count(*) from tasks" return-type="java.lang.Integer"/>
+    <query method="countTasks2" ref="select count(*) from tasks"/>
+</dao-class>
+</sdm>`
+	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if code := run([]string{"gen", "-dir", "sdm"}, &out, &errOut); code != 0 {
+		t.Fatalf("gen: %d %s", code, errOut.String())
+	}
+	dao, err := os.ReadFile(filepath.Join("dal", "TasksDao.h"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(dao), "ret_value") || strings.Count(string(dao), `DL_STR col_names[] = {DL_T("count(*)")};`) != 2 {
+		t.Errorf("TasksDao.h:\n%s", dao)
+	}
+}
