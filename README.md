@@ -459,12 +459,32 @@ CListReader2<Task> tasks;
 dao.getTasksByGroup(t.g_id, tasks);
 ```
 
-`target` of the type map is a value class of `DataStore.h`: `CInteger` (`qint64`), `CDouble`,
-`CText` (`QString`), `CBlob` (`QByteArray`), and `CValue`, which holds anything in a `QVariant`
-(`unknown`, JSON, arrays). `default` is for a type without a key; a type that is mapped already is
-not mapped to `default` once more. A value class is a `Value` and two conversions, `toVariant()` for
-a parameter and `fromVariant()` for a fetched column: a class of your own (`QDateTime`, `QUuid`, ...)
-needs nothing else, the data store has no list of types to extend.
+`target` of the type map is a value class of `DataStore.h`, one of a pair for each type:
+
+|              | NOT NULL column (`Value`) | nullable column (`Value`, `IsNull`) |
+|--------------|---------------------------|-------------------------------------|
+| `qint64`     | `CInteger`                | `CIntegerN`                         |
+| `double`     | `CDouble`                 | `CDoubleN`                          |
+| `QString`    | `CText`                   | `CTextN`                            |
+| `QByteArray` | `CBlob`                   | `CBlobN`                            |
+
+A NOT NULL class never sends NULL (`QString()` goes as `""`); a new nullable one is NULL, and
+`IsNull = false` goes along with `Value`. `CVariant` holds anything in a `QVariant`, NULL included
+(`unknown`, JSON, arrays). The type map of `sdmc init` picks the class of the pair itself:
+`target="CText${N}"`, where the macro `${N}` of `settings.xml` gives `N` for a nullable column of a
+table (not for the PK). Columns of queries have no such metadata and get the NOT NULL class; give
+them `CTextN` in the type map or in `<field>` where needed. `default` is for a type without a key; a
+type that is mapped already is not mapped to `default` once more.
+
+The pairs are typedefs of two templates, `CNotNull<T>` and `CNullable<T>` (C++11, Qt 5.7+):
+a class of your own is one line, `typedef CNullable<QDateTime> CDateTimeN;`, for any `T` that
+`QVariant` converts; the data store has no list of types to extend. `CValue` is the interface of
+the adapter, without data: a value class of another kind is a `Value` and two conversions,
+`toVariant()` for a parameter and `fromVariant()` for a fetched column.
+
+A project made before these classes: `CValue` is not a value class any more, put `CVariant` in its
+place in the type map, and add `${N}` (the macro and the targets) for nullable columns; `IsNull` of
+a NOT NULL class is gone, and the compiler shows each place.
 
 Do not change the adapter of the data store: the value classes, `CRowProcessor`, `CListReader`,
 `DL_STR`/`DL_T` and the methods `insert`, `execDML`, `queryRow`, `queryRowList` of `CDataStore`;

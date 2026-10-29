@@ -1,25 +1,25 @@
     <type-map default="">
 
-        <type detected="int2" target="CInteger"/>
-        <type detected="int4" target="CInteger"/>
-        <type detected="int8" target="CInteger"/>
-        <type detected="float4" target="CDouble"/>
-        <type detected="float8" target="CDouble"/>
-        <type detected="numeric" target="CDouble"/>
-        <type detected="varchar" target="CText"/>
-        <type detected="text" target="CText"/>
-        <type detected="bpchar" target="CText"/>
-        <type detected="json" target="CValue"/>
-        <type detected="jsonb" target="CValue"/>
-        <type detected="bytea" target="CBlob"/>
-        <type detected="bool" target="CInteger"/>
-        <type detected="date" target="CText"/>
-        <type detected="timestamp" target="CText"/>
-        <type detected="timestamptz" target="CText"/>
-        <type detected="uuid" target="CText"/>
-        <type detected="_text" target="CValue"/>
-        <type detected="_varchar" target="CValue"/>
-        <type detected="refcursor" target="CText"/>
-        <type detected="unknown" target="CValue"/>
+        <type detected="int2" target="CInteger${N}"/>
+        <type detected="int4" target="CInteger${N}"/>
+        <type detected="int8" target="CInteger${N}"/>
+        <type detected="float4" target="CDouble${N}"/>
+        <type detected="float8" target="CDouble${N}"/>
+        <type detected="numeric" target="CDouble${N}"/>
+        <type detected="varchar" target="CText${N}"/>
+        <type detected="text" target="CText${N}"/>
+        <type detected="bpchar" target="CText${N}"/>
+        <type detected="json" target="CVariant"/>
+        <type detected="jsonb" target="CVariant"/>
+        <type detected="bytea" target="CBlob${N}"/>
+        <type detected="bool" target="CInteger${N}"/>
+        <type detected="date" target="CText${N}"/>
+        <type detected="timestamp" target="CText${N}"/>
+        <type detected="timestamptz" target="CText${N}"/>
+        <type detected="uuid" target="CText${N}"/>
+        <type detected="_text" target="CVariant"/>
+        <type detected="_varchar" target="CVariant"/>
+        <type detected="refcursor" target="CText${N}"/>
+        <type detected="unknown" target="CVariant"/>
 
     </type-map>

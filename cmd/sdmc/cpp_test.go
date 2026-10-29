@@ -36,7 +36,7 @@ func TestCpp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, s := range []string{`<folders target="dal" sql="sdm/sql"/>`, `<type-map default="">`, `<type detected="INTEGER" target="CInteger"/>`} {
+	for _, s := range []string{`<folders target="dal" sql="sdm/sql"/>`, `<type-map default="">`, `<type detected="INTEGER" target="CInteger${N}"/>`, `<macro name="${N}">`} {
 		if !strings.Contains(string(settings), s) {
 			t.Errorf("settings.xml: no %s", s)
 		}
@@ -82,7 +82,9 @@ func TestCpp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(dto), "    CInteger t_id; // t\n") || !strings.Contains(string(dto), "    CText t_subject; // t\n") {
+	// the type map of init: CText${N} - a nullable column gets CTextN, the PK does not
+	if !strings.Contains(string(dto), "    CInteger t_id; // t\n") || !strings.Contains(string(dto), "    CIntegerN g_id; // t\n") ||
+		!strings.Contains(string(dto), "    CTextN t_subject; // t\n") {
 		t.Errorf("Task.h:\n%s", dto)
 	}
 	if got := run1(0, "val", "-dir", "sdm"); !strings.Contains(got, "up to date: 2 classes") {

@@ -210,7 +210,7 @@ var javaShortNames = map[string]string{
 	"Integer": "CInteger", "Long": "CInteger", "Short": "CInteger", "Byte": "CInteger", "Boolean": "CInteger",
 	"BigInteger": "CInteger",
 	"Double":     "CDouble", "Float": "CDouble", "BigDecimal": "CDouble",
-	"Date": "CValue", "Timestamp": "CValue", "Time": "CValue", "Object": "CValue",
+	"Date": "CVariant", "Timestamp": "CVariant", "Time": "CVariant", "Object": "CVariant",
 }
 
 // checkJavaTypes catches a short Java name (String country_code, return-type="Integer") that the type

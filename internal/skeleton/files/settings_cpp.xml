@@ -38,8 +38,10 @@
          SQLite says what the column is declared with: INTEGER, VARCHAR, ...
 
          target: a value class of DataStore.h (Qt, the driver {{driver}}): CInteger (qint64),
-         CDouble, CText (QString), CBlob (QByteArray); CValue holds anything in a QVariant.
-         Add your own classes to DataStore.h and use them here.
+         CDouble, CText (QString), CBlob (QByteArray) for NOT NULL columns, CIntegerN, CDoubleN,
+         CTextN, CBlobN (Value and IsNull) for nullable ones; CVariant holds anything in a QVariant.
+         "CText${N}" is CTextN for a nullable column of a table and CText otherwise (the macro ${N}
+         below). Add your own classes to DataStore.h and use them here.
 
          To see which names your database gives, empty the type-map: <type-map default=""/>
          and generate. The code then has the raw names of the driver instead of C++ classes.
@@ -48,6 +50,17 @@
 {{type-map}}
 
     <macros>
+
+        <!-- ${N}: "N" for a nullable column of a table (CTextN), nothing for NOT NULL and PK (CText);
+             SQLite reports "integer primary key" as nullable -->
+        <macro name="${N}">
+            <vm-xml>
+                <if var="$fi.Nullable &amp;&amp; !$fi.PK">
+                    <print var="N"/>
+                </if>
+            </vm-xml>
+        </macro>
+
     </macros>
 
 </settings>

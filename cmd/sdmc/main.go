@@ -25,7 +25,7 @@ import (
 )
 
 // version: a release build sets it from the tag (goreleaser, -ldflags "-X main.version=...")
-var version = "1.0.10"
+var version = "1.1.0"
 
 const usage = `sdmc %s — SQL DAL Maker CLI for Go, Python and C++
 

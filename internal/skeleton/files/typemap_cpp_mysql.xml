@@ -1,41 +1,41 @@
     <type-map default="">
 
-        <type detected="TINYINT" target="CInteger"/>
-        <type detected="SMALLINT" target="CInteger"/>
-        <type detected="MEDIUMINT" target="CInteger"/>
-        <type detected="INT" target="CInteger"/>
-        <type detected="UNSIGNED TINYINT" target="CInteger"/>
-        <type detected="UNSIGNED SMALLINT" target="CInteger"/>
-        <type detected="UNSIGNED MEDIUMINT" target="CInteger"/>
-        <type detected="UNSIGNED INT" target="CInteger"/>
-        <type detected="BIGINT" target="CInteger"/>
-        <type detected="UNSIGNED BIGINT" target="CInteger"/>
-        <type detected="FLOAT" target="CDouble"/>
-        <type detected="DOUBLE" target="CDouble"/>
-        <type detected="DECIMAL" target="CDouble"/>
-        <type detected="CHAR" target="CText"/>
-        <type detected="VARCHAR" target="CText"/>
-        <type detected="TEXT" target="CText"/>
-        <type detected="TINYTEXT" target="CText"/>
-        <type detected="MEDIUMTEXT" target="CText"/>
-        <type detected="LONGTEXT" target="CText"/>
-        <type detected="TIME" target="CText"/>
-        <type detected="GEOMETRY" target="CBlob"/>
-        <type detected="ENUM" target="CText"/>
-        <type detected="SET" target="CValue"/>
-        <type detected="JSON" target="CText"/>
-        <type detected="BLOB" target="CBlob"/>
-        <type detected="TINYBLOB" target="CBlob"/>
-        <type detected="MEDIUMBLOB" target="CBlob"/>
-        <type detected="LONGBLOB" target="CBlob"/>
-        <type detected="NULL" target="CValue"/>
-        <type detected="BINARY" target="CBlob"/>
-        <type detected="VARBINARY" target="CBlob"/>
-        <type detected="BIT" target="CInteger"/>
-        <type detected="DATE" target="CText"/>
-        <type detected="DATETIME" target="CText"/>
-        <type detected="TIMESTAMP" target="CText"/>
-        <type detected="YEAR" target="CInteger"/>
-        <type detected="unknown" target="CValue"/>
+        <type detected="TINYINT" target="CInteger${N}"/>
+        <type detected="SMALLINT" target="CInteger${N}"/>
+        <type detected="MEDIUMINT" target="CInteger${N}"/>
+        <type detected="INT" target="CInteger${N}"/>
+        <type detected="UNSIGNED TINYINT" target="CInteger${N}"/>
+        <type detected="UNSIGNED SMALLINT" target="CInteger${N}"/>
+        <type detected="UNSIGNED MEDIUMINT" target="CInteger${N}"/>
+        <type detected="UNSIGNED INT" target="CInteger${N}"/>
+        <type detected="BIGINT" target="CInteger${N}"/>
+        <type detected="UNSIGNED BIGINT" target="CInteger${N}"/>
+        <type detected="FLOAT" target="CDouble${N}"/>
+        <type detected="DOUBLE" target="CDouble${N}"/>
+        <type detected="DECIMAL" target="CDouble${N}"/>
+        <type detected="CHAR" target="CText${N}"/>
+        <type detected="VARCHAR" target="CText${N}"/>
+        <type detected="TEXT" target="CText${N}"/>
+        <type detected="TINYTEXT" target="CText${N}"/>
+        <type detected="MEDIUMTEXT" target="CText${N}"/>
+        <type detected="LONGTEXT" target="CText${N}"/>
+        <type detected="TIME" target="CText${N}"/>
+        <type detected="GEOMETRY" target="CBlob${N}"/>
+        <type detected="ENUM" target="CText${N}"/>
+        <type detected="SET" target="CVariant"/>
+        <type detected="JSON" target="CText${N}"/>
+        <type detected="BLOB" target="CBlob${N}"/>
+        <type detected="TINYBLOB" target="CBlob${N}"/>
+        <type detected="MEDIUMBLOB" target="CBlob${N}"/>
+        <type detected="LONGBLOB" target="CBlob${N}"/>
+        <type detected="NULL" target="CVariant"/>
+        <type detected="BINARY" target="CBlob${N}"/>
+        <type detected="VARBINARY" target="CBlob${N}"/>
+        <type detected="BIT" target="CInteger${N}"/>
+        <type detected="DATE" target="CText${N}"/>
+        <type detected="DATETIME" target="CText${N}"/>
+        <type detected="TIMESTAMP" target="CText${N}"/>
+        <type detected="YEAR" target="CInteger${N}"/>
+        <type detected="unknown" target="CVariant"/>
 
     </type-map>
