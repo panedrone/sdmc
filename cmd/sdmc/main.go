@@ -25,7 +25,7 @@ import (
 )
 
 // version: a release build sets it from the tag (goreleaser, -ldflags "-X main.version=...")
-var version = "1.1.0"
+var version = "1.1.1"
 
 const usage = `sdmc %s — SQL DAL Maker CLI for Go, Python and C++
 
@@ -34,14 +34,14 @@ usage:
   sdmc init -lang python|cpp -dir <folder> -dao <folder> -db pg|mysql|sqlite
                                   create sdm.xml, settings.xml, XSD and the data store;
                                   all options are required, see sdmc help init
-  sdmc generate|gen [-dir go-sdm|-c N|all] [-m] [-d] [class ...]
+  sdmc generate|gen [-dir sdm|-c N|all] [-m] [-d] [class ...]
                                   generate models and DAO into the folders of settings.xml
-  sdmc validate|val [-dir go-sdm|-c N|all] [-m] [-d] [class ...]
+  sdmc validate|val [-dir sdm|-c N|all] [-m] [-d] [class ...]
                                   exit 1 if the generated code is out of date (for CI)
-  sdmc list|ls [-dir go-sdm|-c N|all] [-m] [-d] [-l] [class ...]
+  sdmc list|ls [-dir sdm|-c N|all] [-m] [-d] [-l] [class ...]
                                   numbered classes of sdm.xml in the order of declaration,
                                   -l: a table with files and dates
-  sdmc xml -orm no_orm|sqlx|gorm [-dir go-sdm|-c N] [-m] [-d] [-force]
+  sdmc xml -orm no_orm|sqlx|gorm [-dir sdm|-c N] [-m] [-d] [-force]
                                   starting XML from the database schema, to the console:
                                   -m <dto-class> for each table and view, -d <dao-class>
                                   for each, named by the table, with <crud/> and FK access;
@@ -49,7 +49,7 @@ usage:
                                   classes Task, sqlx-Task or gorm-Task;
                                   classes already in sdm.xml are skipped, -force: not;
                                   to a file: sdmc xml -orm gorm -m > models.xml
-  sdmc datastore|ds [-dir go-sdm|-c N|all] [-db pg|mysql|sqlite]
+  sdmc datastore|ds [-dir sdm|-c N|all] [-db pg|mysql|sqlite]
                                   update data_store_<orm>.go (Python: data_store_no_orm.py,
                                   C++: DataStore.h and DataStore.cpp) in the DAO folder to this
                                   sdmc version (the database of <db url>, or -db);
@@ -63,7 +63,7 @@ usage:
 <dir>/go.dal, <dir>/python.dal and <dir>/cpp.dal, numbered from 1); -c all: each of them, one after another
 (not for xml). Without -dir and -c: the only one of .sdm; several are printed as a table with
 the command for each, and the console asks for the number; none in .sdm (or no .sdm):
--dir go-sdm.
+-dir sdm.
 
 A folder with python.dal is Python, with cpp.dal C++ (sdmc init -lang python|cpp creates them),
 any other is Go.
@@ -127,7 +127,7 @@ func newFlags(name string, stderr io.Writer) (*flag.FlagSet, *string) {
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() { fmt.Fprintf(stderr, usage, version) }
-	dir := fs.String("dir", "go-sdm", "folder of sdm.xml and settings.xml, relative to the project")
+	dir := fs.String("dir", "sdm", "folder of sdm.xml and settings.xml, relative to the project")
 	return fs, dir
 }
 

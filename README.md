@@ -216,7 +216,7 @@ Options of the other commands:
 
 | option          | default     |                                                                   |
 |-----------------|-------------|-------------------------------------------------------------------|
-| `-dir <folder>` | `go-sdm`    | the folder of `sdm.xml` and `settings.xml`                        |
+| `-dir <folder>` | `sdm`       | the folder of `sdm.xml` and `settings.xml`                        |
 | `-c N\|all`     | from `.sdm` | the configuration N of `.sdm`, or each of them, instead of `-dir` |
 
 `SDM_PWD`, if set, overrides `pwd` of `settings.xml`.
@@ -267,7 +267,7 @@ Without a console (CI, a pipe) the table is all, exit 2: copy the command you ne
 is the worst of them. So one line in CI checks them all: `sdmc val -c all`. `xml` takes one
 configuration only.
 
-No configuration in `.sdm` (or no `.sdm`) means `-dir go-sdm`. `-dir` wins over `.sdm`; `-dir`
+No configuration in `.sdm` (or no `.sdm`) means `-dir sdm`. `-dir` wins over `.sdm`; `-dir`
 together with `-c` is an error.
 
 ## database/sql, sqlx or gorm

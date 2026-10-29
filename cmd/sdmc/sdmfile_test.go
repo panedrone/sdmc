@@ -75,10 +75,10 @@ func TestConfigDir(t *testing.T) {
 	console(t, false, "")
 	two := "--- sdm\na/go.dal\n\nb/sdm/go.dal|b\n"
 
-	if d, _, err := resolve(t, ""); err != nil || d != "go-sdm" {
+	if d, _, err := resolve(t, ""); err != nil || d != "sdm" {
 		t.Errorf("no .sdm: %q %v", d, err)
 	}
-	if d, _, err := resolve(t, "# only comments\nREADME.md\n"); err != nil || d != "go-sdm" {
+	if d, _, err := resolve(t, "# only comments\nREADME.md\n"); err != nil || d != "sdm" {
 		t.Errorf("no go.dal: %q %v", d, err)
 	}
 	if d, _, err := resolve(t, "x/go.dal\n"); err != nil || d != "x" {

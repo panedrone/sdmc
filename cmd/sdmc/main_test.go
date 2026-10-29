@@ -19,7 +19,7 @@ func TestInitGenerate(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, errOut bytes.Buffer
-	if code := run([]string{"init", "-dir", "go-sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "pg"}, &out, &errOut); code != 0 {
+	if code := run([]string{"init", "-dir", "sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "pg"}, &out, &errOut); code != 0 {
 		t.Fatalf("init: %d %s", code, errOut.String())
 	}
 	if !strings.Contains(out.String(), "created: ") || !strings.Contains(out.String(), "next: ") {
@@ -35,7 +35,7 @@ func TestInitGenerate(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = db.Close()
-	settings := filepath.Join("go-sdm", "settings.xml")
+	settings := filepath.Join("sdm", "settings.xml")
 	b, err := os.ReadFile(settings)
 	if err != nil {
 		t.Fatal(err)
@@ -45,7 +45,7 @@ func TestInitGenerate(t *testing.T) {
 		t.Fatal(err)
 	}
 	sdmXML := `<sdm><dto-class name="Task" ref="tasks"/><dao-class name="TasksDao"><crud dto="Task"/></dao-class></sdm>`
-	if err := os.WriteFile(filepath.Join("go-sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -66,7 +66,7 @@ func TestInitGenerate(t *testing.T) {
 	if !strings.Contains(out.String(), "up to date: 2 classes") {
 		t.Errorf("validate output: %s", out.String())
 	}
-	if _, err := os.Stat(filepath.Join("go-sdm", "sdm.xsd")); err != nil {
+	if _, err := os.Stat(filepath.Join("sdm", "sdm.xsd")); err != nil {
 		t.Error(err)
 	}
 }
@@ -78,7 +78,7 @@ func TestListAndSelect(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, errOut bytes.Buffer
-	if code := run([]string{"init", "-dir", "go-sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "sqlite"}, &out, &errOut); code != 0 {
+	if code := run([]string{"init", "-dir", "sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "sqlite"}, &out, &errOut); code != 0 {
 		t.Fatalf("init: %d %s", code, errOut.String())
 	}
 	db, err := sqlite.Open("app.sqlite3")
@@ -101,7 +101,7 @@ func TestListAndSelect(t *testing.T) {
 <dto-class name="Group" ref="groups"/>
 <dao-class name="GroupsDao"><crud dto="Group"/></dao-class>
 </sdm>`
-	if err := os.WriteFile(filepath.Join("go-sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -129,7 +129,7 @@ func TestListAndSelect(t *testing.T) {
 	}
 
 	out.Reset()
-	if code := run([]string{"gen", "1,2", "-dir", "go-sdm"}, &out, &errOut); code != 0 {
+	if code := run([]string{"gen", "1,2", "-dir", "sdm"}, &out, &errOut); code != 0 {
 		t.Fatalf("gen 1,2: %d %s", code, errOut.String())
 	}
 	if got := out.String(); !strings.Contains(got, "created: internal/dbal/models/task.go") ||
@@ -200,7 +200,7 @@ func TestXML(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, errOut bytes.Buffer
-	if code := run([]string{"init", "-dir", "go-sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "sqlite"}, &out, &errOut); code != 0 {
+	if code := run([]string{"init", "-dir", "sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "sqlite"}, &out, &errOut); code != 0 {
 		t.Fatalf("init: %d %s", code, errOut.String())
 	}
 	db, err := sqlite.Open("app.sqlite3")
@@ -217,7 +217,7 @@ func TestXML(t *testing.T) {
 	}
 	_ = db.Close()
 	sdmXML := `<sdm><dto-class name="Group" ref="groups"/><dao-class name="GroupsDao"><crud dto="Group"/></dao-class></sdm>`
-	if err := os.WriteFile(filepath.Join("go-sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -254,14 +254,14 @@ func TestXML(t *testing.T) {
 	// all tables in sdm.xml, of another model: skipped, stdout empty, the reason in stderr
 	sdmXML = `<sdm><dto-class name="sqlx-Group" ref="groups"/><dto-class name="sqlx-Task" ref="tasks"/>
 <dao-class name="GroupsDao"><crud dto="sqlx-Group"/></dao-class><dao-class name="TasksDao"><crud dto="sqlx-Task"/></dao-class></sdm>`
-	if err := os.WriteFile(filepath.Join("go-sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if got := xml("-orm", "gorm"); got != "" || !strings.Contains(errOut.String(), "nothing to print: all 2 tables and views") {
 		t.Errorf("xml, all in sdm.xml: %q %q", got, errOut.String())
 	}
 	// -force: all of them anyway; sdm.xml is not read, a broken one is no error
-	if err := os.WriteFile(filepath.Join("go-sdm", "sdm.xml"), []byte("<sdm"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte("<sdm"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if got := xml("-orm", "gorm", "-force"); !strings.Contains(got, `<dto-class name="gorm-Group" ref="groups"/>`) ||
@@ -293,16 +293,16 @@ func TestInitExisting(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, errOut bytes.Buffer
-	if code := run([]string{"init", "-dir", "go-sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "pg"}, &out, &errOut); code != 0 {
+	if code := run([]string{"init", "-dir", "sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "pg"}, &out, &errOut); code != 0 {
 		t.Fatalf("init: %d %s", code, errOut.String())
 	}
-	sdmXML := filepath.Join("go-sdm", "sdm.xml")
+	sdmXML := filepath.Join("sdm", "sdm.xml")
 	if err := os.WriteFile(sdmXML, []byte("mine"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	out.Reset()
 	errOut.Reset()
-	if code := run([]string{"init", "-dir", "go-sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "pg"}, &out, &errOut); code != 1 {
+	if code := run([]string{"init", "-dir", "sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "pg"}, &out, &errOut); code != 1 {
 		t.Errorf("exit %d, want 1", code)
 	}
 	if !strings.Contains(errOut.String(), "already exists") || out.Len() != 0 {
@@ -441,10 +441,10 @@ func TestNoDB(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, errOut bytes.Buffer
-	if code := run([]string{"init", "-dir", "go-sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "sqlite"}, &out, &errOut); code != 0 {
+	if code := run([]string{"init", "-dir", "sdm", "-dao", "internal/dbal", "-orm", "no_orm", "-db", "sqlite"}, &out, &errOut); code != 0 {
 		t.Fatalf("init: %d %s", code, errOut.String())
 	}
-	settings := filepath.Join("go-sdm", "settings.xml")
+	settings := filepath.Join("sdm", "settings.xml")
 	b, err := os.ReadFile(settings)
 	if err != nil {
 		t.Fatal(err)
@@ -482,7 +482,7 @@ func TestDataStore(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, errOut bytes.Buffer
-	if code := run([]string{"init", "-dir", "go-sdm", "-dao", "internal/dbal", "-orm", "gorm", "-db", "sqlite"}, &out, &errOut); code != 0 {
+	if code := run([]string{"init", "-dir", "sdm", "-dao", "internal/dbal", "-orm", "gorm", "-db", "sqlite"}, &out, &errOut); code != 0 {
 		t.Fatalf("init: %d %s", code, errOut.String())
 	}
 	out.Reset()
@@ -497,7 +497,7 @@ func TestDataStore(t *testing.T) {
 		}
 	}
 	out.Reset()
-	if code := run([]string{"datastore", "-dir", "go-sdm"}, &out, &errOut); code != 0 ||
+	if code := run([]string{"datastore", "-dir", "sdm"}, &out, &errOut); code != 0 ||
 		strings.TrimSpace(out.String()) != "updated: "+ds+" (gorm for sqlite)" {
 		t.Fatalf("outdated: %d %q %q", code, out.String(), errOut.String())
 	}
