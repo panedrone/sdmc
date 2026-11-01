@@ -1,5 +1,5 @@
 // Package datastore holds the data store sources the generated DAO rely on:
-// one variant per database (pg, mysql, sqlite) and framework (no_orm, sqlx, gorm), datastore/<db>/<orm>/.
+// one variant per database (pg, mysql, sqlite, mssql) and framework (no_orm, sqlx, gorm), datastore/<db>/<orm>/.
 // They are in the repository as is, so that they can be downloaded by hand; sdmc init takes them from here too.
 // Under "//go:build ignore": the sdmc module needs no drivers, sqlx or gorm.
 //
@@ -9,7 +9,7 @@
 // they do not diverge.
 //
 // templates/data_store_no_orm.go.txt comes from src/resources/data_store_no_orm.go of sdm-plugins
-// (without Oracle and SQL Server).
+// (without Oracle).
 //
 // Python has no ORM: one variant per database, python/<db>/data_store_no_orm.py, from
 // templates/data_store_no_orm.py.txt (src/resources/data_store_no_orm.py of sdm-plugins) with the markers
@@ -27,16 +27,16 @@ import (
 	"strings"
 )
 
-//go:embed templates/*.go.txt templates/*.py.txt templates/DataStore.*.txt pg/*/*.go mysql/*/*.go sqlite/*/*.go python/*/*.py cpp/*/*
+//go:embed templates/*.go.txt templates/*.py.txt templates/DataStore.*.txt pg/*/*.go mysql/*/*.go sqlite/*/*.go mssql/*/*.go python/*/*.py cpp/*/*
 var fs embed.FS
 
 // Variants are the values of sdmc init -orm, the first is the default.
 var Variants = []string{"no_orm", "sqlx", "gorm"}
 
 // DBs are the databases, the first is the default.
-var DBs = []string{"pg", "mysql", "sqlite"}
+var DBs = []string{"pg", "mysql", "sqlite", "mssql"}
 
-var dbNames = map[string]string{"pg": "PostgreSQL", "mysql": "MySQL", "sqlite": "SQLite"}
+var dbNames = map[string]string{"pg": "PostgreSQL", "mysql": "MySQL", "sqlite": "SQLite", "mssql": "SQL Server"}
 
 var ormNames = map[string]string{"no_orm": "database/sql (no ORM)", "sqlx": "sqlx", "gorm": "gorm"}
 
@@ -183,6 +183,10 @@ var pyVars = map[string][]string{
 		"{{connect}}", "sqlite3.connect('app.sqlite3')",
 		"{{out_param_note}}", "",
 		"{{exec_dml_params}}", ""},
+	"mssql": {"{{driver}}", "mssql-python", "{{import}}", "mssql_python",
+		"{{connect}}", "mssql_python.connect('Server=localhost;Database=master;UID=sa;PWD=;Encrypt=no')",
+		"{{out_param_note}}", "",
+		"{{exec_dml_params}}", "; a list of callbacks for the result sets of a procedure"},
 }
 
 // PythonText is the Python data store of db as it goes to the DAO folder, with LF.
@@ -233,6 +237,10 @@ var cppVars = map[string][]string{
 		"{{open_params}}", "const QString &file",
 		"{{open_args}}", `"app.sqlite3"`,
 		"{{open_doc}}", "the SQLite file; yours, as everything but the adapter"},
+	"mssql": {"{{qt_driver}}", "QODBC",
+		"{{open_params}}", "const QString &host, int port, const QString &database, const QString &user, const QString &password",
+		"{{open_args}}", `"localhost", 1433, "master", "sa", ""`,
+		"{{open_doc}}", "the connection to the server by ODBC Driver 18 for SQL Server; yours, as everything but the adapter"},
 }
 
 // CppText is the C++ data store of db as it goes to the DAO folder: file name -> text, with LF.

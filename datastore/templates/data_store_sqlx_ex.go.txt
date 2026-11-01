@@ -15,6 +15,9 @@ import (
 	//sdm:if mysql
 	_ "github.com/go-sql-driver/mysql" // MySQL
 	//sdm:end
+	//sdm:if mssql
+	_ "github.com/microsoft/go-mssqldb" // SQL Server
+	//sdm:end
 	//sdm:if sqlite
 	_ "github.com/mattn/go-sqlite3" // SQLite3, cgo; without cgo: modernc.org/sqlite, driver "sqlite"
 	//sdm:end
@@ -34,6 +37,13 @@ func (ds *_DS) initDb() (err error) {
 		dsn = "root:root@tcp(localhost:3306)/mysql?parseTime=true" // parseTime: DATETIME -> time.Time
 	}
 	ds.db, err = sqlx.Open("mysql", dsn)
+	//sdm:end
+	//sdm:if mssql
+	url := os.Getenv("DATABASE_URL") // sqlserver://user:pwd@host:1433?database=db, instance: host/SQLEXPRESS
+	if url == "" {
+		url = "sqlserver://sa:sa@localhost:1433?database=master"
+	}
+	ds.db, err = sqlx.Open("sqlserver", url)
 	//sdm:end
 	//sdm:if sqlite
 	file := os.Getenv("DATABASE_URL") // path to the database file

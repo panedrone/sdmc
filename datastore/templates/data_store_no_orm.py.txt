@@ -119,6 +119,10 @@ class _DS(DataStore):
 #sdm:if mysql
         return bool(self.conn.in_transaction)
 #sdm:end
+#sdm:if mssql
+        # the ODBC driver keeps a transaction open all the time while autocommit is off
+        return not self.conn.autocommit
+#sdm:end
 #sdm:if pg
         # libpq PQtransactionStatus, the same in psycopg2 (2.8+) and psycopg: 0 is IDLE
         return self.conn.info.transaction_status != 0
@@ -133,6 +137,9 @@ class _DS(DataStore):
 #sdm:end
 #sdm:if pg
         pass  # psycopg starts a transaction by itself with the first statement
+#sdm:end
+#sdm:if mssql
+        pass  # autocommit is off: there is always a transaction
 #sdm:end
 
     def commit(self):
@@ -157,7 +164,13 @@ class _DS(DataStore):
                 row = cursor.fetchone()
                 for i in range(len(ai_values)):
                     ai_values[i][1] = row[i]
-#sdm:else
+#sdm:end
+#sdm:if mssql
+                # no lastrowid in SQL Server: @@IDENTITY of the session, in a batch of its own
+                cursor.execute('select cast(@@identity as bigint)')  # numeric(38, 0) otherwise
+                ai_values[0][1] = cursor.fetchone()[0]
+#sdm:end
+#sdm:if sqlite mysql
                 ai_values[0][1] = cursor.lastrowid
 #sdm:end
 
@@ -216,6 +229,24 @@ class _DS(DataStore):
 
         return self._exec(do_exec)
 #sdm:end
+#sdm:if mssql
+        callbacks = _get_callbacks(params)
+
+        def do_exec(cursor):
+            cursor.execute(sql, [p for p in params if not _is_callbacks(p)])
+            if callbacks is None:
+                return cursor.rowcount
+            # the result sets of the procedure go to the callbacks of the DAO, in their order
+            for callback in callbacks:
+                _skip_counts(cursor)
+                columns = [col[0] for col in cursor.description]
+                for row in cursor.fetchall():
+                    callback(dict(zip(columns, row)))
+                cursor.nextset()
+            return 0
+
+        return self._exec(do_exec)
+#sdm:end
 
     def query_scalar(self, sql, params, out_params=None):
         rows = self.query_all_scalars(sql, params, out_params)
@@ -243,6 +274,9 @@ class _DS(DataStore):
                 return
 #sdm:end
             cursor.execute(sql, params)
+#sdm:if mssql
+            _skip_counts(cursor)
+#sdm:end
             for row in cursor:
                 res.append(row[0])
 
@@ -274,6 +308,9 @@ class _DS(DataStore):
                 return
 #sdm:end
             cursor.execute(sql, params)
+#sdm:if mssql
+            _skip_counts(cursor)
+#sdm:end
             columns = [col[0] for col in cursor.description]
             for row in cursor:
                 callback(dict(zip(columns, row)))
@@ -291,7 +328,15 @@ class _DS(DataStore):
 def _format_sql(sql):
 #sdm:if sqlite
     return sql
-#sdm:else
+#sdm:end
+#sdm:if mssql
+    # "call p(?, ?)" -> "{call p(?, ?)}", the ODBC escape; "{call ...}" and "exec ..." as is
+    parts = sql.split(None, 1)
+    if len(parts) == 2 and parts[0].lower() == 'call':
+        return '{call ' + parts[1].strip() + '}'
+    return sql
+#sdm:end
+#sdm:if pg mysql
     return sql.replace('?', '%s')
 #sdm:end
 #sdm:if pg mysql
@@ -341,4 +386,23 @@ def _fetch_all(result, callback):
     columns = [d[0] for d in result.description]
     for row in result:
         callback(dict(zip(columns, row)))
+#sdm:end
+#sdm:if mssql
+
+
+def _is_callbacks(p):
+    return isinstance(p, list) and len(p) > 0 and callable(p[0])
+
+
+def _get_callbacks(params):
+    for p in params:
+        if _is_callbacks(p):
+            return p
+    return None
+
+
+def _skip_counts(cursor):
+    # the row counts of a procedure without "set nocount on" come before its result set
+    while cursor.description is None and cursor.nextset():
+        pass
 #sdm:end

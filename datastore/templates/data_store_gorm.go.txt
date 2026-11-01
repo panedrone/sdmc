@@ -77,7 +77,7 @@ func FetchSql(cursor string) string {
 }
 
 //sdm:end
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 type Out struct {
 	/*
 		var outParam float64 // no need to init
@@ -233,7 +233,7 @@ func (ds *_DS) rawExec(ctx context.Context, sqlString string, args ...any) (rows
 	return res.RowsAffected, res.Error
 }
 
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func isPtr(p any) bool {
 	val := reflect.ValueOf(p)
 	kindOfJ := val.Kind()
@@ -250,7 +250,7 @@ func pointsToNil(p any) bool {
 }
 
 //sdm:end
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func validateDest(dest any) (err error) {
 	if dest == nil {
 		err = errors.New("Out/InOut -> Dest is nil")
@@ -263,7 +263,7 @@ func validateDest(dest any) (err error) {
 }
 
 //sdm:end
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func (ds *_DS) processExecParams(args []any, onRowArr *[]any, queryArgs *[]any) (hasParamsImplRc bool, hasParamsOutRc bool, err error) {
 	for _, arg := range args {
 		switch param := arg.(type) {
@@ -489,7 +489,7 @@ func fetchDriverRows(rows driver.Rows, onRowFunc any) error {
 }
 
 //sdm:end
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func assignPtrParams(values []any, queryArgs []any) error {
 	for i, arg := range queryArgs {
 		if isPtr(arg) {
@@ -506,7 +506,7 @@ func assignPtrParams(values []any, queryArgs []any) error {
 
 func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAffected int64, err error) {
 	sqlString = ds.formatSQL(sqlString)
-	//sdm:if pg mysql
+	//sdm:if pg mysql mssql
 	var onRowArr []any
 	var queryArgs []any
 	// Syntax like [on_test1:Test, on_test2:Test] is used to call SP with IMPLICIT cursors
@@ -521,7 +521,7 @@ func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAff
 	//sdm:if pg
 	return ds.exec2(ctx, sqlString, onRowArr, queryArgs...)
 	//sdm:end
-	//sdm:if mysql
+	//sdm:if mysql mssql
 	return ds.rawExec(ctx, sqlString, queryArgs...)
 	//sdm:end
 	//sdm:if sqlite
@@ -531,7 +531,7 @@ func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAff
 
 func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ...any) error {
 	sqlString = ds.formatSQL(sqlString)
-	//sdm:if pg mysql
+	//sdm:if pg mysql mssql
 	var onRowArr []any
 	var queryArgs []any
 	implicitCursors, outCursors, err := ds.processExecParams(args, &onRowArr, &queryArgs)
@@ -567,7 +567,7 @@ func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ..
 	if rows.Next() {
 		return errMultipleRows(sqlString)
 	}
-	//sdm:if pg mysql
+	//sdm:if pg mysql mssql
 	err = assignPtrParams(values, queryArgs)
 	if err != nil {
 		return err
@@ -1269,7 +1269,7 @@ func errMultipleRows(sqlString string) error {
 	return fmt.Errorf("more than 1 row found for %s", sqlString)
 }
 
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func errUnexpectedInQuery() error {
 	return errors.New("not supported: 'query([onTest]) for implicit cursors', query(onTest) for out cursors")
 }

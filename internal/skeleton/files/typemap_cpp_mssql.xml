@@ -1,0 +1,35 @@
+    <type-map default="">
+
+        <type detected="tinyint" target="CInteger${N}"/>
+        <type detected="smallint" target="CInteger${N}"/>
+        <type detected="int" target="CInteger${N}"/>
+        <type detected="bigint" target="CInteger${N}"/>
+        <type detected="bit" target="CInteger${N}"/>
+        <type detected="decimal" target="CDouble${N}"/>
+        <type detected="numeric" target="CDouble${N}"/>
+        <type detected="money" target="CDouble${N}"/>
+        <type detected="smallmoney" target="CDouble${N}"/>
+        <type detected="real" target="CDouble${N}"/>
+        <type detected="float" target="CDouble${N}"/>
+        <type detected="char" target="CText${N}"/>
+        <type detected="varchar" target="CText${N}"/>
+        <type detected="text" target="CText${N}"/>
+        <type detected="nchar" target="CText${N}"/>
+        <type detected="nvarchar" target="CText${N}"/>
+        <type detected="ntext" target="CText${N}"/>
+        <type detected="xml" target="CText${N}"/>
+        <type detected="uniqueidentifier" target="CText${N}"/>
+        <type detected="date" target="CText${N}"/>
+        <type detected="time" target="CText${N}"/>
+        <type detected="datetime" target="CText${N}"/>
+        <type detected="datetime2" target="CText${N}"/>
+        <type detected="smalldatetime" target="CText${N}"/>
+        <type detected="datetimeoffset" target="CText${N}"/>
+        <type detected="binary" target="CBlob${N}"/>
+        <type detected="varbinary" target="CBlob${N}"/>
+        <type detected="image" target="CBlob${N}"/>
+        <type detected="timestamp" target="CBlob${N}"/>
+        <type detected="sql_variant" target="CVariant"/>
+        <type detected="unknown" target="CVariant"/>
+
+    </type-map>

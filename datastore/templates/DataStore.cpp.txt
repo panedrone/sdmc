@@ -16,9 +16,15 @@ bool CDataStore::open(const QString &file) {
 bool CDataStore::open(const QString &host, int port, const QString &database, const QString &user, const QString &password) {
     errors.clear();
     QSqlDatabase db = QSqlDatabase::addDatabase("{{qt_driver}}", connectionName);
+//sdm:if mssql
+    // QODBC: the database name is the connection string of the ODBC driver; instance: host\SQLEXPRESS
+    db.setDatabaseName(QString("DRIVER={ODBC Driver 18 for SQL Server};SERVER=%1,%2;DATABASE=%3;Encrypt=no")
+                           .arg(host).arg(port).arg(database));
+//sdm:else
     db.setHostName(host);
     db.setPort(port);
     db.setDatabaseName(database);
+//sdm:end
     db.setUserName(user);
     db.setPassword(password);
 //sdm:end
@@ -88,6 +94,9 @@ bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *pa
 bool CDataStore::readRow(QSqlQuery &query, int ret_values_count, CValue *ret_values[], DL_STR col_names[]) {
     for (int i = 0; i < ret_values_count; i++) {
         int index = query.record().indexOf(QString::fromUtf8(col_names[i]));
+        if (index < 0 && i < query.record().count() && query.record().fieldName(i).isEmpty()) {
+            index = i; // a column without a name, as count(*) in SQL Server: col_1, col_2, ... by position
+        }
         if (index < 0) {
             errors = QString("no column %1 in the result").arg(col_names[i]);
             return false;
@@ -114,7 +123,17 @@ int CDataStore::insert(DL_STR sql, int params_count, CValue *params[], int AI_va
         return -1;
     }
     QVariant id = last.value(0);
-//sdm:else
+//sdm:end
+//sdm:if mssql
+    // no lastInsertId in QODBC for SQL Server: @@IDENTITY of the session
+    QSqlQuery last(QSqlDatabase::database(connectionName, false));
+    if (!last.exec("select cast(@@identity as bigint)") || !last.next()) {
+        errors = last.lastError().text();
+        return -1;
+    }
+    QVariant id = last.value(0);
+//sdm:end
+//sdm:if mysql sqlite
     QVariant id = query.lastInsertId();
 //sdm:end
     AI_values[0]->fromVariant(id);

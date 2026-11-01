@@ -81,6 +81,9 @@ bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *pa
 bool CDataStore::readRow(QSqlQuery &query, int ret_values_count, CValue *ret_values[], DL_STR col_names[]) {
     for (int i = 0; i < ret_values_count; i++) {
         int index = query.record().indexOf(QString::fromUtf8(col_names[i]));
+        if (index < 0 && i < query.record().count() && query.record().fieldName(i).isEmpty()) {
+            index = i; // a column without a name, as count(*) in SQL Server: col_1, col_2, ... by position
+        }
         if (index < 0) {
             errors = QString("no column %1 in the result").arg(col_names[i]);
             return false;

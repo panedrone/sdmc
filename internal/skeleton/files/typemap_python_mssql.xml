@@ -1,0 +1,35 @@
+    <type-map default="">
+
+        <type detected="tinyint" target="int"/>
+        <type detected="smallint" target="int"/>
+        <type detected="int" target="int"/>
+        <type detected="bigint" target="int"/>
+        <type detected="bit" target="bool"/>
+        <type detected="decimal" target="Decimal"/>
+        <type detected="numeric" target="Decimal"/>
+        <type detected="money" target="Decimal"/>
+        <type detected="smallmoney" target="Decimal"/>
+        <type detected="real" target="float"/>
+        <type detected="float" target="float"/>
+        <type detected="char" target="str"/>
+        <type detected="varchar" target="str"/>
+        <type detected="text" target="str"/>
+        <type detected="nchar" target="str"/>
+        <type detected="nvarchar" target="str"/>
+        <type detected="ntext" target="str"/>
+        <type detected="xml" target="str"/>
+        <type detected="uniqueidentifier" target="UUID"/>
+        <type detected="date" target="date"/>
+        <type detected="time" target="time"/>
+        <type detected="datetime" target="datetime"/>
+        <type detected="datetime2" target="datetime"/>
+        <type detected="smalldatetime" target="datetime"/>
+        <type detected="datetimeoffset" target="datetime"/>
+        <type detected="binary" target="bytes"/>
+        <type detected="varbinary" target="bytes"/>
+        <type detected="image" target="bytes"/>
+        <type detected="timestamp" target="bytes"/>
+        <type detected="sql_variant" target="object"/>
+        <type detected="unknown" target="object"/>
+
+    </type-map>

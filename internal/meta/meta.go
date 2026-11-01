@@ -8,7 +8,7 @@
 // RawType is the same in the driver's words: the second vocabulary of type-map keys, on a par with Java names.
 package meta
 
-// Metadata has one implementation per dialect (pg, mysql, sqlite).
+// Metadata has one implementation per dialect (pg, mysql, sqlite, mssql).
 type Metadata interface {
 	// SQLColumns returns the result columns of jdbcSQL (SQL with '?').
 	SQLColumns(jdbcSQL string) ([]Column, error)

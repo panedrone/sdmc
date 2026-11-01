@@ -14,6 +14,9 @@ import (
 	//sdm:if mysql
 	"gorm.io/driver/mysql"
 	//sdm:end
+	//sdm:if mssql
+	"gorm.io/driver/sqlserver"
+	//sdm:end
 	//sdm:if sqlite
 	"gorm.io/driver/sqlite" // cgo; without cgo: github.com/glebarez/sqlite
 	//sdm:end
@@ -34,6 +37,12 @@ func (ds *_DS) initDb() (err error) {
 		dsn = "root:root@tcp(localhost:3306)/mysql?parseTime=true" // parseTime: DATETIME -> time.Time
 	}
 	dialector := mysql.Open(dsn)
+	//sdm:end
+	//sdm:if mssql
+	if dsn == "" { // sqlserver://user:pwd@host:1433?database=db, instance: host/SQLEXPRESS
+		dsn = "sqlserver://sa:sa@localhost:1433?database=master"
+	}
+	dialector := sqlserver.Open(dsn)
 	//sdm:end
 	//sdm:if sqlite
 	if dsn == "" { // path to the database file

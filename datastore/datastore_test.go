@@ -56,6 +56,11 @@ func TestSpecific(t *testing.T) {
 		{"pg", "gorm", []string{"FetchSql", "exec2", "type Out", "type InOut", "validateDest"}, nil},
 		{"pg", "sqlx", []string{"Rebind", "RETURNING"}, nil},
 		{"mysql", "sqlx", []string{"LastInsertId", "queryImplRc", "type Out", "type InOut", "validateDest"}, []string{"RETURNING", "FetchPg", "exec2"}},
+		// SQL Server: @p1.., @@IDENTITY instead of LastInsertId, result sets and OUT like MySQL
+		{"mssql", "no_orm", []string{`"@p"`, "SELECT @@IDENTITY", "queryImplRc", "type Out", "type InOut", `sql.Open("sqlserver"`, "go-mssqldb"},
+			[]string{"res.LastInsertId()", "RETURNING", "FetchPg", "exec2"}},
+		{"mssql", "sqlx", []string{"Rebind", "SELECT @@IDENTITY", "queryImplRc", "type Out", `sqlx.Open("sqlserver"`}, []string{"res.LastInsertId()", "RETURNING", "exec2"}},
+		{"mssql", "gorm", []string{"sqlserver.Open", "queryImplRc", "type Out", "type InOut"}, []string{"FetchSql", "exec2"}},
 	}
 	for _, c := range cases {
 		files, err := Files(c.orm, c.db, "dbal")
@@ -108,6 +113,7 @@ func TestPythonSpecific(t *testing.T) {
 		{"pg", []string{"transaction_status", "RETURNING", "class OutParam", "replace('?', '%s')", "_get_sp_name"}, []string{"lastrowid", "callproc"}},
 		{"mysql", []string{"bool(self.conn.in_transaction)", "lastrowid", "class OutParam", "callproc", "stored_results", "replace('?', '%s')"}, []string{"RETURNING"}},
 		{"sqlite", []string{"return self.conn.in_transaction", "lastrowid", "execute('begin')"}, []string{"RETURNING", "OutParam", "callproc", "_get_sp_name", "%s"}},
+		{"mssql", []string{"conn.autocommit", "select cast(@@identity as bigint)", "{call ", "nextset", "mssql_python"}, []string{"cursor.lastrowid", "RETURNING", "OutParam", "callproc", "%s"}},
 	}
 	for _, c := range cases {
 		text, err := PythonText(c.db)
@@ -134,6 +140,7 @@ func TestCppVariants(t *testing.T) {
 		"pg":     {[]string{`"QPSQL"`, "select lastval()", "setHostName"}, []string{"query.lastInsertId()"}},
 		"mysql":  {[]string{`"QMYSQL"`, "lastInsertId", "setHostName"}, []string{"lastval"}},
 		"sqlite": {[]string{`"QSQLITE"`, "lastInsertId", "open(const QString &file)"}, []string{"lastval", "setHostName"}},
+		"mssql":  {[]string{`"QODBC"`, "select cast(@@identity as bigint)", "ODBC Driver 18 for SQL Server"}, []string{"lastval", "query.lastInsertId()", "setHostName"}},
 	}
 	for _, db := range DBs {
 		want, err := GenerateCpp(db)

@@ -1,0 +1,53 @@
+# SQL Server, the Northwind sample of Microsoft (instnwnd.sql): metadump against MetaDump.java
+#   go run ./cli/metadump -url sqlserver://localhost:1433?database=Northwind -user sa cli/metadump/mssql_northwind.txt
+table	Categories
+table	Customers
+table	Employees
+table	EmployeeTerritories
+table	[Order Details]
+table	Orders
+table	Products
+table	Region
+table	Shippers
+table	Suppliers
+table	Territories
+table	CustomerDemographics
+table	CustomerCustomerDemo
+table	[Alphabetical list of products]
+table	Invoices
+table	dbo.Shippers
+table	[dbo].[Order Details]
+table	NoSuchTable
+pk	Categories
+pk	[Order Details]
+pk	EmployeeTerritories
+pk	CustomerCustomerDemo
+pk	dbo.Orders
+pk	[Alphabetical list of products]
+sql	select * from Orders where OrderID = ?
+sql	select count(*) from Customers
+sql	select count(*) as cnt from Customers where City = ?
+sql	select CustomerID, CompanyName from Customers where City = ? and Country = ?
+sql	select o.OrderID, c.CompanyName, o.Freight from Orders o join Customers c on c.CustomerID = o.CustomerID where o.OrderDate between ? and ?
+sql	select cast(1 as bit) b, cast(1 as tinyint) ti, cast(1 as smallint) si, cast(1 as int) i, cast(1 as bigint) bi
+sql	select cast(1.5 as decimal(10,2)) d, cast(1.5 as numeric(18,4)) n, cast(1 as money) m, cast(1 as smallmoney) sm, cast(1 as real) r, cast(1 as float) f
+sql	select cast('a' as char(3)) c, cast('a' as nchar(3)) nc, cast('a' as varchar(10)) vc, cast('a' as nvarchar(10)) nvc, cast('a' as varchar(max)) vcm, cast('a' as nvarchar(max)) nvcm
+sql	select cast('2020-01-01' as date) d, cast('10:00' as time) t, cast(getdate() as datetime) dt, cast(getdate() as datetime2) dt2, cast(getdate() as smalldatetime) sdt, cast(getdate() as datetimeoffset) dto
+sql	select cast(0x01 as binary(4)) b, cast(0x01 as varbinary(10)) vb, cast(0x01 as varbinary(max)) vbm, newid() u, cast('<a/>' as xml) x
+sql	select Notes, Photo from Employees
+sql	select dbo.ufnNoSuchFunction(?)
+sql	insert into Shippers (CompanyName, Phone) values (?, ?)
+sql	update Shippers set Phone = ? where ShipperID = ?
+sql	{call CustOrderHist(?)}
+sql	exec CustOrderHist ?
+sql	{call [Ten Most Expensive Products]}
+params	1	select * from Orders where OrderID = ?
+params	2	select * from Orders where OrderDate between ? and ?
+params	1	select * from Customers where CustomerID = ?
+params	0	select count(*) from Customers
+params	2	insert into Shippers (CompanyName, Phone) values (?, ?)
+params	2	update Shippers set Phone = ? where ShipperID = ?
+params	1	delete from Shippers where ShipperID = ?
+params	1	{call CustOrderHist(?)}
+params	2	{call [Sales by Year](?, ?)}
+params	1	select * from [Order Details] where OrderID = ?

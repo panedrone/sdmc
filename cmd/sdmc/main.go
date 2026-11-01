@@ -30,8 +30,8 @@ var version = "1.1.2"
 const usage = `sdmc %s — SQL DAL Maker CLI for Go, Python and C++
 
 usage:
-  sdmc init -dir <folder> -dao <folder> -orm no_orm|sqlx|gorm -db pg|mysql|sqlite
-  sdmc init -lang python|cpp -dir <folder> -dao <folder> -db pg|mysql|sqlite
+  sdmc init -dir <folder> -dao <folder> -orm no_orm|sqlx|gorm -db pg|mysql|sqlite|mssql
+  sdmc init -lang python|cpp -dir <folder> -dao <folder> -db pg|mysql|sqlite|mssql
                                   create sdm.xml, settings.xml, XSD and the data store;
                                   all options are required, see sdmc help init
   sdmc generate|gen [-dir sdm|-c N|all] [-m] [-d] [class ...]
@@ -49,7 +49,7 @@ usage:
                                   classes Task, sqlx-Task or gorm-Task;
                                   classes already in sdm.xml are skipped, -force: not;
                                   to a file: sdmc xml -orm gorm -m > models.xml
-  sdmc datastore|ds [-dir sdm|-c N|all] [-db pg|mysql|sqlite]
+  sdmc datastore|ds [-dir sdm|-c N|all] [-db pg|mysql|sqlite|mssql]
                                   update data_store_<orm>.go (Python: data_store_no_orm.py,
                                   C++: DataStore.h and DataStore.cpp) in the DAO folder to this
                                   sdmc version (the database of <db url>, or -db);
@@ -441,7 +441,8 @@ func loadSettings(dir string) (*sdmxml.Settings, error) {
 		return nil, fmt.Errorf("%s/settings.xml has no <db>, the database to generate from. Add one of:\n\n"+
 			"    <db url=\"postgres://localhost:5432/db\" user=\"postgres\" pwd=\"\"/>\n"+
 			"    <db url=\"mysql://localhost:3306/db\" user=\"root\" pwd=\"\"/>\n"+
-			"    <db url=\"sqlite:app.sqlite3\" user=\"\" pwd=\"\"/>   (the file is relative to the project)", dir)
+			"    <db url=\"sqlite:app.sqlite3\" user=\"\" pwd=\"\"/>   (the file is relative to the project)\n"+
+			"    <db url=\"sqlserver://localhost:1433;databaseName=db;encrypt=false\" user=\"sa\" pwd=\"\"/>", dir)
 	}
 	return s, nil
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/panedrone/sdmc/internal/cppgen"
 	"github.com/panedrone/sdmc/internal/gogen"
 	"github.com/panedrone/sdmc/internal/meta"
+	"github.com/panedrone/sdmc/internal/meta/mssql"
 	"github.com/panedrone/sdmc/internal/meta/mysql"
 	"github.com/panedrone/sdmc/internal/meta/pg"
 	"github.com/panedrone/sdmc/internal/meta/sqlite"
@@ -144,9 +145,16 @@ func OpenMetadata(projectDir string, j sdmxml.DB) (meta.Metadata, error) {
 		}
 		return mysql.Open(addr, db, u, p)
 	}
+	if strings.HasPrefix(url, "jdbc:sqlserver:") || strings.HasPrefix(url, "sqlserver:") {
+		cs, err := mssql.ConnString(url, j.User, j.Pwd)
+		if err != nil {
+			return nil, err
+		}
+		return mssql.Open(cs)
+	}
 	cs, err := pg.ConnString(url, j.User, j.Pwd)
 	if err != nil {
-		return nil, errors.New("unsupported database URL (PostgreSQL, MySQL and SQLite only): " + j.URL)
+		return nil, errors.New("unsupported database URL (PostgreSQL, MySQL, SQLite and SQL Server only): " + j.URL)
 	}
 	return pg.Open(context.Background(), cs)
 }

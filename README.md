@@ -7,7 +7,7 @@
 
 SQL DAL Maker CLI generates the data access layer — models and DAO — from an XML manifest and
 the metadata of a **live database**: Go (database/sql, sqlx, gorm), [Python](#python-db-api-20)
-and [C++ (Qt)](#c-qt); PostgreSQL, MySQL and SQLite. One static binary, no runtime dependencies.
+and [C++ (Qt)](#c-qt); PostgreSQL, MySQL, SQLite and SQL Server. One static binary, no runtime dependencies.
 
 **SQL first, no ORM, no reflection at run time:** you write SQL or point at a table, the
 database says what the columns and parameters are, and you get plain functions to call.
@@ -164,7 +164,7 @@ and views anyway, without reading `sdm.xml`.
 
 A name with spaces or other characters a class name cannot have (`Order Details`) gives a class of
 its words (`OrderDetail`, `OrderDetailsDao`, `getOrderDetailsByOrder`) and a quoted ref, `"Order Details"`
-for PostgreSQL and SQLite, `` `Order Details` `` for MySQL. A quoted name is a table name in any `ref`
+for PostgreSQL and SQLite, `` `Order Details` `` for MySQL, `[Order Details]` for SQL Server. A quoted name is a table name in any `ref`
 and `table` (`[Order Details]` too); SQL takes it as it is written.
 
 ```
@@ -210,12 +210,12 @@ All four are required, without defaults: `init` writes files, and a forgotten op
 them somewhere else. Without one of them nothing is written, and `sdmc` prints the help of `init`
 with an example (also `sdmc help init`).
 
-| option                    |                                                                                                               |
-|---------------------------|---------------------------------------------------------------------------------------------------------------|
-| `-dir <folder>`           | the folder of `sdm.xml` and `settings.xml`, relative to `go.mod`; its line in `.sdm`: `<folder>/go.dal`       |
-| `-dao <folder>`           | the folder of the DAO, models go to `<folder>/models`; the last element is the Go package name                |
-| `-orm no_orm\|sqlx\|gorm` | database/sql, sqlx or gorm: the data store; `field-assign-mode="0"` for `no_orm`, `"3"` for `sqlx` and `gorm` |
-| `-db pg\|mysql\|sqlite`   | the database: type map and url in `settings.xml`, the data store for it                                       |
+| option                         |                                                                                                               |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `-dir <folder>`                | the folder of `sdm.xml` and `settings.xml`, relative to `go.mod`; its line in `.sdm`: `<folder>/go.dal`       |
+| `-dao <folder>`                | the folder of the DAO, models go to `<folder>/models`; the last element is the Go package name                |
+| `-orm no_orm\|sqlx\|gorm`      | database/sql, sqlx or gorm: the data store; `field-assign-mode="0"` for `no_orm`, `"3"` for `sqlx` and `gorm` |
+| `-db pg\|mysql\|sqlite\|mssql` | the database: type map and url in `settings.xml`, the data store for it                                       |
 
 Options of the other commands:
 
@@ -294,22 +294,22 @@ DAO: `DS`, the `DataStore` interface and the `Set...` functions the DAO call. Ev
 yours: the connection, logging, retries, whatever you need. `_ex` is the file for the connection;
 keep it or not. Each database has its own data store, with only what it can do:
 
-|                         | PostgreSQL           | MySQL               | SQLite           |
-|-------------------------|----------------------|---------------------|------------------|
-| driver                  | pgx                  | go-sql-driver/mysql | mattn/go-sqlite3 |
-| generated keys          | `RETURNING`          | `LastInsertId`      | `LastInsertId`   |
-| parameters              | `?` -> `$1, $2, ...` | `?`                 | `?`              |
-| procedures: result sets | yes                  | yes                 | —                |
-| ref-cursors, OUT, INOUT | yes                  | —                   | —                |
+|                         | PostgreSQL           | MySQL               | SQLite           | SQL Server             |
+|-------------------------|----------------------|---------------------|------------------|------------------------|
+| driver                  | pgx                  | go-sql-driver/mysql | mattn/go-sqlite3 | microsoft/go-mssqldb   |
+| generated keys          | `RETURNING`          | `LastInsertId`      | `LastInsertId`   | `SELECT @@IDENTITY`    |
+| parameters              | `?` -> `$1, $2, ...` | `?`                 | `?`              | `?` -> `@p1, @p2, ...` |
+| procedures: result sets | yes                  | yes                 | —                | yes                    |
+| ref-cursors, OUT, INOUT | yes                  | —                   | —                | OUT, INOUT             |
 
 `sdmc init` writes the one for `-db` and `-orm`. By hand, take it from [`datastore/`](datastore),
 remove the first line `//go:build ignore` and set the package name of your DAO folder:
 
-|              | PostgreSQL                       | MySQL                                  | SQLite                                   |
-|--------------|----------------------------------|----------------------------------------|------------------------------------------|
-| database/sql | [pg/no_orm](datastore/pg/no_orm) | [mysql/no_orm](datastore/mysql/no_orm) | [sqlite/no_orm](datastore/sqlite/no_orm) |
-| sqlx         | [pg/sqlx](datastore/pg/sqlx)     | [mysql/sqlx](datastore/mysql/sqlx)     | [sqlite/sqlx](datastore/sqlite/sqlx)     |
-| gorm         | [pg/gorm](datastore/pg/gorm)     | [mysql/gorm](datastore/mysql/gorm)     | [sqlite/gorm](datastore/sqlite/gorm)     |
+|              | PostgreSQL                       | MySQL                                  | SQLite                                   | SQL Server                             |
+|--------------|----------------------------------|----------------------------------------|------------------------------------------|----------------------------------------|
+| database/sql | [pg/no_orm](datastore/pg/no_orm) | [mysql/no_orm](datastore/mysql/no_orm) | [sqlite/no_orm](datastore/sqlite/no_orm) | [mssql/no_orm](datastore/mssql/no_orm) |
+| sqlx         | [pg/sqlx](datastore/pg/sqlx)     | [mysql/sqlx](datastore/mysql/sqlx)     | [sqlite/sqlx](datastore/sqlite/sqlx)     | [mssql/sqlx](datastore/mssql/sqlx)     |
+| gorm         | [pg/gorm](datastore/pg/gorm)     | [mysql/gorm](datastore/mysql/gorm)     | [sqlite/gorm](datastore/sqlite/gorm)     | [mssql/gorm](datastore/mssql/gorm)     |
 
 The connection is `DATABASE_URL` (or the default in `_ex`). All data stores, Python and C++
 included, are made from the templates in [`datastore/templates`](datastore/templates) by
@@ -317,7 +317,7 @@ included, are made from the templates in [`datastore/templates`](datastore/templ
 
 `sdmc gen` does not touch the data store. After `sdmc` is updated, `sdmc datastore` (`sdmc ds`)
 replaces `data_store_<orm>.go` in the DAO folder of `settings.xml` with the one of this version —
-the ORM by the file name, the database by `<db url>` (or `-db pg|mysql|sqlite`), the package of the
+the ORM by the file name, the database by `<db url>` (or `-db pg|mysql|sqlite|mssql`), the package of the
 file kept — and prints what it took. `_ex` is never touched. The data store is rewritten as a whole,
 in every language: if you changed it, look at the diff and bring your changes back. Regenerate along
 with it (`sdmc gen`): the generated code and the adapter change together.
@@ -333,8 +333,14 @@ up to date: sqlx/dbal/data_store_sqlx.go (sqlx for mysql)
 
 A data store of the IDE plug-in (one file for all databases) becomes the one for your database
 only, so the first `sdmc ds` shows a large diff. `Out` and `InOut` are in every data store of
-PostgreSQL and MySQL: the same DAO compile with no_orm, sqlx and gorm, even where MySQL cannot
-fill OUT parameters.
+PostgreSQL, MySQL and SQL Server: the same DAO compile with no_orm, sqlx and gorm, even where MySQL
+cannot fill OUT parameters.
+
+SQL Server and Go: go-mssqldb knows no `{call p(?)}`, so the `ref` of a DAO method calls a procedure
+by `exec p ?` (`<query-dto-list dto="Row" method="custOrderHist(id)" ref="exec CustOrderHist ?"/>`);
+a `<dto-class ref>` keeps `{call p(?)}`, it is only for the columns. `<db url>` takes both forms,
+`sqlserver://host:1433;databaseName=db;encrypt=false` (JDBC, as in `<jdbc url>`) and
+`sqlserver://host:1433?database=db` (go-mssqldb).
 
 ## Type map
 
@@ -345,6 +351,7 @@ fill OUT parameters.
 | PostgreSQL | `int4`, `int8`, `numeric`, `varchar`, `text`, `timestamptz`, `uuid`, `_text` (arrays), `refcursor`, ... |
 | MySQL      | `INT`, `UNSIGNED BIGINT`, `DECIMAL`, `VARCHAR`, `TEXT`, `DATETIME`, `JSON`, ...                         |
 | SQLite     | what the column is declared with: `INTEGER`, `VARCHAR`, `REAL`, ...                                     |
+| SQL Server | `int`, `bigint`, `decimal`, `money`, `nvarchar`, `datetime2`, `varbinary`, `uniqueidentifier`, ...      |
 
 with a prefix for sqlx and gorm classes (`sqlx-int4`, `gorm-timestamptz`) and `+auto` for
 the column of `auto="..."` (`gorm-uuid+auto`). `target` is the Go type of the field, its tags
@@ -366,7 +373,7 @@ is replaced by the type of the column from the database, or by `unknown` if ther
 
 ## Python DB-API 2.0
 
-Python without ORM: plain DB-API 2.0 (sqlite3, psycopg2/psycopg, mysql-connector-python) behind a
+Python without ORM: plain DB-API 2.0 (sqlite3, psycopg2/psycopg, mysql-connector-python, mssql-python) behind a
 data store, byte for byte what the Python target of the IDE plug-ins generates for no ORM.
 A working example: [sdm_todolist_fastapi_no_orm](https://github.com/panedrone/sdm_todolist_fastapi_no_orm)
 (FastAPI + SQLite, a Vue front-end); `sdmc val` there says its `dbal` is up to date. Run `sdmc` in
@@ -414,12 +421,14 @@ is yours, the connection included (`create_ds(conn)`). There is no `_ex` file: k
 where you like. Template:
 [`datastore/templates/data_store_no_orm.py.txt`](datastore/templates/data_store_no_orm.py.txt).
 
-|                | PostgreSQL                          | MySQL                                  | SQLite                                   |
-|----------------|-------------------------------------|----------------------------------------|------------------------------------------|
-| file           | [python/pg](datastore/python/pg)    | [python/mysql](datastore/python/mysql) | [python/sqlite](datastore/python/sqlite) |
-| generated keys | `RETURNING`                         | `lastrowid`                            | `lastrowid`                              |
-| parameters     | `?` -> `%s`                         | `?` -> `%s`                            | `?`                                      |
-| procedures     | `call`, OUT and INOUT by `OutParam` | `callproc`: result sets, OUT and INOUT | —                                        |
+|                | PostgreSQL                          | MySQL                                  | SQLite                                   | SQL Server                             |
+|----------------|-------------------------------------|----------------------------------------|------------------------------------------|----------------------------------------|
+| file           | [python/pg](datastore/python/pg)    | [python/mysql](datastore/python/mysql) | [python/sqlite](datastore/python/sqlite) | [python/mssql](datastore/python/mssql) |
+| generated keys | `RETURNING`                         | `lastrowid`                            | `lastrowid`                              | `select @@identity`                    |
+| parameters     | `?` -> `%s`                         | `?` -> `%s`                            | `?`                                      | `?`                                    |
+| procedures     | `call`, OUT and INOUT by `OutParam` | `callproc`: result sets, OUT and INOUT | —                                        | `{call p(?)}`, `exec p ?`: result sets |
+
+SQL Server: mssql-python needs Python 3.10+; pyodbc (`?` too) works with the same data store.
 
 ## C++ (Qt)
 
@@ -497,12 +506,12 @@ everything else is yours (`open`, transactions, your value classes). Templates:
 [`DataStore.h.txt`](datastore/templates/DataStore.h.txt) and
 [`DataStore.cpp.txt`](datastore/templates/DataStore.cpp.txt).
 
-|                | PostgreSQL                           | MySQL                                | SQLite                             |
-|----------------|--------------------------------------|--------------------------------------|------------------------------------|
-| files          | [cpp/pg](datastore/cpp/pg)           | [cpp/mysql](datastore/cpp/mysql)     | [cpp/sqlite](datastore/cpp/sqlite) |
-| Qt driver      | `QPSQL`                              | `QMYSQL`                             | `QSQLITE`                          |
-| generated keys | `select lastval()`                   | `lastInsertId`                       | `lastInsertId`                     |
-| `open`         | host, port, database, user, password | host, port, database, user, password | the file                           |
+|                | PostgreSQL                           | MySQL                                | SQLite                             | SQL Server                           |
+|----------------|--------------------------------------|--------------------------------------|------------------------------------|--------------------------------------|
+| files          | [cpp/pg](datastore/cpp/pg)           | [cpp/mysql](datastore/cpp/mysql)     | [cpp/sqlite](datastore/cpp/sqlite) | [cpp/mssql](datastore/cpp/mssql)     |
+| Qt driver      | `QPSQL`                              | `QMYSQL`                             | `QSQLITE`                          | `QODBC`                              |
+| generated keys | `select lastval()`                   | `lastInsertId`                       | `lastInsertId`                     | `select @@identity`                  |
+| `open`         | host, port, database, user, password | host, port, database, user, password | the file                           | host, port, database, user, password |
 
 ## Syntax of XML manifest
 

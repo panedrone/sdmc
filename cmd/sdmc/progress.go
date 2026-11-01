@@ -189,6 +189,15 @@ func dbLabel(raw string) string {
 	if f, ok := strings.CutPrefix(s, "sqlite:"); ok {
 		return f
 	}
+	if h, ok := strings.CutPrefix(s, "sqlserver://"); ok && strings.Contains(h, ";") { // JDBC: host:port;databaseName=db
+		host, params, _ := strings.Cut(h, ";")
+		for _, p := range strings.Split(params, ";") {
+			if k, v, ok := strings.Cut(p, "="); ok && strings.EqualFold(k, "databaseName") {
+				return host + "/" + v
+			}
+		}
+		return host
+	}
 	if u, err := url.Parse(s); err == nil && u.Host != "" {
 		return u.Host + u.Path
 	}

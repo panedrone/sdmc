@@ -34,7 +34,7 @@ type Options struct {
 	SdmDir     string   // relative to ProjectDir, with '/'
 	DaoDir     string   // relative to ProjectDir, with '/'; Go models go to DaoDir/models, Python ones to DaoDir
 	ORM        string   // Go data store: datastore.Variants, "" means the first; Python has none
-	DB         string   // type-map and url: pg, mysql, sqlite; "" means pg
+	DB         string   // type-map and url: pg, mysql, sqlite, mssql; "" means pg
 }
 
 // Langs are the values of sdmc init -lang, the first is the default.
@@ -59,6 +59,8 @@ var dbConf = map[string]struct{ name, url, user, jar, class, jdbcURL string }{
 		"mysql-connector-j-26.7.0.jar", "com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/mysql"},
 	"sqlite": {"SQLite", "sqlite:app.sqlite3", "",
 		"sqlite-jdbc-3.51.1.0.jar", "org.sqlite.JDBC", "jdbc:sqlite:$PROJECT_DIR$/app.sqlite3"},
+	"mssql": {"SQL Server", "sqlserver://localhost:1433;databaseName=master;encrypt=false", "sa",
+		"mssql-jdbc-12.6.3.jre11.jar", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://localhost:1433;databaseName=master;encrypt=false"},
 }
 
 // Init creates the configuration and the data store. It returns the created files.
@@ -189,8 +191,8 @@ var langNames = map[gen.Lang]string{gen.Go: "Go", gen.Python: "Python", gen.Cpp:
 
 // drivers are the drivers the type map of the language describes.
 var drivers = map[gen.Lang]map[string]string{
-	gen.Python: {"pg": "psycopg2, psycopg", "mysql": "mysql-connector-python", "sqlite": "sqlite3"},
-	gen.Cpp:    {"pg": "QPSQL", "mysql": "QMYSQL", "sqlite": "QSQLITE"},
+	gen.Python: {"pg": "psycopg2, psycopg", "mysql": "mysql-connector-python", "sqlite": "sqlite3", "mssql": "mssql-python"},
+	gen.Cpp:    {"pg": "QPSQL", "mysql": "QMYSQL", "sqlite": "QSQLITE", "mssql": "QODBC"},
 }
 
 // dataStoreOf is the data store of a Python or C++ DAO folder: file name -> text.
@@ -394,7 +396,7 @@ func refreshOneFolder(lang gen.Lang, daoDir, db string) ([]DataStoreFile, error)
 	return res, nil
 }
 
-// dbOf maps <db url> to pg, mysql or sqlite.
+// dbOf maps <db url> to pg, mysql, sqlite or mssql.
 func dbOf(url string) (string, error) {
 	u := strings.TrimPrefix(strings.TrimSpace(url), "jdbc:")
 	switch {
@@ -404,6 +406,8 @@ func dbOf(url string) (string, error) {
 		return "mysql", nil
 	case strings.HasPrefix(u, "postgres:"), strings.HasPrefix(u, "postgresql:"):
 		return "pg", nil
+	case strings.HasPrefix(u, "sqlserver:"):
+		return "mssql", nil
 	}
 	return "", fmt.Errorf("the database of <db url=%q> is unknown (-db %s)", url, strings.Join(DBs, "|"))
 }

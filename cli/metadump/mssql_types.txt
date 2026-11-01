@@ -1,0 +1,15 @@
+# SQL Server: the column types Northwind does not have, in a probe database
+#   go run ./cli/metadump -url sqlserver://localhost:1433?database=sdm_probe -user sa cli/metadump/mssql_types.txt
+# the database: create database sdm_probe
+exec	drop table if exists t_fk
+exec	drop table if exists t_types
+exec	create table t_types (id bigint identity primary key, ti tinyint not null, si smallint, b bit, d decimal(12,3), n numeric(5), f float, r real, m money, sm smallmoney, c char(5), vc varchar(20), vcm varchar(max), t text, nc nchar(5), nvc nvarchar(20), nvcm nvarchar(max), nt ntext, x xml, u uniqueidentifier not null unique, bn binary(8), vb varbinary(16), vbm varbinary(max), img image, dt date, tm time, tm3 time(3), dtm datetime, dt2 datetime2, dt23 datetime2(3), sdt smalldatetime, dto datetimeoffset, rv rowversion, sv sql_variant)
+exec	create table t_fk (k int not null, id bigint not null references t_types(id), primary key (k, id))
+exec	create index ix_t_types_vc on t_types (vc) include (nvc)
+table	t_types
+table	t_fk
+pk	t_fk
+sql	select * from t_types where id = ? and vc like ?
+sql	select ti + 1 as ti1, d * 2 as d2, isnull(nvc, '') as s, cast(dt2 as date) as only_date from t_types
+params	3	select * from t_types where ti = ? and dto > ? and u = ?
+params	2	insert into t_types (ti, u) values (?, ?)

@@ -65,7 +65,7 @@ func FetchPg(cursor string) string {
 }
 
 //sdm:end
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 type Out struct {
 	/*
 		var outParam float64 // no need to init
@@ -207,7 +207,26 @@ func (ds *_DS) insert(ctx context.Context, sqlString string, aiNames string, arg
 	return
 }
 
-//sdm:else
+//sdm:end
+//sdm:if mssql
+// insert — SQL Server: LastInsertId is not supported by go-mssqldb, @@IDENTITY comes back in the same batch
+func (ds *_DS) insert(ctx context.Context, sqlString string, _ string, args ...any) (id any, err error) {
+	sqlString += ";SELECT @@IDENTITY;"
+	rows, err := ds.querySqlx(ctx, sqlString, args...)
+	if err != nil {
+		return
+	}
+	defer _close(rows)
+	if rows.Next() {
+		err = rows.Scan(&id) // numeric(38,0): []uint8
+		return
+	}
+	err = errors.New("SELECT @@IDENTITY FAILED: " + sqlString)
+	return
+}
+
+//sdm:end
+//sdm:if mysql sqlite
 // insert — {{DB}}: LastInsertId
 func (ds *_DS) insert(ctx context.Context, sqlString string, _ string, args ...any) (id any, err error) {
 	res, err := ds.execSqlx(ctx, sqlString, args...)
@@ -227,7 +246,7 @@ func (ds *_DS) Insert(ctx context.Context, sqlString string, aiNames string, arg
 	return ds.insert(ctx, ds.formatSQL(sqlString), aiNames, args...)
 }
 
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func isPtr(p any) bool {
 	val := reflect.ValueOf(p)
 	kindOfJ := val.Kind()
@@ -255,7 +274,7 @@ func validateDest(dest any) (err error) {
 }
 
 //sdm:end
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func (ds *_DS) processExecParams(args []any, onRowArr *[]any, queryArgs *[]any) (hasParamsImplRc bool, hasParamsOutRc bool, err error) {
 	for _, arg := range args {
 		switch param := arg.(type) {
@@ -601,7 +620,7 @@ func fieldsByTraversal(v reflect.Value, traversals [][]int, values []any, ptrs b
 	return nil
 }
 
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func assignPtrParams(values []any, queryArgs []any) error {
 	for i, arg := range queryArgs {
 		if isPtr(arg) {
@@ -618,7 +637,7 @@ func assignPtrParams(values []any, queryArgs []any) error {
 
 func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAffected int64, err error) {
 	sqlString = ds.formatSQL(sqlString)
-	//sdm:if pg mysql
+	//sdm:if pg mysql mssql
 	var onRowArr []any
 	var queryArgs []any
 	// Syntax like [on_test1:Test, on_test2:Test] is used to call SP with IMPLICIT cursors
@@ -633,7 +652,7 @@ func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAff
 	//sdm:if pg
 	return ds.exec2(ctx, sqlString, onRowArr, queryArgs...)
 	//sdm:end
-	//sdm:if mysql
+	//sdm:if mysql mssql
 	return ds.execRows(ctx, sqlString, queryArgs...)
 	//sdm:end
 	//sdm:if sqlite
@@ -643,7 +662,7 @@ func (ds *_DS) Exec(ctx context.Context, sqlString string, args ...any) (rowsAff
 
 func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ...any) error {
 	sqlString = ds.formatSQL(sqlString)
-	//sdm:if pg mysql
+	//sdm:if pg mysql mssql
 	var onRowArr []any
 	var queryArgs []any
 	hasParamsImplRc, hasParamsRefRc, err := ds.processExecParams(args, &onRowArr, &queryArgs)
@@ -679,7 +698,7 @@ func (ds *_DS) Query(ctx context.Context, sqlString string, destPtr any, args ..
 	if rows.Next() {
 		return errMultipleRows(sqlString)
 	}
-	//sdm:if pg mysql
+	//sdm:if pg mysql mssql
 	err = assignPtrParams(values, queryArgs)
 	if err != nil {
 		return err
@@ -888,8 +907,12 @@ func (ds *_DS) prepareFetch(rows *sqlx.Rows) (colNames []string, values []any, v
 	return
 }
 
+//sdm:if pg mssql
 //sdm:if pg
 // formatSQL — PostgreSQL: ? -> $1, $2, ...
+//sdm:else
+// formatSQL — SQL Server: ? -> @p1, @p2, ...
+//sdm:end
 func (ds *_DS) formatSQL(sqlString string) string {
 	// https://jmoiron.github.io/sqlx/
 	// bindvars
@@ -1348,7 +1371,7 @@ func errMultipleRows(sqlString string) error {
 	return fmt.Errorf("more than 1 row found for %s", sqlString)
 }
 
-//sdm:if pg mysql
+//sdm:if pg mysql mssql
 func errUnexpectedInQuery() error {
 	return errors.New("not supported: 'query([onTest]) for implicit cursors', query(onTest) for out cursors")
 }
