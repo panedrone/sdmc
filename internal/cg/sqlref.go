@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/panedrone/sdmc/internal/meta"
 )
 
 // The grammar of 'ref' (SqlUtils.java). The branches and the order of checks are as in Java,
@@ -55,7 +57,31 @@ var illegalTableChars = "/\n\r\t\x00\f?*\\<>|\";,(){}"
 
 func IsTableRef(ref string) bool {
 	ref = strings.TrimSpace(ref)
-	if ref == "" || reWS.MatchString(ref) {
+	if ref == "" {
+		return false
+	}
+	// a name quoted by the rules of the database may have spaces: [Order Details], "Order Details", `Order Details`
+	parts, ok := meta.SplitTableRef(ref)
+	if !ok {
+		return false // a quote is not closed
+	}
+	if slices.ContainsFunc(parts, meta.IsQuotedName) {
+		for _, p := range parts {
+			if meta.IsQuotedName(p) {
+				if len(p) < 3 {
+					return false // [] or ""
+				}
+			} else if !isUnquotedTableRef(p) {
+				return false
+			}
+		}
+		return true
+	}
+	return isUnquotedTableRef(ref)
+}
+
+func isUnquotedTableRef(ref string) bool {
+	if reWS.MatchString(ref) {
 		return false
 	}
 	if IsSQLShortcutRef(ref) || IsJdbcStoredProcCall(ref) || IsSQLFileRef(ref) ||

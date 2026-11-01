@@ -162,6 +162,11 @@ are skipped whatever their model â€” `gorm-Task` is skipped if there is `Task` â
 `sdmc xml` prints only it; if nothing is left, the reason goes to stderr. `-force` prints all tables
 and views anyway, without reading `sdm.xml`.
 
+A name with spaces or other characters a class name cannot have (`Order Details`) gives a class of
+its words (`OrderDetail`, `OrderDetailsDao`, `getOrderDetailsByOrder`) and a quoted ref, `"Order Details"`
+for PostgreSQL and SQLite, `` `Order Details` `` for MySQL. A quoted name is a table name in any `ref`
+and `table` (`[Order Details]` too); SQL takes it as it is written.
+
 ```
 $ sdmc xml -orm no_orm -m
 <dto-class name="Group" ref="groups"/>

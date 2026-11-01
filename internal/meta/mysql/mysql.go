@@ -270,7 +270,9 @@ func schemaExpr(schema string, args *[]any) string {
 }
 
 func (db *DB) Table(tableRef string) (*meta.Table, error) {
-	schema, table, err := splitSchema(tableRef)
+	// SQL takes the name as it is written ([Order Details]), the catalog without the quotes
+	mdRef := meta.UnquoteTableRef(tableRef)
+	schema, table, err := splitSchema(mdRef)
 	if err != nil {
 		return nil, err
 	}
@@ -283,13 +285,13 @@ func (db *DB) Table(tableRef string) (*meta.Table, error) {
 		return nil, err
 	}
 	if n, _ := r.GetInt(0, 0); n == 0 {
-		return nil, errors.New("Not found: '" + tableRef + "'. The search is case-sensitive.")
+		return nil, errors.New("Not found: '" + mdRef + "'. The search is case-sensitive.")
 	}
 	columns, err := db.SQLColumns("select * from " + tableRef)
 	if err != nil {
 		return nil, err
 	}
-	tableColumns, err := db.tableColumns(tableRef)
+	tableColumns, err := db.tableColumns(mdRef)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +407,7 @@ func (db *DB) importedKeys(table string) (map[string]string, error) {
 }
 
 func (db *DB) PKColNames(tableRef string) ([]string, error) {
-	schema, table, err := splitSchema(tableRef)
+	schema, table, err := splitSchema(meta.UnquoteTableRef(tableRef))
 	if err != nil {
 		return nil, err
 	}

@@ -143,7 +143,9 @@ func (db *DB) SQLParams(jdbcSQL string, typeCount int) (*meta.Params, error) {
 // Table -----------------------------------------------------------
 
 func (db *DB) Table(tableRef string) (*meta.Table, error) {
-	schema, table, err := splitSchema(tableRef)
+	// SQL takes the name as it is written ([Order Details]), the catalog without the quotes
+	mdRef := meta.UnquoteTableRef(tableRef)
+	schema, table, err := splitSchema(mdRef)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +154,7 @@ func (db *DB) Table(tableRef string) (*meta.Table, error) {
 		return nil, err
 	}
 	if !found {
-		return nil, errors.New("Not found: '" + tableRef + "'. The search is case-sensitive.")
+		return nil, errors.New("Not found: '" + mdRef + "'. The search is case-sensitive.")
 	}
 	columns, err := db.SQLColumns("select * from " + tableRef)
 	if err != nil {
@@ -249,7 +251,7 @@ func (db *DB) importedKeys(schema, table string) (map[string]string, error) {
 }
 
 func (db *DB) PKColNames(tableRef string) ([]string, error) {
-	schema, table, err := splitSchema(tableRef)
+	schema, table, err := splitSchema(meta.UnquoteTableRef(tableRef))
 	if err != nil {
 		return nil, err
 	}

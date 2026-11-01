@@ -21,6 +21,8 @@ func (c fakeCatalog) Tables(includeViews bool) ([]string, error) {
 	return c.tables, nil
 }
 
+func (c fakeCatalog) IdentifierQuote() string { return `"` }
+
 func (c fakeCatalog) ImportedKeys(table string) ([]meta.ImportedKey, error) {
 	if c.keyErr[table] {
 		return nil, errors.New("no access")
@@ -68,6 +70,41 @@ func TestDaoClasses(t *testing.T) {
 </dao-class>
 <dao-class name="VSalesDao">
     <crud dto="gorm-VSale" table="v_sales"/>
+</dao-class>
+`
+	if got != want {
+		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+// Names with spaces (SQL Server, SQLite): the words make the class names, refs are quoted by the database.
+func TestSpacedNames(t *testing.T) {
+	northwind := fakeCatalog{
+		tables: []string{"Order Details", "Orders"},
+		keys: map[string][]meta.ImportedKey{
+			"Order Details": {{PKTable: "Orders", FKColumn: "OrderID"}},
+		},
+	}
+	got, err := DtoClasses(northwind, "", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `<dto-class name="OrderDetail" ref="&quot;Order Details&quot;"/>
+<dto-class name="Order" ref="Orders"/>
+`
+	if got != want {
+		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+	got, err = DaoClasses(northwind, "", cg.LowerCamelCase, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = `<dao-class name="OrderDetailsDao">
+    <crud dto="OrderDetail" table="&quot;Order Details&quot;"/>
+    <query-dto-list dto="OrderDetail" method="getOrderDetailsByOrder(orderID)" ref="&quot;Order Details&quot;(OrderID)"/>
+</dao-class>
+<dao-class name="OrdersDao">
+    <crud dto="Order" table="Orders"/>
 </dao-class>
 `
 	if got != want {
@@ -125,6 +162,11 @@ func TestDtoClassName(t *testing.T) {
 		"sheep":           "Sheep",
 		"user_class":      "UserClass",
 		"123":             "123",
+		// SQL Server allows spaces and other characters in names: they separate the words
+		"Order Details":                  "OrderDetail",
+		"Alphabetical list of products":  "AlphabeticalListOfProduct",
+		"Customer and Suppliers by City": "CustomerAndSuppliersByCity",
+		"api-key":                        "ApiKey",
 	} {
 		if got := DtoClassName(table, true); got != want {
 			t.Errorf("%s: %s, want %s", table, got, want)

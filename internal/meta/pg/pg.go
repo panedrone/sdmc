@@ -203,14 +203,16 @@ func (db *DB) loadAutoIncrement(fields []pgconn.FieldDescription) error {
 // Table -----------------------------------------------------------
 
 func (db *DB) Table(tableRef string) (*meta.Table, error) {
-	if err := db.validateTableName(tableRef); err != nil {
+	// SQL takes the name as it is written ([Order Details]), the catalog without the quotes
+	mdRef := meta.UnquoteTableRef(tableRef)
+	if err := db.validateTableName(mdRef); err != nil {
 		return nil, err
 	}
 	columns, err := db.SQLColumns("select * from " + tableRef)
 	if err != nil {
 		return nil, err
 	}
-	tableColumns, err := db.tableColumns(tableRef)
+	tableColumns, err := db.tableColumns(mdRef)
 	if err != nil {
 		return nil, err
 	}
@@ -385,7 +387,7 @@ func (db *DB) importedKeys(schema, table string) (map[string]string, error) {
 }
 
 func (db *DB) PKColNames(tableRef string) ([]string, error) {
-	schema, table, err := splitSchema(tableRef)
+	schema, table, err := splitSchema(meta.UnquoteTableRef(tableRef))
 	if err != nil {
 		return nil, err
 	}

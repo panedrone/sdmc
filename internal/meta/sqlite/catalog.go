@@ -8,6 +8,11 @@ import (
 
 var _ meta.Catalog = (*DB)(nil)
 
+// IdentifierQuote: as getIdentifierQuoteString of xerial.
+func (db *DB) IdentifierQuote() string {
+	return "\""
+}
+
 // Tables: as xerial getTables: no sqlite_* tables, TABLE before VIEW, then by name.
 func (db *DB) Tables(includeViews bool) ([]string, error) {
 	views := "0"

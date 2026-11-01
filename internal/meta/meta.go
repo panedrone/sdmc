@@ -37,6 +37,9 @@ type Catalog interface {
 	Tables(includeViews bool) ([]string, error)
 	// ImportedKeys lists the foreign key columns of table: by PK table, then key order.
 	ImportedKeys(table string) ([]ImportedKey, error)
+	// IdentifierQuote is getIdentifierQuoteString: the quote of the names the assistants write
+	// quoted when they are not plain names (QuoteName).
+	IdentifierQuote() string
 }
 
 // ImportedKey is a row of getImportedKeys: PKTABLE_NAME and FKCOLUMN_NAME.

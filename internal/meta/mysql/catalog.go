@@ -4,6 +4,11 @@ import "github.com/panedrone/sdmc/internal/meta"
 
 var _ meta.Catalog = (*DB)(nil)
 
+// IdentifierQuote: as getIdentifierQuoteString of Connector/J.
+func (db *DB) IdentifierQuote() string {
+	return "`"
+}
+
 // Tables: as Connector/J getTables on the current database: BASE TABLE before VIEW, then by name.
 func (db *DB) Tables(includeViews bool) ([]string, error) {
 	views := 0

@@ -8,6 +8,7 @@ package assist
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -27,7 +28,8 @@ func DtoClasses(cat meta.Catalog, model string, inUse map[string]bool) (string, 
 	for _, t := range tables {
 		name := DtoClassName(t, true)
 		if !inUse[name] {
-			fmt.Fprintf(&b, "<dto-class name=\"%s\" ref=\"%s\"/>\n", attr(withModel(model, name)), attr(t))
+			ref := meta.QuoteName(t, cat.IdentifierQuote())
+			fmt.Fprintf(&b, "<dto-class name=\"%s\" ref=\"%s\"/>\n", attr(withModel(model, name)), attr(ref))
 		}
 	}
 	return b.String(), nil
@@ -51,9 +53,10 @@ func DaoClasses(cat meta.Catalog, model string, mode cg.FieldNamesMode, dtoInUse
 			continue
 		}
 		fmt.Fprintf(&b, "<dao-class name=\"%s\">\n", attr(dao))
-		fmt.Fprintf(&b, "    <crud dto=\"%s\" table=\"%s\"/>\n", attr(withModel(model, dto)), attr(t))
+		quote := cat.IdentifierQuote()
+		fmt.Fprintf(&b, "    <crud dto=\"%s\" table=\"%s\"/>\n", attr(withModel(model, dto)), attr(meta.QuoteName(t, quote)))
 		if keys, err := cat.ImportedKeys(t); err == nil {
-			fkAccess(&b, model, mode, t, keys)
+			fkAccess(&b, model, mode, t, quote, keys)
 		} // else as in Java: the <crud> stays, the FK access of the table is skipped
 		b.WriteString("</dao-class>\n")
 	}
@@ -75,7 +78,7 @@ func withModel(model, name string) string {
 
 // fkAccess: a "get<FkTable>By<PkClass>" for each referenced table, all FK columns to it as
 // the parameters and the shortcut "fk_table(col, ...)" as the SQL, named by mode (SdmUtils.add_fk_access).
-func fkAccess(b *strings.Builder, model string, mode cg.FieldNamesMode, fkTable string, keys []meta.ImportedKey) {
+func fkAccess(b *strings.Builder, model string, mode cg.FieldNamesMode, fkTable, quote string, keys []meta.ImportedKey) {
 	var pkTables []string
 	cols := map[string][]string{}
 	for _, k := range keys {
@@ -101,7 +104,7 @@ func fkAccess(b *strings.Builder, model string, mode cg.FieldNamesMode, fkTable 
 			method = cg.CamelCaseToLowerSnakeCase(method)
 		}
 		method += "(" + strings.Join(params, ", ") + ")"
-		ref := fkTable + "(" + strings.Join(cols[pk], ", ") + ")"
+		ref := meta.QuoteName(fkTable, quote) + "(" + strings.Join(cols[pk], ", ") + ")"
 		fmt.Fprintf(b, "    <query-dto-list dto=\"%s\" method=\"%s\" ref=\"%s\"/>\n",
 			attr(withModel(model, DtoClassName(fkTable, true))), attr(method), attr(ref))
 	}
@@ -110,7 +113,8 @@ func fkAccess(b *strings.Builder, model string, mode cg.FieldNamesMode, fkTable 
 // DtoClassName is table_name_to_dto_class_name: the title-cased table name, with the last
 // word made singular if singular.
 func DtoClassName(table string, singular bool) string {
-	word := cg.Title(table)
+	// a character a class name cannot have separates the words as "_" does: Order Details -> OrderDetails
+	word := cg.Title(reNotInName.ReplaceAllString(table, "_"))
 	if !singular {
 		return word
 	}
@@ -131,6 +135,8 @@ func DtoClassName(table string, singular bool) string {
 	}
 	return string(r[:last]) + string(unicode.ToUpper(w[0])) + strings.ToLower(string(w[1:]))
 }
+
+var reNotInName = regexp.MustCompile(`[^\p{L}\p{Nd}_]+`)
 
 var attrEscaper = strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", `"`, "&quot;")
 

@@ -31,3 +31,31 @@ func TestFormatJdbcSQLForCpp(t *testing.T) {
 		}
 	}
 }
+
+// Names quoted by the rules of the database may have spaces; refs without quotes are as before.
+func TestIsTableRef(t *testing.T) {
+	for ref, want := range map[string]bool{
+		"tasks":                     true,
+		"public.tasks":              true,
+		"[Order Details]":           true,
+		`"Order Details"`:           true,
+		"`Order Details`":           true,
+		"dbo.[Order Details]":       true,
+		"[dbo].[Order Details]":     true,
+		"Order Details":             false,
+		"[Order Details":            false,
+		"[]":                        false,
+		"[Order Details](OrderID)":  false, // an SQL shortcut
+		"[Order Details].":          false,
+		"a.b.":                      false,
+		"tasks.sql":                 false,
+		"select * from t":           false,
+		`a"b`:                       false,
+		"tasks(t_id)":               false,
+		"[Order Details] / OrderID": false,
+	} {
+		if got := IsTableRef(ref); got != want {
+			t.Errorf("%s: %t, want %t", ref, got, want)
+		}
+	}
+}

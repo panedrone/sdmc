@@ -8,6 +8,11 @@ import (
 
 var _ meta.Catalog = (*DB)(nil)
 
+// IdentifierQuote: as getIdentifierQuoteString of pgjdbc.
+func (db *DB) IdentifierQuote() string {
+	return "\""
+}
+
 // Tables: as pgjdbc getTables with no schema: all schemas but the system ones, tables
 // ('r', 'p') before views, then by schema and name.
 func (db *DB) Tables(includeViews bool) ([]string, error) {

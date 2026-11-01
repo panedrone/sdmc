@@ -50,3 +50,32 @@ func TestCatalog(t *testing.T) {
 		t.Errorf("keys: %v", keys)
 	}
 }
+
+// A table with a space in its name: refs quote it, the catalog is asked without the quotes.
+func TestQuotedTableRef(t *testing.T) {
+	db, err := Open(":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	if err := db.Exec(`create table "Order Details" (OrderID integer not null, ProductID integer not null,
+		Quantity integer, primary key (OrderID, ProductID))`); err != nil {
+		t.Fatal(err)
+	}
+	for _, ref := range []string{`"Order Details"`, "[Order Details]", "`Order Details`"} {
+		tbl, err := db.Table(ref)
+		if err != nil {
+			t.Fatalf("%s: %v", ref, err)
+		}
+		if len(tbl.Columns) != 3 || len(tbl.TableColumns) != 3 {
+			t.Errorf("%s: %d columns, %d table columns", ref, len(tbl.Columns), len(tbl.TableColumns))
+		}
+		pk, err := db.PKColNames(ref)
+		if err != nil || !reflect.DeepEqual(pk, []string{"OrderID", "ProductID"}) {
+			t.Errorf("%s: PK %v %v", ref, pk, err)
+		}
+	}
+	if _, err := db.Table("Order Details"); err == nil {
+		t.Error("an unquoted name with a space is not a table name in SQL")
+	}
+}
