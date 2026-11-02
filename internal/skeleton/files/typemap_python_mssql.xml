@@ -29,6 +29,9 @@
         <type detected="varbinary" target="bytes"/>
         <type detected="image" target="bytes"/>
         <type detected="timestamp" target="bytes"/>
+        <type detected="geography" target="bytes"/>
+        <type detected="geometry" target="bytes"/>
+        <type detected="hierarchyid" target="bytes"/>
         <type detected="sql_variant" target="object"/>
         <type detected="unknown" target="object"/>
 

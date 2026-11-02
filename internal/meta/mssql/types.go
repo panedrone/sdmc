@@ -66,10 +66,15 @@ func (t colType) javaType() string {
 		return "java.util.Date"
 	case "datetimeoffset":
 		return "microsoft.sql.DateTimeOffset"
-	case "binary", "varbinary", "image", "timestamp":
+	case "binary", "varbinary", "image", "timestamp", "geography", "geometry", "hierarchyid":
 		return "byte[]"
 	}
 	return meta.JavaObject
+}
+
+// clr: the CLR types of SQL Server, varbinary for mssql-jdbc.
+func (t colType) clr() bool {
+	return t.name == "geography" || t.name == "geometry" || t.name == "hierarchyid"
 }
 
 func (t colType) unicode() bool {
@@ -131,9 +136,9 @@ func (t colType) size() int {
 		return 26 + t.fractional()
 	case "uniqueidentifier":
 		return 36
-	case "char", "varchar", "nchar", "nvarchar", "binary", "varbinary":
+	case "char", "varchar", "nchar", "nvarchar", "binary", "varbinary", "hierarchyid": // hierarchyid: varbinary(892)
 		return t.length()
-	case "text", "image":
+	case "text", "image", "geography", "geometry": // CLR types: varbinary(max) for mssql-jdbc
 		return maxBytes
 	case "ntext", "xml":
 		return maxChars
@@ -182,7 +187,7 @@ func (t colType) displaySize() int {
 		return 13
 	case "float":
 		return 22
-	case "binary", "varbinary":
+	case "binary", "varbinary", "hierarchyid":
 		if t.maxLength < 0 {
 			return maxBytes
 		}
@@ -250,7 +255,7 @@ func (t colType) sqlType() int {
 		return tLongNVarchar
 	case "binary", "timestamp":
 		return tBinary
-	case "varbinary": // varbinary(max) too
+	case "varbinary", "geography", "geometry", "hierarchyid": // varbinary(max) too
 		return tVarbinary
 	case "image":
 		return tLongVarbinary

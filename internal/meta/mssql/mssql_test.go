@@ -72,6 +72,10 @@ func TestTypes(t *testing.T) {
 		{colType{name: "datetimeoffset", scale: 7}, "microsoft.sql.DateTimeOffset", 34, 7, 34, 34, -155, 7},
 		{colType{name: "uniqueidentifier"}, "java.lang.String", 36, 0, 36, 36, 1, 0},
 		{colType{name: "sql_variant"}, "java.lang.Object", 0, 0, 0, maxBytes, -150, 0},
+		// CLR types: varbinary for mssql-jdbc
+		{colType{name: "geography", maxLength: -1}, "byte[]", maxBytes, 0, maxBytes, maxBytes, -3, 0},
+		{colType{name: "geometry", maxLength: -1}, "byte[]", maxBytes, 0, maxBytes, maxBytes, -3, 0},
+		{colType{name: "hierarchyid", maxLength: 892}, "byte[]", 892, 0, 1784, 892, -3, 0},
 	} {
 		got := []int{c.t.rsPrecision(), c.t.rsScale(), c.t.displaySize(), c.t.columnSize(), c.t.sqlType(), c.t.decimalDigits()}
 		want := []int{c.precision, c.scale, c.display, c.size, c.sql, c.digits}

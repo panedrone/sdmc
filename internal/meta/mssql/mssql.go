@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -276,7 +277,7 @@ func splitArgs(s string) []string {
 }
 
 func (db *DB) procParams(proc string) ([]colType, error) {
-	rows, err := db.db.QueryContext(db.ctx, `select type_name(p.system_type_id), p.max_length, p.precision, p.scale
+	rows, err := db.db.QueryContext(db.ctx, `select coalesce(type_name(p.system_type_id), type_name(p.user_type_id)), p.max_length, p.precision, p.scale
 		from sys.parameters p
 		where p.object_id = object_id(@p1) and p.parameter_id > 0
 		order by p.parameter_id`, proc)
@@ -306,6 +307,9 @@ func (db *DB) SQLParams(jdbcSQL string, typeCount int) (*meta.Params, error) {
 		return res, nil
 	}
 	types, err := db.paramTypes(native, n, proc)
+	if err == nil && slices.ContainsFunc(types, func(t colType) bool { return t.name == "hierarchyid" }) {
+		err = errors.New("hierarchyid") // mssql-jdbc cannot describe a hierarchyid parameter
+	}
 	if err != nil {
 		res.Count = 0 // getParameterMetaData throws: the plug-in takes 0 parameters
 		return res, nil
@@ -313,6 +317,9 @@ func (db *DB) SQLParams(jdbcSQL string, typeCount int) (*meta.Params, error) {
 	for i := 0; i < typeCount && i < len(types); i++ {
 		if types[i].name != "" {
 			res.JavaTypes[i] = types[i].javaType()
+			if types[i].clr() { // geography, geometry: mssql-jdbc gives no class name for the parameter
+				res.JavaTypes[i] = meta.JavaObject
+			}
 			res.RawTypes[i] = types[i].name
 		}
 	}
@@ -388,7 +395,7 @@ func (db *DB) tableColumns(tableRef string) ([]meta.TableColumn, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := db.db.QueryContext(db.ctx, `select c.name, type_name(c.system_type_id), c.max_length, c.precision, c.scale,
+	rows, err := db.db.QueryContext(db.ctx, `select c.name, coalesce(type_name(c.system_type_id), type_name(c.user_type_id)), c.max_length, c.precision, c.scale,
 			c.is_identity, c.is_nullable
 		from sys.columns c
 		join sys.objects o on o.object_id = c.object_id

@@ -29,6 +29,9 @@
         <type detected="varbinary" target="CBlob${N}"/>
         <type detected="image" target="CBlob${N}"/>
         <type detected="timestamp" target="CBlob${N}"/>
+        <type detected="geography" target="CBlob${N}"/>
+        <type detected="geometry" target="CBlob${N}"/>
+        <type detected="hierarchyid" target="CBlob${N}"/>
         <type detected="sql_variant" target="CVariant"/>
         <type detected="unknown" target="CVariant"/>
 

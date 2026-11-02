@@ -31,6 +31,9 @@
         <type detected="varbinary" target="[]byte${json} -> SetBytes"/>
         <type detected="image" target="[]byte${json} -> SetBytes"/>
         <type detected="timestamp" target="[]byte${json} -> SetBytes"/>
+        <type detected="geography" target="[]byte${json} -> SetBytes"/>
+        <type detected="geometry" target="[]byte${json} -> SetBytes"/>
+        <type detected="hierarchyid" target="[]byte${json} -> SetBytes"/>
         <type detected="sql_variant" target="any${json}"/>
         <type detected="unknown" target="any${json}"/>
 
@@ -65,6 +68,9 @@
         <type detected="sqlx-varbinary" target="[]byte${json-sqlx} -> SetBytes"/>
         <type detected="sqlx-image" target="[]byte${json-sqlx} -> SetBytes"/>
         <type detected="sqlx-timestamp" target="[]byte${json-sqlx} -> SetBytes"/>
+        <type detected="sqlx-geography" target="[]byte${json-sqlx} -> SetBytes"/>
+        <type detected="sqlx-geometry" target="[]byte${json-sqlx} -> SetBytes"/>
+        <type detected="sqlx-hierarchyid" target="[]byte${json-sqlx} -> SetBytes"/>
         <type detected="sqlx-sql_variant" target="any${json-sqlx}"/>
         <type detected="sqlx-unknown" target="any${json-sqlx}"/>
 
@@ -99,6 +105,9 @@
         <type detected="gorm-varbinary" target="[]byte${json-gorm} -> SetBytes"/>
         <type detected="gorm-image" target="[]byte${json-gorm} -> SetBytes"/>
         <type detected="gorm-timestamp" target="[]byte${json-gorm} -> SetBytes"/>
+        <type detected="gorm-geography" target="[]byte${json-gorm} -> SetBytes"/>
+        <type detected="gorm-geometry" target="[]byte${json-gorm} -> SetBytes"/>
+        <type detected="gorm-hierarchyid" target="[]byte${json-gorm} -> SetBytes"/>
         <type detected="gorm-sql_variant" target="any${json-gorm}"/>
         <type detected="gorm-unknown" target="any${json-gorm}"/>
 
