@@ -31,6 +31,29 @@ jobs:
       - name: test
         if: runner.os == 'Windows'
         run: go test ./...
+      # coverage of the shipped code by all tests together (-coverpkg): cli/ and internal/meta/metadump
+      # are design-time and not counted; the code that needs a live PostgreSQL, MySQL or SQL Server is
+      # counted and stays uncovered (CI has no database server)
+      - name: coverage
+        if: runner.os == 'Linux'
+        run: |
+          pkgs=$(go list ./... | grep -v -e /cli/ -e /metadump | paste -sd, -)
+          go test -coverpkg="$pkgs" -coverprofile=coverage.out $(go list ./... | grep -v /cli/) > /dev/null
+          total=$(go tool cover -func=coverage.out | tail -1 | awk '{print $NF}')
+          echo "coverage: $total"
+          echo "### Coverage: $total" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
+        with:
+          name: coverage
+          path: coverage.out
+      # the badge of README; without the secret CODECOV_TOKEN the upload fails, CI does not
+      - uses: codecov/codecov-action@v5
+        if: runner.os == 'Linux'
+        with:
+          files: coverage.out
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
       # the C++ and Python data stores in datastore/ are what the templates give (go run ./cli/dsgen)
       - name: generated data stores are up to date
         if: runner.os == 'Linux'
