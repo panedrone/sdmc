@@ -1,14 +1,14 @@
     <type-map default="">
 
-        <type detected="INTEGER" target="CInteger${N}"/>
-        <type detected="INT" target="CInteger${N}"/>
-        <type detected="BIGINT" target="CInteger${N}"/>
-        <type detected="SMALLINT" target="CInteger${N}"/>
-        <type detected="TINYINT" target="CInteger${N}"/>
-        <type detected="MEDIUMINT" target="CInteger${N}"/>
-        <type detected="UNSIGNED BIG INT" target="CInteger${N}"/>
-        <type detected="INT2" target="CInteger${N}"/>
-        <type detected="INT8" target="CInteger${N}"/>
+        <type detected="INTEGER" target="CInt64${N}"/>
+        <type detected="INT" target="CInt64${N}"/>
+        <type detected="BIGINT" target="CInt64${N}"/>
+        <type detected="SMALLINT" target="CInt64${N}"/>
+        <type detected="TINYINT" target="CInt64${N}"/>
+        <type detected="MEDIUMINT" target="CInt64${N}"/>
+        <type detected="UNSIGNED BIG INT" target="CInt64${N}"/>
+        <type detected="INT2" target="CInt64${N}"/>
+        <type detected="INT8" target="CInt64${N}"/>
         <type detected="STRING" target="CText${N}"/>
         <type detected="VARYING CHARACTER" target="CText${N}"/>
         <type detected="NATIVE CHARACTER" target="CText${N}"/>
@@ -31,7 +31,7 @@
         <type detected="BINARY" target="CBlob${N}"/>
         <type detected="VARBINARY" target="CBlob${N}"/>
         <type detected="IMAGE" target="CBlob${N}"/>
-        <type detected="BIT" target="CInteger${N}"/>
+        <type detected="BIT" target="CInt64${N}"/>
 
         <type detected="BOOLEAN" target="CBool${N}"/>
         <type detected="DATE" target="CText${N}"/>

@@ -46,9 +46,9 @@ QVariant nullOf() {
     below or, for anything else, a Value and the two conversions.
 
     Each type comes twice, the same way for all of them, from two templates:
-      - CNotNull<T> (CInteger, CDouble, CText, CBlob, ...): a NOT NULL column, Value only; NULL is never
+      - CNotNull<T> (CInt32, CDouble, CText, CBlob, ...): a NOT NULL column, Value only; NULL is never
         sent (QString() goes as ""), a NULL that comes anyway is 0 or empty;
-      - CNullable<T> (CIntegerN, CDoubleN, CTextN, CBlobN, ...): a nullable column, Value and IsNull; a new
+      - CNullable<T> (CInt32N, CDoubleN, CTextN, CBlobN, ...): a nullable column, Value and IsNull; a new
         one is NULL, set IsNull = false along with Value.
     T is any type QVariant converts (QVariant::fromValue, value<T>): typedef CNullable<QUuid> CUuidN;
     CVariant is one: QVariant has its own NULL.
@@ -135,8 +135,15 @@ public:
     }
 };
 
-// the classes of the type map; one more type is one more pair of lines
-typedef CNotNull<qint64> CInteger;
+// the classes of the type map; one more type is one more pair of lines. No 8-bit integers: qint8 and
+// quint8 are chars in C++, a stream prints them as characters; TINYINT goes to CInt16 or CUInt16.
+typedef CNotNull<qint16> CInt16;
+typedef CNotNull<qint32> CInt32;
+typedef CNotNull<qint64> CInt64;
+typedef CNotNull<quint16> CUInt16;
+typedef CNotNull<quint32> CUInt32;
+typedef CNotNull<quint64> CUInt64;
+typedef CNotNull<float> CFloat;
 typedef CNotNull<double> CDouble;
 typedef CNotNull<QString> CText;
 typedef CNotNull<QByteArray> CBlob;
@@ -145,7 +152,13 @@ typedef CNotNull<QDate> CDate;
 typedef CNotNull<QTime> CTime;
 typedef CNotNull<QDateTime> CDateTime;
 
-typedef CNullable<qint64> CIntegerN;
+typedef CNullable<qint16> CInt16N;
+typedef CNullable<qint32> CInt32N;
+typedef CNullable<qint64> CInt64N;
+typedef CNullable<quint16> CUInt16N;
+typedef CNullable<quint32> CUInt32N;
+typedef CNullable<quint64> CUInt64N;
+typedef CNullable<float> CFloatN;
 typedef CNullable<double> CDoubleN;
 typedef CNullable<QString> CTextN;
 typedef CNullable<QByteArray> CBlobN;
@@ -153,6 +166,10 @@ typedef CNullable<bool> CBoolN;
 typedef CNullable<QDate> CDateN;
 typedef CNullable<QTime> CTimeN;
 typedef CNullable<QDateTime> CDateTimeN;
+
+// CInteger is CInt64: the one integer class of the type maps before sdmc 1.3.2
+typedef CInt64 CInteger;
+typedef CInt64N CIntegerN;
 
 class CRowProcessor {
 public:

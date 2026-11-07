@@ -1,9 +1,9 @@
     <type-map default="">
 
-        <type detected="int2" target="CInteger${N}"/>
-        <type detected="int4" target="CInteger${N}"/>
-        <type detected="int8" target="CInteger${N}"/>
-        <type detected="float4" target="CDouble${N}"/>
+        <type detected="int2" target="CInt16${N}"/>
+        <type detected="int4" target="CInt32${N}"/>
+        <type detected="int8" target="CInt64${N}"/>
+        <type detected="float4" target="CFloat${N}"/>
         <type detected="float8" target="CDouble${N}"/>
         <type detected="numeric" target="CText${N}"/>
         <type detected="varchar" target="CText${N}"/>

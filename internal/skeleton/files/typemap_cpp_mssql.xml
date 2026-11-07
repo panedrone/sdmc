@@ -1,15 +1,15 @@
     <type-map default="">
 
-        <type detected="tinyint" target="CInteger${N}"/>
-        <type detected="smallint" target="CInteger${N}"/>
-        <type detected="int" target="CInteger${N}"/>
-        <type detected="bigint" target="CInteger${N}"/>
+        <type detected="tinyint" target="CUInt16${N}"/>
+        <type detected="smallint" target="CInt16${N}"/>
+        <type detected="int" target="CInt32${N}"/>
+        <type detected="bigint" target="CInt64${N}"/>
         <type detected="bit" target="CBool${N}"/>
         <type detected="decimal" target="CText${N}"/>
         <type detected="numeric" target="CText${N}"/>
         <type detected="money" target="CText${N}"/>
         <type detected="smallmoney" target="CText${N}"/>
-        <type detected="real" target="CDouble${N}"/>
+        <type detected="real" target="CFloat${N}"/>
         <type detected="float" target="CDouble${N}"/>
         <type detected="char" target="CText${N}"/>
         <type detected="varchar" target="CText${N}"/>

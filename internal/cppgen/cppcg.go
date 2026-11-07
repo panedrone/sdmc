@@ -207,8 +207,8 @@ func checkNames(plan []cg.DaoMethod) error {
 // class of DataStore.h for each.
 var javaShortNames = map[string]string{
 	"String": "CText", "Character": "CText",
-	"Integer": "CInteger", "Long": "CInteger", "Short": "CInteger", "Byte": "CInteger", "BigInteger": "CInteger",
-	"Boolean": "CBool", "Double": "CDouble", "Float": "CDouble", "BigDecimal": "CText",
+	"Byte": "CInt16", "Short": "CInt16", "Integer": "CInt32", "Long": "CInt64", "BigInteger": "CInt64",
+	"Boolean": "CBool", "Float": "CFloat", "Double": "CDouble", "BigDecimal": "CText",
 	"Date": "CDate", "Time": "CTime", "Timestamp": "CDateTime", "Object": "CVariant",
 }
 

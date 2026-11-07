@@ -489,7 +489,13 @@ dao.getTasksByGroup(t.g_id, tasks);
 
 |              | NOT NULL column (`Value`) | nullable column (`Value`, `IsNull`) |
 |--------------|---------------------------|-------------------------------------|
-| `qint64`     | `CInteger`                | `CIntegerN`                         |
+| `qint16`     | `CInt16`                  | `CInt16N`                           |
+| `qint32`     | `CInt32`                  | `CInt32N`                           |
+| `qint64`     | `CInt64`                  | `CInt64N`                           |
+| `quint16`    | `CUInt16`                 | `CUInt16N`                          |
+| `quint32`    | `CUInt32`                 | `CUInt32N`                          |
+| `quint64`    | `CUInt64`                 | `CUInt64N`                          |
+| `float`      | `CFloat`                  | `CFloatN`                           |
 | `double`     | `CDouble`                 | `CDoubleN`                          |
 | `QString`    | `CText`                   | `CTextN`                            |
 | `QByteArray` | `CBlob`                   | `CBlobN`                            |
@@ -498,8 +504,15 @@ dao.getTasksByGroup(t.g_id, tasks);
 | `QTime`      | `CTime`                   | `CTimeN`                            |
 | `QDateTime`  | `CDateTime`               | `CDateTimeN`                        |
 
-The type maps of `sdmc init`: integers `CInteger`, floating point `CDouble`, strings `CText`, binary
-`CBlob`; `bool` (PostgreSQL, SQLite `BOOLEAN`) and `bit` (SQL Server) `CBool`; dates and timestamps
+The type maps of `sdmc init`: an integer gets the class of its range, the unsigned ones an unsigned
+class: `CInt16` (`int2`, `smallint`, `TINYINT`, `SMALLINT`, `YEAR`), `CInt32` (`int4`, `int`,
+`MEDIUMINT`, `INT`), `CInt64` (`int8`, `bigint`, `BIGINT`), `CUInt16` (`tinyint` of SQL Server,
+`UNSIGNED TINYINT`, `UNSIGNED SMALLINT`), `CUInt32` (`UNSIGNED MEDIUMINT`, `UNSIGNED INT`), `CUInt64`
+(`UNSIGNED BIGINT`, `BIT` of MySQL). There are no 8-bit classes: `qint8` and `quint8` are chars in
+C++, and a stream prints them as characters. SQLite keeps every integer as a signed 64-bit one,
+whatever the column is declared with (`UNSIGNED BIG INT` too), so there every integer is `CInt64`.
+`CFloat` for `float4`/`FLOAT`/`real`, `CDouble` for the rest of floating point; strings `CText`,
+binary `CBlob`; `bool` (PostgreSQL, SQLite `BOOLEAN`) and `bit` (SQL Server) `CBool`; dates and timestamps
 `CDate`/`CDateTime` (SQLite keeps them as text, so there they are `CText`). `numeric`/`decimal`/`money`
 are `CText` in PostgreSQL, MySQL and SQL Server: `open()` sets `QSql::HighPrecision`, the driver gives
 them as a string with every digit, and a `double` would lose them; SQLite stores them as `REAL` anyway
@@ -524,6 +537,9 @@ A project with the type map of an earlier `sdmc init` keeps its classes: `sdmc d
 into `DataStore.h`, the type map is not touched; take the targets of the table above into it, and the
 fields of `bool`, dates and `numeric` change their type (`Value` is `bool`, `QDate`, `QDateTime`,
 `QString`).
+
+`CInteger`/`CIntegerN` stay as other names of `CInt64`/`CInt64N`: the type maps of earlier
+`sdmc init` keep compiling.
 
 A project made before these classes: `CValue` is not a value class any more, put `CVariant` in its
 place in the type map, and add `${N}` (the macro and the targets) for nullable columns; `IsNull` of

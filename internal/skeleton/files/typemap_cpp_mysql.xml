@@ -1,16 +1,16 @@
     <type-map default="">
 
-        <type detected="TINYINT" target="CInteger${N}"/>
-        <type detected="SMALLINT" target="CInteger${N}"/>
-        <type detected="MEDIUMINT" target="CInteger${N}"/>
-        <type detected="INT" target="CInteger${N}"/>
-        <type detected="UNSIGNED TINYINT" target="CInteger${N}"/>
-        <type detected="UNSIGNED SMALLINT" target="CInteger${N}"/>
-        <type detected="UNSIGNED MEDIUMINT" target="CInteger${N}"/>
-        <type detected="UNSIGNED INT" target="CInteger${N}"/>
-        <type detected="BIGINT" target="CInteger${N}"/>
-        <type detected="UNSIGNED BIGINT" target="CInteger${N}"/>
-        <type detected="FLOAT" target="CDouble${N}"/>
+        <type detected="TINYINT" target="CInt16${N}"/>
+        <type detected="SMALLINT" target="CInt16${N}"/>
+        <type detected="MEDIUMINT" target="CInt32${N}"/>
+        <type detected="INT" target="CInt32${N}"/>
+        <type detected="UNSIGNED TINYINT" target="CUInt16${N}"/>
+        <type detected="UNSIGNED SMALLINT" target="CUInt16${N}"/>
+        <type detected="UNSIGNED MEDIUMINT" target="CUInt32${N}"/>
+        <type detected="UNSIGNED INT" target="CUInt32${N}"/>
+        <type detected="BIGINT" target="CInt64${N}"/>
+        <type detected="UNSIGNED BIGINT" target="CUInt64${N}"/>
+        <type detected="FLOAT" target="CFloat${N}"/>
         <type detected="DOUBLE" target="CDouble${N}"/>
         <type detected="DECIMAL" target="CText${N}"/>
         <type detected="CHAR" target="CText${N}"/>
@@ -31,11 +31,11 @@
         <type detected="NULL" target="CVariant"/>
         <type detected="BINARY" target="CBlob${N}"/>
         <type detected="VARBINARY" target="CBlob${N}"/>
-        <type detected="BIT" target="CInteger${N}"/>
+        <type detected="BIT" target="CUInt64${N}"/>
         <type detected="DATE" target="CDate${N}"/>
         <type detected="DATETIME" target="CDateTime${N}"/>
         <type detected="TIMESTAMP" target="CDateTime${N}"/>
-        <type detected="YEAR" target="CInteger${N}"/>
+        <type detected="YEAR" target="CInt16${N}"/>
         <type detected="unknown" target="CVariant"/>
 
     </type-map>
