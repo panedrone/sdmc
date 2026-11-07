@@ -15,6 +15,8 @@ bool CDataStore::open(const QString &host, int port, const QString &database, co
                            .arg(host).arg(port).arg(database));
     db.setUserName(user);
     db.setPassword(password);
+    // numeric and decimal come as QString, not double: CText keeps every digit
+    db.setNumericalPrecisionPolicy(QSql::HighPrecision);
     if (!db.open()) {
         errors = db.lastError().text();
         return false;

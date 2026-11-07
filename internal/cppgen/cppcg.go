@@ -207,10 +207,9 @@ func checkNames(plan []cg.DaoMethod) error {
 // class of DataStore.h for each.
 var javaShortNames = map[string]string{
 	"String": "CText", "Character": "CText",
-	"Integer": "CInteger", "Long": "CInteger", "Short": "CInteger", "Byte": "CInteger", "Boolean": "CInteger",
-	"BigInteger": "CInteger",
-	"Double":     "CDouble", "Float": "CDouble", "BigDecimal": "CDouble",
-	"Date": "CVariant", "Timestamp": "CVariant", "Time": "CVariant", "Object": "CVariant",
+	"Integer": "CInteger", "Long": "CInteger", "Short": "CInteger", "Byte": "CInteger", "BigInteger": "CInteger",
+	"Boolean": "CBool", "Double": "CDouble", "Float": "CDouble", "BigDecimal": "CText",
+	"Date": "CDate", "Time": "CTime", "Timestamp": "CDateTime", "Object": "CVariant",
 }
 
 // checkJavaTypes catches a short Java name (String country_code, return-type="Integer") that the type

@@ -21,7 +21,10 @@
 
 #include <QtSql/QSqlDatabase>
 #include <QByteArray>
+#include <QDate>
+#include <QDateTime>
 #include <QString>
+#include <QTime>
 #include <QVariant>
 
 #include <list>
@@ -43,11 +46,11 @@ QVariant nullOf() {
     below or, for anything else, a Value and the two conversions.
 
     Each type comes twice, the same way for all of them, from two templates:
-      - CNotNull<T> (CInteger, CDouble, CText, CBlob): a NOT NULL column, Value only; NULL is never
+      - CNotNull<T> (CInteger, CDouble, CText, CBlob, ...): a NOT NULL column, Value only; NULL is never
         sent (QString() goes as ""), a NULL that comes anyway is 0 or empty;
-      - CNullable<T> (CIntegerN, CDoubleN, CTextN, CBlobN): a nullable column, Value and IsNull; a new
+      - CNullable<T> (CIntegerN, CDoubleN, CTextN, CBlobN, ...): a nullable column, Value and IsNull; a new
         one is NULL, set IsNull = false along with Value.
-    T is any type QVariant converts (QVariant::fromValue, value<T>): typedef CNullable<QDateTime> CDateTimeN;
+    T is any type QVariant converts (QVariant::fromValue, value<T>): typedef CNullable<QUuid> CUuidN;
     CVariant is one: QVariant has its own NULL.
     Which of the two a field gets is up to the type map of settings.xml: target="CText${N}", where the
     macro ${N} gives "N" for a nullable column of a table.
@@ -137,11 +140,19 @@ typedef CNotNull<qint64> CInteger;
 typedef CNotNull<double> CDouble;
 typedef CNotNull<QString> CText;
 typedef CNotNull<QByteArray> CBlob;
+typedef CNotNull<bool> CBool;
+typedef CNotNull<QDate> CDate;
+typedef CNotNull<QTime> CTime;
+typedef CNotNull<QDateTime> CDateTime;
 
 typedef CNullable<qint64> CIntegerN;
 typedef CNullable<double> CDoubleN;
 typedef CNullable<QString> CTextN;
 typedef CNullable<QByteArray> CBlobN;
+typedef CNullable<bool> CBoolN;
+typedef CNullable<QDate> CDateN;
+typedef CNullable<QTime> CTimeN;
+typedef CNullable<QDateTime> CDateTimeN;
 
 class CRowProcessor {
 public:

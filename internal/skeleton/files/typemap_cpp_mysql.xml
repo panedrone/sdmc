@@ -12,7 +12,7 @@
         <type detected="UNSIGNED BIGINT" target="CInteger${N}"/>
         <type detected="FLOAT" target="CDouble${N}"/>
         <type detected="DOUBLE" target="CDouble${N}"/>
-        <type detected="DECIMAL" target="CDouble${N}"/>
+        <type detected="DECIMAL" target="CText${N}"/>
         <type detected="CHAR" target="CText${N}"/>
         <type detected="VARCHAR" target="CText${N}"/>
         <type detected="TEXT" target="CText${N}"/>
@@ -32,9 +32,9 @@
         <type detected="BINARY" target="CBlob${N}"/>
         <type detected="VARBINARY" target="CBlob${N}"/>
         <type detected="BIT" target="CInteger${N}"/>
-        <type detected="DATE" target="CText${N}"/>
-        <type detected="DATETIME" target="CText${N}"/>
-        <type detected="TIMESTAMP" target="CText${N}"/>
+        <type detected="DATE" target="CDate${N}"/>
+        <type detected="DATETIME" target="CDateTime${N}"/>
+        <type detected="TIMESTAMP" target="CDateTime${N}"/>
         <type detected="YEAR" target="CInteger${N}"/>
         <type detected="unknown" target="CVariant"/>
 

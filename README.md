@@ -490,6 +490,18 @@ dao.getTasksByGroup(t.g_id, tasks);
 | `double`     | `CDouble`                 | `CDoubleN`                          |
 | `QString`    | `CText`                   | `CTextN`                            |
 | `QByteArray` | `CBlob`                   | `CBlobN`                            |
+| `bool`       | `CBool`                   | `CBoolN`                            |
+| `QDate`      | `CDate`                   | `CDateN`                            |
+| `QTime`      | `CTime`                   | `CTimeN`                            |
+| `QDateTime`  | `CDateTime`               | `CDateTimeN`                        |
+
+The type maps of `sdmc init`: integers `CInteger`, floating point `CDouble`, strings `CText`, binary
+`CBlob`; `bool` (PostgreSQL, SQLite `BOOLEAN`) and `bit` (SQL Server) `CBool`; dates and timestamps
+`CDate`/`CDateTime` (SQLite keeps them as text, so there they are `CText`). `numeric`/`decimal`/`money`
+are `CText` in PostgreSQL, MySQL and SQL Server: `open()` sets `QSql::HighPrecision`, the driver gives
+them as a string with every digit, and a `double` would lose them; SQLite stores them as `REAL` anyway
+and they stay `CDouble`. Left as `CText`: `time` of MySQL (it goes beyond 24 hours) and of SQL Server,
+`datetimeoffset`, `uuid`.
 
 A NOT NULL class never sends NULL (`QString()` goes as `""`); a new nullable one is NULL, and
 `IsNull = false` goes along with `Value`. `CVariant` holds anything in a `QVariant`, NULL included
@@ -500,10 +512,15 @@ them `CTextN` in the type map or in `<field>` where needed. `default` is for a t
 type that is mapped already is not mapped to `default` once more.
 
 The pairs are typedefs of two templates, `CNotNull<T>` and `CNullable<T>` (C++11, Qt 5.7+):
-a class of your own is one line, `typedef CNullable<QDateTime> CDateTimeN;`, for any `T` that
+a class of your own is one line, `typedef CNullable<QUuid> CUuidN;`, for any `T` that
 `QVariant` converts; the data store has no list of types to extend. `CValue` is the interface of
 the adapter, without data: a value class of another kind is a `Value` and two conversions,
 `toVariant()` for a parameter and `fromVariant()` for a fetched column.
+
+A project with the type map of an earlier `sdmc init` keeps its classes: `sdmc ds` brings the new ones
+into `DataStore.h`, the type map is not touched; take the targets of the table above into it, and the
+fields of `bool`, dates and `numeric` change their type (`Value` is `bool`, `QDate`, `QDateTime`,
+`QString`).
 
 A project made before these classes: `CValue` is not a value class any more, put `CVariant` in its
 place in the type map, and add `${N}` (the macro and the targets) for nullable columns; `IsNull` of

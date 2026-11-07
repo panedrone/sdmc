@@ -33,7 +33,7 @@
         <type detected="IMAGE" target="CBlob${N}"/>
         <type detected="BIT" target="CInteger${N}"/>
 
-        <type detected="BOOLEAN" target="CInteger${N}"/>
+        <type detected="BOOLEAN" target="CBool${N}"/>
         <type detected="DATE" target="CText${N}"/>
         <type detected="DATETIME" target="CText${N}"/>
         <type detected="TIMESTAMP" target="CText${N}"/>

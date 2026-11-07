@@ -5,17 +5,18 @@
         <type detected="int8" target="CInteger${N}"/>
         <type detected="float4" target="CDouble${N}"/>
         <type detected="float8" target="CDouble${N}"/>
-        <type detected="numeric" target="CDouble${N}"/>
+        <type detected="numeric" target="CText${N}"/>
         <type detected="varchar" target="CText${N}"/>
         <type detected="text" target="CText${N}"/>
         <type detected="bpchar" target="CText${N}"/>
         <type detected="json" target="CVariant"/>
         <type detected="jsonb" target="CVariant"/>
         <type detected="bytea" target="CBlob${N}"/>
-        <type detected="bool" target="CInteger${N}"/>
-        <type detected="date" target="CText${N}"/>
-        <type detected="timestamp" target="CText${N}"/>
-        <type detected="timestamptz" target="CText${N}"/>
+        <type detected="bool" target="CBool${N}"/>
+        <type detected="date" target="CDate${N}"/>
+        <type detected="timestamp" target="CDateTime${N}"/>
+        <type detected="timestamptz" target="CDateTime${N}"/>
+        <type detected="time" target="CTime${N}"/>
         <type detected="uuid" target="CText${N}"/>
         <type detected="_text" target="CVariant"/>
         <type detected="_varchar" target="CVariant"/>

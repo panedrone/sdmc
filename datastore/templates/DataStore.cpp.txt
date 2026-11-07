@@ -28,6 +28,10 @@ bool CDataStore::open(const QString &host, int port, const QString &database, co
     db.setUserName(user);
     db.setPassword(password);
 //sdm:end
+//sdm:if pg mysql mssql
+    // numeric and decimal come as QString, not double: CText keeps every digit
+    db.setNumericalPrecisionPolicy(QSql::HighPrecision);
+//sdm:end
     if (!db.open()) {
         errors = db.lastError().text();
         return false;
