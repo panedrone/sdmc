@@ -7,6 +7,7 @@
 package sdmxml
 
 import (
+	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -215,6 +216,7 @@ func readXML(path, root string, v any) error {
 	if err != nil {
 		return err
 	}
+	data = normalizeAttrs(data)
 	var probe struct {
 		XMLName xml.Name
 	}
@@ -228,4 +230,59 @@ func readXML(path, root string, v any) error {
 		return fmt.Errorf("%s: %w", path, err)
 	}
 	return nil
+}
+
+// normalizeAttrs replaces the literal line breaks and tabs of attribute values with spaces, as an XML
+// processor must (XML 1.0, 3.3.3) and as JAXB of the plug-in does: a multi-line ref="..." is one line of SQL
+// for both. encoding/xml keeps them. A line break written as &#10; stays a line break; text, comments,
+// CDATA and processing instructions are left as they are.
+func normalizeAttrs(data []byte) []byte {
+	res := make([]byte, 0, len(data))
+	skipTo := func(i int, end string) int { // copies through the end of a comment, CDATA or PI
+		j := bytes.Index(data[i:], []byte(end))
+		if j < 0 {
+			j = len(data) - i
+		} else {
+			j += len(end)
+		}
+		res = append(res, data[i:i+j]...)
+		return i + j
+	}
+	for i := 0; i < len(data); {
+		switch {
+		case bytes.HasPrefix(data[i:], []byte("<!--")):
+			i = skipTo(i, "-->")
+		case bytes.HasPrefix(data[i:], []byte("<![CDATA[")):
+			i = skipTo(i, "]]>")
+		case bytes.HasPrefix(data[i:], []byte("<?")):
+			i = skipTo(i, "?>")
+		case data[i] == '<': // a tag: attribute values are between quotes
+			var quote byte
+			for ; i < len(data); i++ {
+				c := data[i]
+				switch {
+				case quote != 0 && c == quote:
+					quote = 0
+				case quote != 0 && c == '\r':
+					if i+1 < len(data) && data[i+1] == '\n' {
+						i++ // CR LF is one line break
+					}
+					c = ' '
+				case quote != 0 && (c == '\n' || c == '\t'):
+					c = ' '
+				case quote == 0 && (c == '"' || c == '\''):
+					quote = c
+				}
+				res = append(res, c)
+				if quote == 0 && c == '>' {
+					i++
+					break
+				}
+			}
+		default:
+			res = append(res, data[i])
+			i++
+		}
+	}
+	return res
 }
