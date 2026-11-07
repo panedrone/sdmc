@@ -32,8 +32,8 @@ jobs:
         if: runner.os == 'Windows'
         run: go test ./...
       # coverage of the shipped code by all tests together (-coverpkg): cli/ and internal/meta/metadump
-      # are design-time and not counted; the code that needs a live PostgreSQL, MySQL or SQL Server is
-      # counted and stays uncovered (CI has no database server)
+      # are design-time and not counted; SQL Server metadata is tested on a fake database/sql driver,
+      # the code that needs a live PostgreSQL or MySQL is counted and stays uncovered (no database server)
       - name: coverage
         if: runner.os == 'Linux'
         run: |

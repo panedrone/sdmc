@@ -40,7 +40,8 @@ go run ./cli/dsgen && git diff --exit-code -- datastore
 ```
 
 - Tests need no database server: they generate from SQLite databases they create; PostgreSQL,
-  MySQL and SQL Server code is tested without a connection. Do not add tests that need one.
+  MySQL and SQL Server code is tested without a connection (SQL Server on a fake database/sql
+  driver, `internal/meta/mssql/fake_test.go`). Do not add tests that need one.
 - Edit data stores in `datastore/templates` only, then `go run ./cli/dsgen`; never the generated copies.
 - The generated code must stay byte for byte what the IDE plug-ins
   ([sqldalmaker](https://github.com/panedrone/sqldalmaker)) generate for the same XML.

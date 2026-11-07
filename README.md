@@ -3,7 +3,6 @@
 [![CI](https://github.com/panedrone/sdmc/actions/workflows/ci.yml/badge.svg)](https://github.com/panedrone/sdmc/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/panedrone/sdmc.svg)](https://pkg.go.dev/github.com/panedrone/sdmc)
 [![codecov](https://codecov.io/gh/panedrone/sdmc/graph/badge.svg)](https://codecov.io/gh/panedrone/sdmc)
-[![Go Report Card](https://goreportcard.com/badge/github.com/panedrone/sdmc)](https://goreportcard.com/report/github.com/panedrone/sdmc)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](LICENSE)
 
 SQL DAL Maker CLI generates the data access layer — models and DAO — from an XML manifest and
