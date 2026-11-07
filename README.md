@@ -37,8 +37,8 @@ A database with the tables `groups` and `tasks`, a Go module. Create the configu
 database for a starting manifest, generate:
 
 ```bash
-sdmc init -dir go-sdm -dao internal/dbal -orm no_orm -db sqlite   # set <db url> in go-sdm/settings.xml
-sdmc xml -orm no_orm                                              # paste it into go-sdm/sdm.xml
+sdmc init -dir sdm -dao internal/dbal -orm no_orm -db sqlite   # set <db url> in sdm/settings.xml
+sdmc xml -orm no_orm                                           # paste it into sdm/sdm.xml
 sdmc gen
 ```
 
@@ -88,8 +88,8 @@ Open the repository in VS Code (*Reopen in Container*) or in GitHub Codespaces, 
 
 ```bash
 mkdir /tmp/demo && cd /tmp/demo && go mod init example.com/demo
-sdmc init -dir go-sdm -dao internal/dbal -orm no_orm -db pg
-sdmc xml -orm no_orm      # paste it into go-sdm/sdm.xml
+sdmc init -dir sdm -dao internal/dbal -orm no_orm -db pg
+sdmc xml -orm no_orm      # paste it into sdm/sdm.xml
 sdmc gen
 ```
 
@@ -101,9 +101,9 @@ Nothing to set: PostgreSQL answers on `localhost:5432`, the default `<db url>` o
 `sdmc init`, in the folder of `go.mod`, creates the configuration (see [its options](#options-of-init)):
 
 ```
-go-sdm/sdm.xml                         classes to generate
-go-sdm/settings.xml                    folders, database URL, type map of the database
-go-sdm/*.xsd                           completion and validation in the IDE
+sdm/sdm.xml                            classes to generate
+sdm/settings.xml                       folders, database URL, type map of the database
+sdm/*.xsd                              completion and validation in the IDE
 internal/dbal/data_store_no_orm.go     the data store used by the generated code, for the database
 internal/dbal/data_store_no_orm_ex.go  your part: connection
 ```
