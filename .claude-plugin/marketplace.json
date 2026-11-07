@@ -1,0 +1,14 @@
+{
+  "name": "sdmc",
+  "description": "SQL DAL Maker CLI: data access layer from a live database",
+  "owner": {
+    "name": "panedrone"
+  },
+  "plugins": [
+    {
+      "name": "sdmc",
+      "source": "./plugins/sdmc",
+      "description": "Generate models and DAO for Go, Python and C++ (Qt) from a live database with sdmc"
+    }
+  ]
+}

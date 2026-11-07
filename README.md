@@ -80,6 +80,15 @@ somebody changed the schema or the XML and forgot to regenerate.
 go install github.com/panedrone/sdmc/cmd/sdmc@latest
 ```
 
+**Coding agents:** "generate the DAO for this database with sdmc" is a task an agent does end to end:
+`init`, `<db url>`, `xml`, `gen`, and `val` as its proof. The workflow for agents is a skill,
+[plugins/sdmc/skills/sdmc/SKILL.md](plugins/sdmc/skills/sdmc/SKILL.md) (the open `SKILL.md` format);
+[AGENTS.md](AGENTS.md) and [llms.txt](llms.txt) point to it. In Claude Code:
+
+```
+/plugin install sdmc --marketplace panedrone/sdmc
+```
+
 ### Try it in a dev container
 
 [`.devcontainer`](.devcontainer) is Go with `sdmc` installed and PostgreSQL 17 next to it, with the

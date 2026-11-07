@@ -1,0 +1,11 @@
+{
+  "name": "sdmc",
+  "description": "Generate models and DAO (SQL first, no ORM) for Go, Python and C++ (Qt) from a live PostgreSQL, MySQL, SQLite or SQL Server database with sdmc, the SQL DAL Maker CLI.",
+  "author": {
+    "name": "panedrone"
+  },
+  "homepage": "https://github.com/panedrone/sdmc",
+  "repository": "https://github.com/panedrone/sdmc",
+  "license": "ISC",
+  "keywords": ["sql", "dao", "codegen", "go", "golang", "python", "qt", "database-first", "no-orm"]
+}
