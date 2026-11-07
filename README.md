@@ -348,7 +348,7 @@ cannot fill OUT parameters.
 SQL Server and Go: go-mssqldb knows no `{call p(?)}`, so the `ref` of a DAO method calls a procedure
 by `exec p ?` (`<query-dto-list dto="Row" method="custOrderHist(id)" ref="exec CustOrderHist ?"/>`);
 a `<dto-class ref>` keeps `{call p(?)}`, it is only for the columns. `<db url>` takes both forms,
-`sqlserver://host:1433;databaseName=db;encrypt=false` (JDBC, as in `<jdbc url>`) and
+`sqlserver://host:1433;databaseName=db;encrypt=false` (as in the IDE plug-ins) and
 `sqlserver://host:1433?database=db` (go-mssqldb).
 
 ## Type map
@@ -376,14 +376,12 @@ driver instead of Go types. Where the driver says nothing about the type (MySQL 
 expressions), the key is `unknown`. A type written in `sdm.xml` (`<field type="int4">`,
 `return-type="int8"`) goes through the same type map.
 
-The `settings.xml` of the IDE plug-ins (Java names: `java.lang.Integer`, ...) works as is for Go
-and Python. C++ knows the driver names only: a column is looked up by `int4`, `DECIMAL`,
-`datetimeoffset`, never by its Java name, and a column without a key (and without `default`) gets
-the driver name in the code, for the compiler to report the type the type map lacks. A Java key
-there maps nothing. One Java name stands for several types (`java.util.Date` is a date, a time and
-a timestamp), so C++ code from the same `settings.xml` is not what the IDE plug-in generates.
-A Java name in `sdm.xml` (`<field type="java.lang.Integer">`) without a key in the type map
-is replaced by the type of the column from the database, or by `unknown` if there is no column.
+The `settings.xml` of the IDE plug-ins works as is. C++ looks up a column by the driver name only
+(`int4`, `DECIMAL`, `datetimeoffset`): a column without a key (and without `default`) gets the
+driver name in the code, for the compiler to report the type the type map lacks. The keys of the
+IDE plug-in may stay in the same `settings.xml`; for C++ sdmc does not look them up. A type of the
+IDE plug-in in `sdm.xml` (`<field type="...">`) without a key in the type map is replaced by the
+type of the column from the database, or by `unknown` if there is no column.
 
 ## Python DB-API 2.0
 
@@ -471,10 +469,10 @@ needs no `-orm`. `<dto field-names-mode>` names the fields and the CRUD methods 
 An XML written for Go may have names a C++ compiler rejects; `gen` reports all of them for a DAO class
 instead of writing it: a keyword as a method or a parameter (`register`, `delete`, `class`), and a
 method named as the model class it returns (`OrdersByMonth` returning `CListReader<OrdersByMonth>`:
-inside the DAO the method hides the class). Rename them in the XML. The same for a short Java type
-of old XML, `get_city_by_country(String country_code)` or `return-type="Long"`, that the type map
-leaves as is (no key, empty `default`): remove the type, and it comes from the metadata, or write the
-C++ one (`CText`).
+inside the DAO the method hides the class). Rename them in the XML. The same for a type of an old
+XML that C++ does not know, `get_city_by_country(String country_code)` or `return-type="Long"`, and
+the type map leaves as is (no key, empty `default`): remove the type, and it comes from the
+metadata, or write the C++ one (`CText`).
 
 ```cpp
 CDataStore ds;
