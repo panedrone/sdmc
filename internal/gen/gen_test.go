@@ -20,6 +20,9 @@ import (
 //
 // task_board/refcursors_python, python_branches, cpp, cpp_branches, cpp_camel and cpp_snake are the
 // plug-in project of qt6_sqlite3_task_board with this XML (the sdm folder of the Java harness is an absolute path to them).
+// C++ is not the plug-in's any more: its type map knows the driver names only (TypeMap.DriverNamesOnly),
+// so the cpp* settings.xml have driver keys; the SQLite parameters, String for the plug-in and unknown
+// for the driver, get "default" (CValue) instead of CText.
 var goldenCases = []struct {
 	label, project, sdm string
 }{

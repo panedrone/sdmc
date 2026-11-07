@@ -20,11 +20,12 @@
           url="jdbc:sqlite:$PROJECT_DIR$/task_tracker.sqlite" user="" pwd=""/>
 
     <type-map default="CValue">
-        <type detected="java.lang.Integer" target="CInteger"/>
-        <type detected="java.lang.Long" target="CLong"/>
-        <type detected="java.lang.Double" target="CDouble"/>
-        <type detected="java.lang.String" target="CText"/>
-        <type detected="byte[]" target="CBlob"/>
+        <type detected="INTEGER" target="CInteger"/>
+        <type detected="BIGINT" target="CInteger"/>
+        <type detected="BOOLEAN" target="CInteger"/>
+        <type detected="DATE" target="CText"/>
+        <type detected="STRING" target="CText"/>
+        <type detected="TEXT" target="CText"/>
     </type-map>
 
     <macros>

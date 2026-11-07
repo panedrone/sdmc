@@ -86,13 +86,14 @@ func newTranslator(lang Lang, md meta.Metadata, s *sdmxml.Settings, sdm *sdmxml.
 		return &translator{dto: dtoGen.Translate, dao: daoGen.Translate}, nil
 	}
 	if lang == Cpp {
-		// CppCG: <dto field-names-mode> for the fields and the CRUD methods, the parameters as they are
+		// CppCG: <dto field-names-mode> for the fields and the CRUD methods, the parameters as they are;
+		// the type map knows the driver names only: no Java names in C++
 		mode := cppgen.FieldNamesMode(s.Dto.FieldNamesMode)
-		dtoGen, err := cppgen.NewDTO(cg.NewCore(md, s, mode, cg.AsIs, sqlRoot), s, sdm)
+		dtoGen, err := cppgen.NewDTO(cg.NewCore(md, s, mode, cg.AsIs, sqlRoot).DriverNamesOnly(), s, sdm)
 		if err != nil {
 			return nil, err
 		}
-		daoGen, err := cppgen.NewDAO(cg.NewCore(md, s, mode, cg.AsIs, sqlRoot), s, sdm)
+		daoGen, err := cppgen.NewDAO(cg.NewCore(md, s, mode, cg.AsIs, sqlRoot).DriverNamesOnly(), s, sdm)
 		if err != nil {
 			return nil, err
 		}

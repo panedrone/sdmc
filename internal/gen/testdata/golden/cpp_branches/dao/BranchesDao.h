@@ -31,7 +31,7 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_subjects(CText &b_id, CListReader<CValue> &reader) {
+    int get_subjects(CValue &b_id, CListReader<CValue> &reader) {
         DL_STR sql = DL_T("select t_subject from tasks where b_id = ?");
         struct : public CRowProcessor {
             CValue buff;
@@ -48,7 +48,7 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_subjects_ext(DL_STR sql, CText &b_id, CListReader<CValue> &reader) {
+    int get_subjects_ext(DL_STR sql, CValue &b_id, CListReader<CValue> &reader) {
         struct : public CRowProcessor {
             CValue buff;
             CListReader<CValue> *pReader;
@@ -74,7 +74,7 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_count_by_board(CText &b_id, CValue &res) {
+    int get_count_by_board(CValue &b_id, CValue &res) {
         DL_STR sql = DL_T("select count(*) from tasks where b_id = ?");
         CValue *params[] = {&b_id};
         CValue *res_values[] = {&res};
@@ -85,7 +85,7 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_task(CText &t_id, Task &res) {
+    int get_task(CValue &t_id, Task &res) {
         DL_STR sql = DL_T("select * from tasks where t_id = ?");
         CValue *params[] = {&t_id};
         CValue *res_values[] = {&res.t_id, &res.t_dt_created, &res.t_dt_updated, &res.t_subject, &res.t_comments, &res.t_status, &res.b_id};
@@ -96,7 +96,7 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_task_ext(DL_STR sql, CText &t_id, Task &res) {
+    int get_task_ext(DL_STR sql, CValue &t_id, Task &res) {
         CValue *params[] = {&t_id};
         CValue *res_values[] = {&res.t_id, &res.t_dt_created, &res.t_dt_updated, &res.t_subject, &res.t_comments, &res.t_status, &res.b_id};
         DL_STR col_names[] = {DL_T("t_id"), DL_T("t_dt_created"), DL_T("t_dt_updated"), DL_T("t_subject"), DL_T("t_comments"), DL_T("t_status"), DL_T("b_id")};
@@ -116,7 +116,7 @@ public:
     /*
        Returns the number of affected rows or -1 on error.
     */
-    int set_status(CText &t_id, CText &t_status) {
+    int set_status(CValue &t_id, CValue &t_status) {
         DL_STR sql = DL_T("update tasks set t_status = ? where t_id = ?");
         CValue *params[] = {&t_id, &t_status};
         return m_ds.execDML(sql, 2, params);
@@ -125,7 +125,7 @@ public:
     /*
        Returns the number of affected rows or -1 on error.
     */
-    int set_status_ext(DL_STR sql, CText &t_id, CText &t_status) {
+    int set_status_ext(DL_STR sql, CValue &t_id, CValue &t_status) {
         CValue *params[] = {&t_id, &t_status};
         return m_ds.execDML(sql, 2, params);
     }

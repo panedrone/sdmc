@@ -44,7 +44,9 @@ go run ./cli/dsgen && git diff --exit-code -- datastore
   driver, `internal/meta/mssql/fake_test.go`). Do not add tests that need one.
 - Edit data stores in `datastore/templates` only, then `go run ./cli/dsgen`; never the generated copies.
 - The generated code must stay byte for byte what the IDE plug-ins
-  ([sqldalmaker](https://github.com/panedrone/sqldalmaker)) generate for the same XML.
+  ([sqldalmaker](https://github.com/panedrone/sqldalmaker)) generate for the same XML. Except C++:
+  its type map knows the driver names only, a type without a key goes to the compiler as the driver
+  names it.
 - A behaviour change goes to `README.md` in the same commit; the skill and `llms.txt` too when the
   workflow, a command or an option changes.
 - Releases: a tag `vX.Y.Z` runs `.github/workflows/release.yml` (goreleaser).

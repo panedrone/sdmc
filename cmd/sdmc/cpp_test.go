@@ -91,6 +91,32 @@ func TestCpp(t *testing.T) {
 		t.Errorf("val: %s", got)
 	}
 
+	// no Java names in C++: a Java key does not map a column, without the driver key (TEXT) the
+	// field gets the driver name and the compiler reports it
+	settingsXML := filepath.Join("sdm", "settings.xml")
+	src, err := os.ReadFile(settingsXML)
+	if err != nil {
+		t.Fatal(err)
+	}
+	javaKey := strings.Replace(string(src), `<type detected="TEXT" target="CText${N}"/>`, `<type detected="java.lang.String" target="CText${N}"/>`, 1)
+	if javaKey == string(src) {
+		t.Fatal("no TEXT key in the type map of init")
+	}
+	if err := os.WriteFile(settingsXML, []byte(javaKey), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	run1(0, "gen", "-dir", "sdm")
+	if dto, err = os.ReadFile(filepath.Join("dal", "Task.h")); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(dto), "    TEXT t_subject; // t\n") {
+		t.Errorf("Task.h with a Java key only:\n%s", dto)
+	}
+	if err := os.WriteFile(settingsXML, src, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	run1(0, "gen", "-dir", "sdm")
+
 	h, cpp := filepath.Join("dal", "DataStore.h"), filepath.Join("dal", "DataStore.cpp")
 	if got := run1(0, "ds", "-dir", "sdm"); got != "up to date: "+cpp+" (qt for sqlite)\nup to date: "+h+" (qt for sqlite)\n" {
 		t.Errorf("ds: %q", got)

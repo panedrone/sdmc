@@ -100,7 +100,7 @@ order by b.b_dt_created, b.b_id");
     /*
        Returns the number of affected rows or -1 on error.
     */
-    int del_by_range(CText &b_id1, CText &b_id2) {
+    int del_by_range(CValue &b_id1, CValue &b_id2) {
         DL_STR sql = DL_T("delete from boards where b_id between ? and ?");
         CValue *params[] = {&b_id1, &b_id2};
         return m_ds.execDML(sql, 2, params);

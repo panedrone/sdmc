@@ -376,7 +376,12 @@ driver instead of Go types. Where the driver says nothing about the type (MySQL 
 expressions), the key is `unknown`. A type written in `sdm.xml` (`<field type="int4">`,
 `return-type="int8"`) goes through the same type map.
 
-The `settings.xml` of the IDE plug-ins (Java names: `java.lang.Integer`, ...) works as is.
+The `settings.xml` of the IDE plug-ins (Java names: `java.lang.Integer`, ...) works as is for Go
+and Python. C++ knows the driver names only: a column is looked up by `int4`, `DECIMAL`,
+`datetimeoffset`, never by its Java name, and a column without a key (and without `default`) gets
+the driver name in the code, for the compiler to report the type the type map lacks. A Java key
+there maps nothing. One Java name stands for several types (`java.util.Date` is a date, a time and
+a timestamp), so C++ code from the same `settings.xml` is not what the IDE plug-in generates.
 A Java name in `sdm.xml` (`<field type="java.lang.Integer">`) without a key in the type map
 is replaced by the type of the column from the database, or by `unknown` if there is no column.
 

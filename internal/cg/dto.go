@@ -33,7 +33,10 @@ func NewCore(md meta.Metadata, s *sdmxml.Settings, dtoMode, paramMode FieldNames
 }
 
 func (c *Core) DtoFieldNamesMode() FieldNamesMode { return c.dtoMode }
-func (c *Core) SQLRoot() string                   { return c.sqlRoot }
+
+// DriverNamesOnly: the type map looks up the types of metadata by the driver name only (TypeMap.DriverNamesOnly).
+func (c *Core) DriverNamesOnly() *Core { c.tm.DriverNamesOnly(); return c }
+func (c *Core) SQLRoot() string        { return c.sqlRoot }
 
 // TargetTypeByTypeMap returns the type without the assign function.
 func (c *Core) TargetTypeByTypeMap(detected string) string {

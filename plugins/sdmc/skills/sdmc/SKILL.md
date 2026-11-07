@@ -105,7 +105,9 @@ sdmc init -lang cpp    -dir sdm -dao dal  -db sqlite
 
 The rest is the same: `<db url>`, `sdmc xml` (no `-orm`), paste, `sdmc gen`, `sdmc val`. Python: a DAO
 class over `create_ds(conn)` from `dbal/data_store_no_orm.py`, snake_case names. C++: headers
-`<Class>.h` in `dal`, next to `DataStore.h`/`DataStore.cpp`.
+`<Class>.h` in `dal`, next to `DataStore.h`/`DataStore.cpp`. The C++ type map is keyed by driver
+names only (`int4`, `DECIMAL`, `datetimeoffset`; Java names map nothing): a field typed with such a
+name fails to compile, add `<type detected="that name" target="C...${N}"/>` and regenerate.
 
 ## Checks before reporting done
 

@@ -29,7 +29,14 @@ type TypeMap struct {
 	detected    map[string]string
 	defaultType string
 	rawOfJava   func(string) string // meta.Metadata.RawOfJava; nil means unknown
+	driverOnly  bool                // C++: a column is looked up by the driver name only (DriverNamesOnly)
 }
+
+// DriverNamesOnly makes a type from metadata look up the driver name only (int4, VARCHAR,
+// datetimeoffset), never the Java name: without a key (and without "default") the code gets the
+// driver name as is, and the compiler reports it instead of a Java name mapping it silently.
+// Types written in XML and already rendered ones are looked up as before.
+func (m *TypeMap) DriverNamesOnly() { m.driverOnly = true }
 
 // RawOfJava returns a Java name in the words of the database driver; meta.RawUnknown if the database does not know it.
 func (m *TypeMap) RawOfJava(javaType string) string {
@@ -79,6 +86,18 @@ func (m *TypeMap) TargetRaw(detected, raw string) string {
 			return raw
 		}
 		return detected // no overrides: as is, regardless of default
+	}
+	if m.driverOnly && raw != "" {
+		if t, ok := m.detected[raw]; ok {
+			return t
+		}
+		if strings.TrimSpace(m.defaultType) != "" {
+			return m.defaultType
+		}
+		if i := strings.IndexByte(raw, '-'); i > 0 {
+			return raw[i+1:] // without the model, as above
+		}
+		return raw
 	}
 	if t, ok := m.detected[detected]; ok {
 		return t
