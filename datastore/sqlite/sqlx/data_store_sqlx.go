@@ -632,6 +632,8 @@ func _setFloat32(d *float32, value any) error {
 		*d = v
 	case float64:
 		*d = float32(v)
+	case int64:
+		*d = float32(v) // SQLite: REAL/NUMERIC column with an integer value
 	case []byte:
 		str := string(v) // PostgreSQL
 		d64, err := strconv.ParseFloat(str, 64)
