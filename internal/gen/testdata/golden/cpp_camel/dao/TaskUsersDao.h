@@ -23,7 +23,7 @@ public:
     */
     int createTaskUser(TaskUser &p) {
         DL_STR sql = DL_T("insert into task_users (t_id, u_id, tu_comment, tu_date) values (?, ?, ?, ?)");
-        CValue *params[] = {&p.tID, &p.uID, &p.tuComment, &p.tuDate};
+        CRef params[] = {p.tID, p.uID, p.tuComment, p.tuDate};
         return m_ds.execDML(sql, 4, params);
     }
 	
@@ -39,7 +39,7 @@ public:
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *res_values[] = {&rp.buff.tID, &rp.buff.uID, &rp.buff.tuComment, &rp.buff.tuDate};
+        CRef res_values[] = {rp.buff.tID, rp.buff.uID, rp.buff.tuComment, rp.buff.tuDate};
         DL_STR col_names[] = {DL_T("t_id"), DL_T("u_id"), DL_T("tu_comment"), DL_T("tu_date")};
         return m_ds.queryRowList(sql, 0, 0, 4, res_values, col_names, &rp);
     }
@@ -48,10 +48,10 @@ public:
        C(R)UD: task_users
        Returns the number of fetched rows or -1 on error.
      */
-    int readTaskUser(CInteger &tID, CInteger &uID, TaskUser &res) {
+    int readTaskUser(const qint64 &tID, const qint64 &uID, TaskUser &res) {
         DL_STR sql = DL_T("select * from task_users where t_id=? and u_id=?");
-        CValue *params[] = {&tID, &uID};
-        CValue *res_values[] = {&res.tID, &res.uID, &res.tuComment, &res.tuDate};
+        CRef params[] = {tID, uID};
+        CRef res_values[] = {res.tID, res.uID, res.tuComment, res.tuDate};
         DL_STR col_names[] = {DL_T("t_id"), DL_T("u_id"), DL_T("tu_comment"), DL_T("tu_date")};
         return m_ds.queryRow(sql, 2, params, 4, res_values, col_names);
     }
@@ -62,7 +62,7 @@ public:
     */
     int updateTaskUser(TaskUser &p) {
         DL_STR sql = DL_T("update task_users set tu_comment=?, tu_date=? where t_id=? and u_id=?");
-        CValue *params[] = {&p.tuComment, &p.tuDate, &p.tID, &p.uID};
+        CRef params[] = {p.tuComment, p.tuDate, p.tID, p.uID};
         return m_ds.execDML(sql, 4, params);
     }
 	
@@ -70,16 +70,16 @@ public:
        CRU(D): task_users
        Returns the number of affected rows or -1 on error.
     */
-    int deleteTaskUser(CInteger &tID, CInteger &uID) {
+    int deleteTaskUser(const qint64 &tID, const qint64 &uID) {
         DL_STR sql = DL_T("delete from task_users where t_id=? and u_id=?");
-        CValue *params[] = {&tID, &uID};
+        CRef params[] = {tID, uID};
         return m_ds.execDML(sql, 2, params);
     }
 	
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int getTaskUsersByTask(CInteger &t_id, CListReader<TaskUser> &reader) {
+    int getTaskUsersByTask(const qint64 &t_id, CListReader<TaskUser> &reader) {
         DL_STR sql = DL_T("select * from task_users where t_id=?");
         struct : public CRowProcessor {
             TaskUser buff;
@@ -87,8 +87,8 @@ public:
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *params[] = {&t_id};
-        CValue *res_values[] = {&rp.buff.tID, &rp.buff.uID, &rp.buff.tuComment, &rp.buff.tuDate};
+        CRef params[] = {t_id};
+        CRef res_values[] = {rp.buff.tID, rp.buff.uID, rp.buff.tuComment, rp.buff.tuDate};
         DL_STR col_names[] = {DL_T("t_id"), DL_T("u_id"), DL_T("tu_comment"), DL_T("tu_date")};
         return m_ds.queryRowList(sql, 1, params, 4, res_values, col_names, &rp);
     }

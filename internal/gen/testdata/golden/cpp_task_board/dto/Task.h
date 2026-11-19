@@ -9,13 +9,13 @@
 class Task {
 public:
 
-    CInteger t_id; // t
-    CText t_dt_created; // t
-    CText t_dt_updated; // t
-    CText t_subject; // t
-    CText t_comments; // t
-    CInteger t_status; // t
-    CInteger b_id; // t
+    qint64 t_id; // t
+    QString t_dt_created; // t
+    QString t_dt_updated; // t
+    QString t_subject; // t
+    CTextN t_comments; // t
+    qint64 t_status; // t
+    qint64 b_id; // t
 };
 
 #endif // !defined(_Task_)

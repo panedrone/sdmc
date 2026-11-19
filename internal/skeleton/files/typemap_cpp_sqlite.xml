@@ -1,42 +1,42 @@
     <type-map default="">
 
-        <type detected="INTEGER" target="CInt64${N}"/>
-        <type detected="INT" target="CInt64${N}"/>
-        <type detected="BIGINT" target="CInt64${N}"/>
-        <type detected="SMALLINT" target="CInt64${N}"/>
-        <type detected="TINYINT" target="CInt64${N}"/>
-        <type detected="MEDIUMINT" target="CInt64${N}"/>
-        <type detected="UNSIGNED BIG INT" target="CInt64${N}"/>
-        <type detected="INT2" target="CInt64${N}"/>
-        <type detected="INT8" target="CInt64${N}"/>
-        <type detected="STRING" target="CText${N}"/>
-        <type detected="VARYING CHARACTER" target="CText${N}"/>
-        <type detected="NATIVE CHARACTER" target="CText${N}"/>
-        <type detected="REAL" target="CDouble${N}"/>
-        <type detected="DOUBLE" target="CDouble${N}"/>
-        <type detected="FLOAT" target="CDouble${N}"/>
-        <type detected="NUMERIC" target="CDouble${N}"/>
-        <type detected="DECIMAL" target="CDouble${N}"/>
-        <type detected="TEXT" target="CText${N}"/>
-        <type detected="VARCHAR" target="CText${N}"/>
-        <type detected="CHAR" target="CText${N}"/>
-        <type detected="CHARACTER" target="CText${N}"/>
-        <type detected="NVARCHAR" target="CText${N}"/>
-        <type detected="NCHAR" target="CText${N}"/>
-        <type detected="CLOB" target="CText${N}"/>
-        <type detected="BLOB" target="CBlob${N}"/>
-        <type detected="DOUBLE PRECISION" target="CDouble${N}"/>
-        <type detected="MONEY" target="CDouble${N}"/>
-        <type detected="NTEXT" target="CText${N}"/>
-        <type detected="BINARY" target="CBlob${N}"/>
-        <type detected="VARBINARY" target="CBlob${N}"/>
-        <type detected="IMAGE" target="CBlob${N}"/>
-        <type detected="BIT" target="CInt64${N}"/>
+        <type detected="INTEGER" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="INT" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="BIGINT" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="SMALLINT" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="TINYINT" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="MEDIUMINT" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="UNSIGNED BIG INT" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="INT2" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="INT8" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="STRING" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="VARYING CHARACTER" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="NATIVE CHARACTER" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="REAL" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="DOUBLE" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="FLOAT" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="NUMERIC" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="DECIMAL" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="TEXT" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="VARCHAR" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="CHAR" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="CHARACTER" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="NVARCHAR" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="NCHAR" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="CLOB" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="BLOB" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="DOUBLE PRECISION" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="MONEY" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="NTEXT" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="BINARY" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="VARBINARY" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="IMAGE" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="BIT" target="${nullable}|0:qint64|1:CInt64N"/>
 
-        <type detected="BOOLEAN" target="CBool${N}"/>
-        <type detected="DATE" target="CText${N}"/>
-        <type detected="DATETIME" target="CText${N}"/>
-        <type detected="TIMESTAMP" target="CText${N}"/>
+        <type detected="BOOLEAN" target="${nullable}|0:bool|1:CBoolN"/>
+        <type detected="DATE" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="DATETIME" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="TIMESTAMP" target="${nullable}|0:QString|1:CTextN"/>
         <type detected="unknown" target="CVariant"/>
 
     </type-map>

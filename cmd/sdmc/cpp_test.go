@@ -29,14 +29,14 @@ func TestCpp(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if !strings.Contains(got, ".sdm (IDE plug-ins, sdmc -c N): the line sdm/cpp.dal") {
+	if !strings.Contains(got, ".sdm (sdmc -c N; the IDE plug-ins have no C++): the line sdm/cpp.dal") {
 		t.Errorf("init: %s", got)
 	}
 	settings, err := os.ReadFile(filepath.Join("sdm", "settings.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, s := range []string{`<folders target="dal" sql="sdm/sql"/>`, `<type-map default="">`, `<type detected="INTEGER" target="CInt64${N}"/>`, `<macro name="${N}">`} {
+	for _, s := range []string{`<folders target="dal" sql="sdm/sql"/>`, `<type-map default="">`, `<type detected="INTEGER" target="${nullable}|0:qint64|1:CInt64N"/>`, `<macro name="${nullable}">`} {
 		if !strings.Contains(string(settings), s) {
 			t.Errorf("settings.xml: no %s", s)
 		}
@@ -82,8 +82,8 @@ func TestCpp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// the type map of init: CText${N} - a nullable column gets CTextN, the PK does not
-	if !strings.Contains(string(dto), "    CInt64 t_id; // t\n") || !strings.Contains(string(dto), "    CInt64N g_id; // t\n") ||
+	// the type map of init: a nullable column gets CTextN, NOT NULL and the PK the value itself
+	if !strings.Contains(string(dto), "    qint64 t_id; // t\n") || !strings.Contains(string(dto), "    CInt64N g_id; // t\n") ||
 		!strings.Contains(string(dto), "    CTextN t_subject; // t\n") {
 		t.Errorf("Task.h:\n%s", dto)
 	}
@@ -98,7 +98,7 @@ func TestCpp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	javaKey := strings.Replace(string(src), `<type detected="TEXT" target="CText${N}"/>`, `<type detected="java.lang.String" target="CText${N}"/>`, 1)
+	javaKey := strings.Replace(string(src), `<type detected="TEXT" target="${nullable}|0:QString|1:CTextN"/>`, `<type detected="java.lang.String" target="${nullable}|0:QString|1:CTextN"/>`, 1)
 	if javaKey == string(src) {
 		t.Fatal("no TEXT key in the type map of init")
 	}
@@ -172,7 +172,7 @@ func TestCppNames(t *testing.T) {
     <query-dto-list dto="Task" method="getTasksByGroup(g_id)" ref="tasks(g_id)"/>
     <query-dto-list dto="Task" method="getByGroup(Integer g_id)" ref="tasks(g_id)"/>
     <query method="countAll" ref="select count(*) from tasks" return-type="Long"/>
-    <query-dto-list dto="Task" method="getByGroup2(CInteger g_id)" ref="tasks(g_id)"/>
+    <query-dto-list dto="Task" method="getByGroup2(qint64 g_id)" ref="tasks(g_id)"/>
 </dao-class>
 </sdm>`
 	if err := os.WriteFile(filepath.Join("sdm", "sdm.xml"), []byte(sdmXML), 0o644); err != nil {

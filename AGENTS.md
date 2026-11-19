@@ -23,7 +23,8 @@ Go module `github.com/panedrone/sdmc`, the binary is `cmd/sdmc`.
 - `internal/meta/<db>`: metadata of PostgreSQL, MySQL, SQLite, SQL Server
 - `internal/gen`: a generation run, `settings.xml` + `sdm.xml` to files
 - `internal/cg`: the SQL of a method, its fields and parameters, shared by the generators
-- `internal/gogen`, `internal/pygen`, `internal/cppgen`: Go, Python, C++ (ports of the plug-in's Java and VM templates)
+- `internal/gogen`, `internal/pygen`, `internal/cppgen`: Go, Python, C++ (ports of the plug-in's Java and VM
+  templates; C++ is sdmc's own now, the IDE plug-ins have no C++)
 - `internal/skeleton`: `sdmc init`, XSD, data store files
 - `internal/assist`: `sdmc xml`
 - `datastore/templates`: the source of every data store; `datastore/<db>/...` is generated from it
@@ -45,8 +46,9 @@ go run ./cli/dsgen && git diff --exit-code -- datastore
 - Edit data stores in `datastore/templates` only, then `go run ./cli/dsgen`; never the generated copies.
 - The generated code must stay byte for byte what the IDE plug-ins
   ([sqldalmaker](https://github.com/panedrone/sqldalmaker)) generate for the same XML. Except C++:
-  its type map knows the driver names only, a type without a key goes to the compiler as the driver
-  names it.
+  the IDE plug-ins have no C++, it is sdmc's own (NOT NULL fields are values, the DAO pass `CRef` to
+  the data store, the type map knows the driver names only); the references in
+  `internal/gen/testdata/golden/cpp_*` are sdmc's output.
 - A behaviour change goes to `README.md` in the same commit; the skill and `llms.txt` too when the
   workflow, a command or an option changes.
 - Releases: a tag `vX.Y.Z` runs `.github/workflows/release.yml` (goreleaser).

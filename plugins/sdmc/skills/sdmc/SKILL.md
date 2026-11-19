@@ -105,9 +105,11 @@ sdmc init -lang cpp    -dir sdm -dao dal  -db sqlite
 
 The rest is the same: `<db url>`, `sdmc xml` (no `-orm`), paste, `sdmc gen`, `sdmc val`. Python: a DAO
 class over `create_ds(conn)` from `dbal/data_store_no_orm.py`, snake_case names. C++: headers
-`<Class>.h` in `dal`, next to `DataStore.h`/`DataStore.cpp`. The C++ type map is keyed by driver
-names only (`int4`, `DECIMAL`, `datetimeoffset`; Java names map nothing): a field typed with such a
-name fails to compile, add `<type detected="that name" target="C...${N}"/>` and regenerate.
+`<Class>.h` in `dal`, next to `DataStore.h`/`DataStore.cpp`. A NOT NULL field is the value itself
+(`qint64`, `QString`: no `.Value`), a nullable one a class with `Value` and `IsNull` (`CInt64N`,
+`CTextN`). The C++ type map is keyed by driver names only (`int4`, `DECIMAL`, `datetimeoffset`; Java
+names map nothing): a field typed with such a name fails to compile, add
+`<type detected="that name" target="${nullable}|0:QString|1:CTextN"/>` and regenerate.
 
 ## Checks before reporting done
 

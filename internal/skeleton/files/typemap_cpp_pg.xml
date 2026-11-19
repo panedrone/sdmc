@@ -1,26 +1,26 @@
     <type-map default="">
 
-        <type detected="int2" target="CInt16${N}"/>
-        <type detected="int4" target="CInt32${N}"/>
-        <type detected="int8" target="CInt64${N}"/>
-        <type detected="float4" target="CFloat${N}"/>
-        <type detected="float8" target="CDouble${N}"/>
-        <type detected="numeric" target="CText${N}"/>
-        <type detected="varchar" target="CText${N}"/>
-        <type detected="text" target="CText${N}"/>
-        <type detected="bpchar" target="CText${N}"/>
+        <type detected="int2" target="${nullable}|0:qint16|1:CInt16N"/>
+        <type detected="int4" target="${nullable}|0:qint32|1:CInt32N"/>
+        <type detected="int8" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="float4" target="${nullable}|0:float|1:CFloatN"/>
+        <type detected="float8" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="numeric" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="varchar" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="text" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="bpchar" target="${nullable}|0:QString|1:CTextN"/>
         <type detected="json" target="CVariant"/>
         <type detected="jsonb" target="CVariant"/>
-        <type detected="bytea" target="CBlob${N}"/>
-        <type detected="bool" target="CBool${N}"/>
-        <type detected="date" target="CDate${N}"/>
-        <type detected="timestamp" target="CDateTime${N}"/>
-        <type detected="timestamptz" target="CDateTime${N}"/>
-        <type detected="time" target="CTime${N}"/>
-        <type detected="uuid" target="CText${N}"/>
+        <type detected="bytea" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="bool" target="${nullable}|0:bool|1:CBoolN"/>
+        <type detected="date" target="${nullable}|0:QDate|1:CDateN"/>
+        <type detected="timestamp" target="${nullable}|0:QDateTime|1:CDateTimeN"/>
+        <type detected="timestamptz" target="${nullable}|0:QDateTime|1:CDateTimeN"/>
+        <type detected="time" target="${nullable}|0:QTime|1:CTimeN"/>
+        <type detected="uuid" target="${nullable}|0:QString|1:CTextN"/>
         <type detected="_text" target="CVariant"/>
         <type detected="_varchar" target="CVariant"/>
-        <type detected="refcursor" target="CText${N}"/>
+        <type detected="refcursor" target="${nullable}|0:QString|1:CTextN"/>
         <type detected="unknown" target="CVariant"/>
 
     </type-map>

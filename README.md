@@ -14,8 +14,8 @@ database says what the columns and parameters are, and you get plain functions t
 
 **Why sdmc:** *SQL DAL Maker CLI*, the command-line twin of the
 [SQL DAL Maker IDE plug-ins](https://sqldalmaker.sourceforge.net/): the same `sdm.xml`, the same
-`settings.xml`, the same generated code. It started as go-sdm, for Go only; with Python and C++ the
-"go-" stopped being true ))
+`settings.xml`, the same generated code for Go and Python. C++ (Qt) is sdmc's own: the IDE plug-ins
+have no C++. It started as go-sdm, for Go only; with Python and C++ the "go-" stopped being true ))
 
 The manifest says what to generate: the models, the DAO functions and the SQL behind them.
 **Reverse engineering** does the rest: the generator reads live metadata — tables, views, the
@@ -255,7 +255,7 @@ README.md
 ```
 
 The root file (`go.dal`, `python.dal`, `cpp.dal`) gives the language of its folder, as in the
-plug-in; `sdmc` needs nothing else from it.
+plug-in (`cpp.dal` is sdmc's only); `sdmc` needs nothing else from it.
 
 Without `-dir` a command takes its configuration from there: `-c N` is the N-th, the only one
 needs no `-c`. With several, `sdmc` prints them with the ready command for each and, in the console,
@@ -376,12 +376,12 @@ driver instead of Go types. Where the driver says nothing about the type (MySQL 
 expressions), the key is `unknown`. A type written in `sdm.xml` (`<field type="int4">`,
 `return-type="int8"`) goes through the same type map.
 
-The `settings.xml` of the IDE plug-ins works as is. C++ looks up a column by the driver name only
-(`int4`, `DECIMAL`, `datetimeoffset`): a column without a key (and without `default`) gets the
-driver name in the code, for the compiler to report the type the type map lacks. The keys of the
-IDE plug-in may stay in the same `settings.xml`; for C++ sdmc does not look them up. A type of the
-IDE plug-in in `sdm.xml` (`<field type="...">`) without a key in the type map is replaced by the
-type of the column from the database, or by `unknown` if there is no column.
+The `settings.xml` of the IDE plug-ins works as is. C++ (sdmc only, the IDE plug-ins have no C++)
+looks up a column by the driver name only (`int4`, `DECIMAL`, `datetimeoffset`): a column without a
+key (and without `default`) gets the driver name in the code, for the compiler to report the type
+the type map lacks. Java keys (`java.lang.String`) of an old `settings.xml` may stay; for C++ sdmc
+does not look them up. A Java type in `sdm.xml` (`<field type="...">`) without a key in the type map
+is replaced by the type of the column from the database, or by `unknown` if there is no column.
 
 ## Python DB-API 2.0
 
@@ -444,7 +444,8 @@ SQL Server: mssql-python needs Python 3.10+; pyodbc (`?` too) works with the sam
 
 ## C++ (Qt)
 
-C++ and Qt 5/6 (QtSql): byte for byte what the C++ target of the IDE plug-ins generates.
+C++ and Qt 5/6 (QtSql), sdmc only: the IDE plug-ins have no C++. A field of a NOT NULL column is the
+value itself (`qint64`, `QString`), and the DAO pass the values to the data store as `CRef`.
 A working example: [sdm_thesaurus_qt6](https://github.com/panedrone/sdm_thesaurus_qt6) (Qt 6, a
 thesaurus), with `.sdm`, `sdm/cpp.dal` and the generated models, DAO and data store. Run `sdmc` in
 the project folder:
@@ -454,7 +455,7 @@ sdmc init -lang cpp -dir sdm -dao dal -db sqlite
 ```
 
 `-dir`, `-dao` and `-db` are required, `-orm` is not for C++. `init` creates `sdm/sdm.xml`,
-`sdm/settings.xml`, `sdm/cpp.dal` (the root file of the plug-in), the XSD and the data store
+`sdm/settings.xml`, `sdm/cpp.dal` (the root file: the folder is C++), the XSD and the data store
 `dal/DataStore.h` and `dal/DataStore.cpp`, and prints the line for `.sdm`: `sdm/cpp.dal`. The models
 and the DAO are headers `<Class>.h` in `<folders target>` (`dal`), next to the data store; `sdmc xml`
 needs no `-orm`. `<dto field-names-mode>` names the fields and the CRUD methods (the names of
@@ -472,80 +473,82 @@ method named as the model class it returns (`OrdersByMonth` returning `CListRead
 inside the DAO the method hides the class). Rename them in the XML. The same for a type of an old
 XML that C++ does not know, `get_city_by_country(String country_code)` or `return-type="Long"`, and
 the type map leaves as is (no key, empty `default`): remove the type, and it comes from the
-metadata, or write the C++ one (`CText`).
+metadata, or write the C++ one (`QString`).
 
 ```cpp
 CDataStore ds;
 ds.open("app.sqlite3");
 TasksDao dao(ds);
 Task t;
-t.t_subject.Value = "subject";
+t.t_subject = "subject";           // NOT NULL: the value itself
+t.t_comments.Value = "comments";   // nullable: Value and IsNull
+t.t_comments.IsNull = false;
 dao.createTask(t);                 // t.t_id is the generated value
+Task r;
+dao.readTask(t.t_id, r);           // parameters are const references: dao.readTask(5, r) too
 CListReader2<Task> tasks;
 dao.getTasksByGroup(t.g_id, tasks);
 ```
 
-`target` of the type map is a value class of `DataStore.h`, one of a pair for each type:
+A field or a parameter is one of two kinds, by the column:
 
-|              | NOT NULL column (`Value`) | nullable column (`Value`, `IsNull`) |
-|--------------|---------------------------|-------------------------------------|
-| `qint16`     | `CInt16`                  | `CInt16N`                           |
-| `qint32`     | `CInt32`                  | `CInt32N`                           |
-| `qint64`     | `CInt64`                  | `CInt64N`                           |
-| `quint16`    | `CUInt16`                 | `CUInt16N`                          |
-| `quint32`    | `CUInt32`                 | `CUInt32N`                          |
-| `quint64`    | `CUInt64`                 | `CUInt64N`                          |
-| `float`      | `CFloat`                  | `CFloatN`                           |
-| `double`     | `CDouble`                 | `CDoubleN`                          |
-| `QString`    | `CText`                   | `CTextN`                            |
-| `QByteArray` | `CBlob`                   | `CBlobN`                            |
-| `bool`       | `CBool`                   | `CBoolN`                            |
-| `QDate`      | `CDate`                   | `CDateN`                            |
-| `QTime`      | `CTime`                   | `CTimeN`                            |
-| `QDateTime`  | `CDateTime`               | `CDateTimeN`                        |
+| NOT NULL column | nullable column (`Value`, `IsNull`) |
+|-----------------|-------------------------------------|
+| `qint16`        | `CInt16N`                           |
+| `qint32`        | `CInt32N`                           |
+| `qint64`        | `CInt64N`                           |
+| `quint16`       | `CUInt16N`                          |
+| `quint32`       | `CUInt32N`                          |
+| `quint64`       | `CUInt64N`                          |
+| `float`         | `CFloatN`                           |
+| `double`        | `CDoubleN`                          |
+| `QString`       | `CTextN`                            |
+| `QByteArray`    | `CBlobN`                            |
+| `bool`          | `CBoolN`                            |
+| `QDate`         | `CDateN`                            |
+| `QTime`         | `CTimeN`                            |
+| `QDateTime`     | `CDateTimeN`                        |
 
-The type maps of `sdmc init`: an integer gets the class of its range, the unsigned ones an unsigned
-class: `CInt16` (`int2`, `smallint`, `TINYINT`, `SMALLINT`, `YEAR`), `CInt32` (`int4`, `int`,
-`MEDIUMINT`, `INT`), `CInt64` (`int8`, `bigint`, `BIGINT`), `CUInt16` (`tinyint` of SQL Server,
-`UNSIGNED TINYINT`, `UNSIGNED SMALLINT`), `CUInt32` (`UNSIGNED MEDIUMINT`, `UNSIGNED INT`), `CUInt64`
-(`UNSIGNED BIGINT`, `BIT` of MySQL). There are no 8-bit classes: `qint8` and `quint8` are chars in
+The type maps of `sdmc init`: an integer gets the type of its range, the unsigned ones an unsigned
+type: `qint16` (`int2`, `smallint`, `TINYINT`, `SMALLINT`, `YEAR`), `qint32` (`int4`, `int`,
+`MEDIUMINT`, `INT`), `qint64` (`int8`, `bigint`, `BIGINT`), `quint16` (`tinyint` of SQL Server,
+`UNSIGNED TINYINT`, `UNSIGNED SMALLINT`), `quint32` (`UNSIGNED MEDIUMINT`, `UNSIGNED INT`), `quint64`
+(`UNSIGNED BIGINT`, `BIT` of MySQL). There are no 8-bit types: `qint8` and `quint8` are chars in
 C++, and a stream prints them as characters. SQLite keeps every integer as a signed 64-bit one,
-whatever the column is declared with (`UNSIGNED BIG INT` too), so there every integer is `CInt64`.
-`CFloat` for `float4`/`FLOAT`/`real`, `CDouble` for the rest of floating point; strings `CText`,
-binary `CBlob`; `bool` (PostgreSQL, SQLite `BOOLEAN`) and `bit` (SQL Server) `CBool`; dates and timestamps
-`CDate`/`CDateTime` (SQLite keeps them as text, so there they are `CText`). `numeric`/`decimal`/`money`
-are `CText` in PostgreSQL, MySQL and SQL Server: `open()` sets `QSql::HighPrecision`, the driver gives
-them as a string with every digit, and a `double` would lose them; SQLite stores them as `REAL` anyway
-and they stay `CDouble`. Left as `CText`: `time` of MySQL (it goes beyond 24 hours) and of SQL Server,
-`datetimeoffset`, `uuid`.
+whatever the column is declared with (`UNSIGNED BIG INT` too), so there every integer is `qint64`.
+`float` for `float4`/`FLOAT`/`real`, `double` for the rest of floating point; strings `QString`,
+binary `QByteArray`; `bool` (PostgreSQL, SQLite `BOOLEAN`) and `bit` (SQL Server) `bool`; dates and
+timestamps `QDate`/`QDateTime` (SQLite keeps them as text, so there they are `QString`).
+`numeric`/`decimal`/`money` are `QString` in PostgreSQL, MySQL and SQL Server: `open()` sets
+`QSql::HighPrecision`, the driver gives them as a string with every digit, and a `double` would lose
+them; SQLite stores them as `REAL` anyway and they stay `double`. Left as `QString`: `time` of MySQL
+(it goes beyond 24 hours) and of SQL Server, `datetimeoffset`, `uuid`. A nullable column of each of
+them gets the class of the same row of the table.
 
-A NOT NULL class never sends NULL (`QString()` goes as `""`); a new nullable one is NULL, and
-`IsNull = false` goes along with `Value`. `CVariant` holds anything in a `QVariant`, NULL included
-(`unknown`, JSON, arrays). The type map of `sdmc init` picks the class of the pair itself:
-`target="CText${N}"`, where the macro `${N}` of `settings.xml` gives `N` for a nullable column of a
-table (not for the PK). Columns of queries have no such metadata and get the NOT NULL class; give
-them `CTextN` in the type map or in `<field>` where needed. `default` is for a type without a key; a
-type that is mapped already is not mapped to `default` once more.
+A NOT NULL value never goes as NULL (`QString()` goes as `""`), a NULL that comes anyway is 0 or
+empty; a new nullable class is NULL, and `IsNull = false` goes along with `Value`. `CVariant` holds
+anything in a `QVariant`, NULL included (`unknown`, JSON, arrays). The type map picks the kind
+itself: `target="${nullable}|0:QString|1:CTextN"`, where the macro `${nullable}` of `settings.xml`
+picks `1` for a nullable column of a table (not for the PK) and `0` otherwise. Columns of queries have
+no such metadata and get the NOT NULL value; give them `CTextN` in the type map or in `<field>` where
+needed. `default` is for a type without a key; a type that is mapped already is not mapped to
+`default` once more.
 
-The pairs are typedefs of two templates, `CNotNull<T>` and `CNullable<T>` (C++11, Qt 5.7+):
-a class of your own is one line, `typedef CNullable<QUuid> CUuidN;`, for any `T` that
-`QVariant` converts; the data store has no list of types to extend. `CValue` is the interface of
-the adapter, without data: a value class of another kind is a `Value` and two conversions,
-`toVariant()` for a parameter and `fromVariant()` for a fetched column.
+The nullable classes are typedefs of `CNullable<T>` (C++11, Qt 5.7+): a class of your own is one
+line, `typedef CNullable<QUuid> CUuidN;`, for any `T` that `QVariant` converts. A NOT NULL value of
+your own needs nothing: any `T` that `QVariant` converts goes as is (`QUuid` in the type map). `CValue`
+is the interface of a value class, without data: a class of another kind is a `Value` and two
+conversions, `toVariant()` for a parameter and `fromVariant()` for a fetched column. `CRef` refers to
+either kind for the data store: the DAO make arrays of them, `CRef params[] = {p.t_subject, p.t_comments};`.
 
-A project with the type map of an earlier `sdmc init` keeps its classes: `sdmc ds` brings the new ones
-into `DataStore.h`, the type map is not touched; take the targets of the table above into it, and the
-fields of `bool`, dates and `numeric` change their type (`Value` is `bool`, `QDate`, `QDateTime`,
-`QString`).
+A project of an earlier sdmc: run `sdmc ds` (the generated DAO need `CRef` of the new `DataStore.h`),
+then take the type map above into `settings.xml`: the NOT NULL classes (`CInt64`, `CText`, ...,
+`CInteger`) and `CNotNull<T>` are gone, the targets `CText${N}` become `${nullable}|0:QString|1:CTextN`,
+and the macro `${N}` gives way to `${nullable}` (copy it from the `settings.xml` of `sdmc init`). In
+your code, `.Value` of a NOT NULL field goes away (`t.t_subject = "..."`, not `t.t_subject.Value`);
+the compiler shows each place.
 
-`CInteger`/`CIntegerN` stay as other names of `CInt64`/`CInt64N`: the type maps of earlier
-`sdmc init` keep compiling.
-
-A project made before these classes: `CValue` is not a value class any more, put `CVariant` in its
-place in the type map, and add `${N}` (the macro and the targets) for nullable columns; `IsNull` of
-a NOT NULL class is gone, and the compiler shows each place.
-
-Do not change the adapter of the data store: the value classes, `CRowProcessor`, `CListReader`,
+Do not change the adapter of the data store: `CRef`, the value classes, `CRowProcessor`, `CListReader`,
 `DL_STR`/`DL_T` and the methods `insert`, `execDML`, `queryRow`, `queryRowList` of `CDataStore`;
 everything else is yours (`open`, transactions, your value classes). Templates:
 [`DataStore.h.txt`](datastore/templates/DataStore.h.txt) and

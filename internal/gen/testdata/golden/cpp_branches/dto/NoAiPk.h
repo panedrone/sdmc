@@ -9,8 +9,8 @@
 class NoAiPk {
 public:
 
-    CInteger id; // t
-    CText name; // t
+    qint64 id; // t
+    QString name; // t
 };
 
 #endif // !defined(_NoAiPk_)

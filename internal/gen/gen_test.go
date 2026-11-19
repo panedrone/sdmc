@@ -18,11 +18,13 @@ import (
 // build/<out>/<label>/ is copied to testdata/golden/<label>/. The templates of sdm-plugins are LF
 // (.gitattributes there), as is the output of sdmc.
 //
-// task_board/refcursors_python, python_branches, cpp, cpp_branches, cpp_camel and cpp_snake are the
-// plug-in project of qt6_sqlite3_task_board with this XML (the sdm folder of the Java harness is an absolute path to them).
-// C++ is not the plug-in's any more: its type map knows the driver names only (TypeMap.DriverNamesOnly),
-// so the cpp* settings.xml have driver keys; the SQLite parameters, String for the plug-in and unknown
-// for the driver, get "default" (CValue) instead of CText.
+// task_board/refcursors_python and python_branches are the plug-in project of qt6_sqlite3_task_board with
+// this XML (the sdm folder of the Java harness is an absolute path to them).
+// C++ is sdmc's own, the IDE plug-ins have no C++: the cpp* references are sdmc's output, not the
+// plug-in's; retake them by generating with sdmc and checking the diff by eye. Its type map knows the
+// driver names only (TypeMap.DriverNamesOnly), so the cpp* settings.xml have driver keys; the SQLite
+// parameters, unknown for the driver, get "default" (CVariant). NOT NULL fields are values, the DAO
+// pass CRef (internal/cppgen/cpp.tmpl).
 var goldenCases = []struct {
 	label, project, sdm string
 }{

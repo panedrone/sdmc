@@ -1,4 +1,5 @@
-// Package cppgen is the C++ generator: the port of CppCG.java and cpp.vm. The DTO and DAO of a C++ project
+// Package cppgen is the C++ generator, sdmc's own: it started as the port of CppCG.java and cpp.vm of the
+// IDE plug-ins, which have no C++ any more. The DTO and DAO of a C++ project
 // are headers <Class>.h in one folder, <folders target> of settings.xml; the names of fields and CRUD
 // methods follow <dto field-names-mode> (FieldNamesMode).
 package cppgen
@@ -174,7 +175,7 @@ func init() {
 // checkNames catches the names that are fine in the XML of Go or Java, but not in C++, before the
 // compiler does it with a page of errors: a keyword (register, delete, ...) as a method or a parameter,
 // and a method named as a model class of the same DAO (OrdersByMonth returning CListReader<OrdersByMonth>):
-// inside the class the method hides the type. The plug-in generates such code as is.
+// inside the class the method hides the type. The Java plug-in generated such code as is.
 func checkNames(plan []cg.DaoMethod) error {
 	models := map[string]bool{}
 	for _, m := range plan {
@@ -203,13 +204,13 @@ func checkNames(plan []cg.DaoMethod) error {
 	return errors.Join(errs...)
 }
 
-// javaShortNames are the Java types old XML of the plug-in declares by the short name, with the value
-// class of DataStore.h for each.
+// javaShortNames are the Java types old XML of the plug-in declares by the short name, with the C++
+// type of a NOT NULL value for each.
 var javaShortNames = map[string]string{
-	"String": "CText", "Character": "CText",
-	"Byte": "CInt16", "Short": "CInt16", "Integer": "CInt32", "Long": "CInt64", "BigInteger": "CInt64",
-	"Boolean": "CBool", "Float": "CFloat", "Double": "CDouble", "BigDecimal": "CText",
-	"Date": "CDate", "Time": "CTime", "Timestamp": "CDateTime", "Object": "CVariant",
+	"String": "QString", "Character": "QString",
+	"Byte": "qint16", "Short": "qint16", "Integer": "qint32", "Long": "qint64", "BigInteger": "qint64",
+	"Boolean": "bool", "Float": "float", "Double": "double", "BigDecimal": "QString",
+	"Date": "QDate", "Time": "QTime", "Timestamp": "QDateTime", "Object": "CVariant",
 }
 
 // checkJavaTypes catches a short Java name (String country_code, return-type="Integer") that the type

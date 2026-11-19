@@ -23,7 +23,7 @@ public:
     */
     int createNoAiPk(NoAiPk &p) {
         DL_STR sql = DL_T("insert into _no_ai_pk (id, name) values (?, ?)");
-        CValue *params[] = {&p.id, &p.name};
+        CRef params[] = {p.id, p.name};
         return m_ds.execDML(sql, 2, params);
     }
 	
@@ -39,7 +39,7 @@ public:
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *res_values[] = {&rp.buff.id, &rp.buff.name};
+        CRef res_values[] = {rp.buff.id, rp.buff.name};
         DL_STR col_names[] = {DL_T("id"), DL_T("name")};
         return m_ds.queryRowList(sql, 0, 0, 2, res_values, col_names, &rp);
     }
@@ -48,10 +48,10 @@ public:
        C(R)UD: _no_ai_pk
        Returns the number of fetched rows or -1 on error.
      */
-    int readNoAiPk(CInteger &id, NoAiPk &res) {
+    int readNoAiPk(const qint64 &id, NoAiPk &res) {
         DL_STR sql = DL_T("select * from _no_ai_pk where id=?");
-        CValue *params[] = {&id};
-        CValue *res_values[] = {&res.id, &res.name};
+        CRef params[] = {id};
+        CRef res_values[] = {res.id, res.name};
         DL_STR col_names[] = {DL_T("id"), DL_T("name")};
         return m_ds.queryRow(sql, 1, params, 2, res_values, col_names);
     }
@@ -62,7 +62,7 @@ public:
     */
     int updateNoAiPk(NoAiPk &p) {
         DL_STR sql = DL_T("update _no_ai_pk set name=? where id=?");
-        CValue *params[] = {&p.name, &p.id};
+        CRef params[] = {p.name, p.id};
         return m_ds.execDML(sql, 2, params);
     }
 	
@@ -70,9 +70,9 @@ public:
        CRU(D): _no_ai_pk
        Returns the number of affected rows or -1 on error.
     */
-    int deleteNoAiPk(CInteger &id) {
+    int deleteNoAiPk(const qint64 &id) {
         DL_STR sql = DL_T("delete from _no_ai_pk where id=?");
-        CValue *params[] = {&id};
+        CRef params[] = {id};
         return m_ds.execDML(sql, 1, params);
     }
 };

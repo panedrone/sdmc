@@ -9,11 +9,11 @@
 class Board {
 public:
 
-    CValue b_id; // q
-    CValue b_dt_created; // q
-    CValue b_dt_updated; // q
-    CValue b_name; // q
-    CValue b_tasks_count; // q
+    CVariant b_id; // q
+    CVariant b_dt_created; // q
+    CVariant b_dt_updated; // q
+    CVariant b_name; // q
+    CVariant b_tasks_count; // q
 };
 
 #endif // !defined(_Board_)

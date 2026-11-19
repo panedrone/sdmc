@@ -1,41 +1,41 @@
     <type-map default="">
 
-        <type detected="TINYINT" target="CInt16${N}"/>
-        <type detected="SMALLINT" target="CInt16${N}"/>
-        <type detected="MEDIUMINT" target="CInt32${N}"/>
-        <type detected="INT" target="CInt32${N}"/>
-        <type detected="UNSIGNED TINYINT" target="CUInt16${N}"/>
-        <type detected="UNSIGNED SMALLINT" target="CUInt16${N}"/>
-        <type detected="UNSIGNED MEDIUMINT" target="CUInt32${N}"/>
-        <type detected="UNSIGNED INT" target="CUInt32${N}"/>
-        <type detected="BIGINT" target="CInt64${N}"/>
-        <type detected="UNSIGNED BIGINT" target="CUInt64${N}"/>
-        <type detected="FLOAT" target="CFloat${N}"/>
-        <type detected="DOUBLE" target="CDouble${N}"/>
-        <type detected="DECIMAL" target="CText${N}"/>
-        <type detected="CHAR" target="CText${N}"/>
-        <type detected="VARCHAR" target="CText${N}"/>
-        <type detected="TEXT" target="CText${N}"/>
-        <type detected="TINYTEXT" target="CText${N}"/>
-        <type detected="MEDIUMTEXT" target="CText${N}"/>
-        <type detected="LONGTEXT" target="CText${N}"/>
-        <type detected="TIME" target="CText${N}"/>
-        <type detected="GEOMETRY" target="CBlob${N}"/>
-        <type detected="ENUM" target="CText${N}"/>
+        <type detected="TINYINT" target="${nullable}|0:qint16|1:CInt16N"/>
+        <type detected="SMALLINT" target="${nullable}|0:qint16|1:CInt16N"/>
+        <type detected="MEDIUMINT" target="${nullable}|0:qint32|1:CInt32N"/>
+        <type detected="INT" target="${nullable}|0:qint32|1:CInt32N"/>
+        <type detected="UNSIGNED TINYINT" target="${nullable}|0:quint16|1:CUInt16N"/>
+        <type detected="UNSIGNED SMALLINT" target="${nullable}|0:quint16|1:CUInt16N"/>
+        <type detected="UNSIGNED MEDIUMINT" target="${nullable}|0:quint32|1:CUInt32N"/>
+        <type detected="UNSIGNED INT" target="${nullable}|0:quint32|1:CUInt32N"/>
+        <type detected="BIGINT" target="${nullable}|0:qint64|1:CInt64N"/>
+        <type detected="UNSIGNED BIGINT" target="${nullable}|0:quint64|1:CUInt64N"/>
+        <type detected="FLOAT" target="${nullable}|0:float|1:CFloatN"/>
+        <type detected="DOUBLE" target="${nullable}|0:double|1:CDoubleN"/>
+        <type detected="DECIMAL" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="CHAR" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="VARCHAR" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="TEXT" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="TINYTEXT" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="MEDIUMTEXT" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="LONGTEXT" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="TIME" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="GEOMETRY" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="ENUM" target="${nullable}|0:QString|1:CTextN"/>
         <type detected="SET" target="CVariant"/>
-        <type detected="JSON" target="CText${N}"/>
-        <type detected="BLOB" target="CBlob${N}"/>
-        <type detected="TINYBLOB" target="CBlob${N}"/>
-        <type detected="MEDIUMBLOB" target="CBlob${N}"/>
-        <type detected="LONGBLOB" target="CBlob${N}"/>
+        <type detected="JSON" target="${nullable}|0:QString|1:CTextN"/>
+        <type detected="BLOB" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="TINYBLOB" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="MEDIUMBLOB" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="LONGBLOB" target="${nullable}|0:QByteArray|1:CBlobN"/>
         <type detected="NULL" target="CVariant"/>
-        <type detected="BINARY" target="CBlob${N}"/>
-        <type detected="VARBINARY" target="CBlob${N}"/>
-        <type detected="BIT" target="CUInt64${N}"/>
-        <type detected="DATE" target="CDate${N}"/>
-        <type detected="DATETIME" target="CDateTime${N}"/>
-        <type detected="TIMESTAMP" target="CDateTime${N}"/>
-        <type detected="YEAR" target="CInt16${N}"/>
+        <type detected="BINARY" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="VARBINARY" target="${nullable}|0:QByteArray|1:CBlobN"/>
+        <type detected="BIT" target="${nullable}|0:quint64|1:CUInt64N"/>
+        <type detected="DATE" target="${nullable}|0:QDate|1:CDateN"/>
+        <type detected="DATETIME" target="${nullable}|0:QDateTime|1:CDateTimeN"/>
+        <type detected="TIMESTAMP" target="${nullable}|0:QDateTime|1:CDateTimeN"/>
+        <type detected="YEAR" target="${nullable}|0:qint16|1:CInt16N"/>
         <type detected="unknown" target="CVariant"/>
 
     </type-map>

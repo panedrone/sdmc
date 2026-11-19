@@ -5,10 +5,10 @@
     The data store for C++, Qt 5/6 and PostgreSQL (QtSql, the driver QPSQL), used by the generated DAO.
     "sdmc init -lang cpp -db pg" writes it next to the DAO, "sdmc ds" updates it to the sdmc version.
 
-    The generated DAO use only the adapter: CValue and the value classes, CRowProcessor, CListReader,
-    DL_STR and DL_T, the methods of CDataStore under "the adapter of the generated DAO". Keep their
-    names and parameters; everything else is yours: the connection, transactions, logging, more value
-    classes for the type map of settings.xml.
+    The generated DAO use only the adapter: CRef, CValue and the value classes, CRowProcessor,
+    CListReader, DL_STR and DL_T, the methods of CDataStore under "the adapter of the generated DAO".
+    Keep their names and parameters; everything else is yours: the connection, transactions, logging,
+    more value classes for the type map of settings.xml.
 
         CDataStore ds;
         if (!ds.open("localhost", 5432, "postgres", "postgres", "")) {
@@ -28,6 +28,7 @@
 #include <QVariant>
 
 #include <list>
+#include <type_traits>
 
 // nullOf is the NULL of type T: a typed one, so that any driver knows what it binds
 template <class T>
@@ -40,20 +41,23 @@ QVariant nullOf() {
 }
 
 /*
-    CValue is a value of a column or a parameter, without data of its own: QtSql passes values as
-    QVariant, and each value class converts its Value to and from it, NULL included: toVariant() for
-    a parameter, fromVariant() for a fetched column. A class of your own is a typedef of the templates
-    below or, for anything else, a Value and the two conversions.
+    A field of a model or a parameter of a DAO method is one of two kinds:
+      - a NOT NULL column is the value itself: qint32, double, QString, QByteArray, QDateTime, ... NULL is
+        never sent (QString() goes as ""), a NULL that comes anyway is 0 or empty;
+      - a nullable column is a value class from CNullable<T> (CInt32N, CDoubleN, CTextN, CBlobN, ...):
+        Value and IsNull; a new one is NULL, set IsNull = false along with Value.
+    Which of the two a field gets is up to the type map of settings.xml:
+    target="${nullable}|0:QString|1:CTextN", where the macro ${nullable} picks 1 for a nullable column
+    of a table and 0 otherwise.
 
-    Each type comes twice, the same way for all of them, from two templates:
-      - CNotNull<T> (CInt32, CDouble, CText, CBlob, ...): a NOT NULL column, Value only; NULL is never
-        sent (QString() goes as ""), a NULL that comes anyway is 0 or empty;
-      - CNullable<T> (CInt32N, CDoubleN, CTextN, CBlobN, ...): a nullable column, Value and IsNull; a new
-        one is NULL, set IsNull = false along with Value.
-    T is any type QVariant converts (QVariant::fromValue, value<T>): typedef CNullable<QUuid> CUuidN;
+    CValue is a value class without data of its own: QtSql passes values as QVariant, and each value
+    class converts its Value to and from it, NULL included: toVariant() for a parameter, fromVariant()
+    for a fetched column. A class of your own is a typedef of CNullable<T> (T is any type QVariant
+    converts: typedef CNullable<QUuid> CUuidN) or, for anything else, a Value and the two conversions.
     CVariant is one: QVariant has its own NULL.
-    Which of the two a field gets is up to the type map of settings.xml: target="CText${N}", where the
-    macro ${N} gives "N" for a nullable column of a table.
+
+    CRef is what the generated DAO pass to CDataStore: a reference to a field or a parameter of either
+    kind, a value or a CValue.
  */
 class CValue {
 public:
@@ -95,25 +99,6 @@ inline QVariant notNull(const QByteArray &v) {
     return v.isNull() ? QVariant(QByteArray("")) : QVariant(v);
 }
 
-// CNotNull is a NOT NULL column: Value only. A NULL that comes anyway is T(): 0 or empty.
-template <class T>
-class CNotNull : public CValue {
-public:
-
-    CNotNull() : Value() {
-    }
-
-    T Value;
-
-    QVariant toVariant() const override {
-        return notNull(Value);
-    }
-
-    void fromVariant(const QVariant &v) override {
-        Value = v.value<T>();
-    }
-};
-
 // CNullable is a nullable column: Value and IsNull. A new one is NULL; set IsNull = false along with Value.
 template <class T>
 class CNullable : public CValue {
@@ -135,23 +120,8 @@ public:
     }
 };
 
-// the classes of the type map; one more type is one more pair of lines. No 8-bit integers: qint8 and
-// quint8 are chars in C++, a stream prints them as characters; TINYINT goes to CInt16 or CUInt16.
-typedef CNotNull<qint16> CInt16;
-typedef CNotNull<qint32> CInt32;
-typedef CNotNull<qint64> CInt64;
-typedef CNotNull<quint16> CUInt16;
-typedef CNotNull<quint32> CUInt32;
-typedef CNotNull<quint64> CUInt64;
-typedef CNotNull<float> CFloat;
-typedef CNotNull<double> CDouble;
-typedef CNotNull<QString> CText;
-typedef CNotNull<QByteArray> CBlob;
-typedef CNotNull<bool> CBool;
-typedef CNotNull<QDate> CDate;
-typedef CNotNull<QTime> CTime;
-typedef CNotNull<QDateTime> CDateTime;
-
+// the classes of nullable columns; one more type is one more line. No 8-bit integers: qint8 and quint8
+// are chars in C++, a stream prints them as characters; TINYINT goes to qint16 or quint16.
 typedef CNullable<qint16> CInt16N;
 typedef CNullable<qint32> CInt32N;
 typedef CNullable<qint64> CInt64N;
@@ -167,9 +137,55 @@ typedef CNullable<QDate> CDateN;
 typedef CNullable<QTime> CTimeN;
 typedef CNullable<QDateTime> CDateTimeN;
 
-// CInteger is CInt64: the one integer class of the type maps before sdmc 1.3.2
-typedef CInt64 CInteger;
-typedef CInt64N CIntegerN;
+/*
+    CRef refers to a field or a parameter for CDataStore: a value of a NOT NULL column (qint32 &, QString &)
+    or a CValue. The generated DAO make arrays of them: CRef params[] = {p.t_subject, p.t_comment};
+    It takes a const reference for both: parameters are only read, fetched values are written to the
+    fields of a model or to res, which are never const.
+ */
+class CRef {
+public:
+
+    CRef(const CValue &v) : ptr(const_cast<CValue *>(&v)), to(&valueTo), from(&valueFrom) {
+    }
+
+    template <class T, class = typename std::enable_if<!std::is_base_of<CValue, T>::value>::type>
+    CRef(const T &v) : ptr(const_cast<T *>(&v)), to(&rawTo<T>), from(&rawFrom<T>) {
+    }
+
+    QVariant toVariant() const {
+        return to(ptr);
+    }
+
+    void fromVariant(const QVariant &v) const {
+        from(ptr, v);
+    }
+
+private:
+
+    void *ptr;
+    QVariant (*to)(const void *);
+    void (*from)(void *, const QVariant &);
+
+    static QVariant valueTo(const void *p) {
+        return static_cast<const CValue *>(p)->toVariant();
+    }
+
+    static void valueFrom(void *p, const QVariant &v) {
+        static_cast<CValue *>(p)->fromVariant(v);
+    }
+
+    // a NULL that comes to a NOT NULL value is T(): 0 or empty
+    template <class T>
+    static QVariant rawTo(const void *p) {
+        return notNull(*static_cast<const T *>(p));
+    }
+
+    template <class T>
+    static void rawFrom(void *p, const QVariant &v) {
+        *static_cast<T *>(p) = v.value<T>();
+    }
+};
 
 class CRowProcessor {
 public:
@@ -184,7 +200,7 @@ public:
     A DAO method for a list calls read() for each fetched row:
 
         struct : CListReader<Task> {
-            void read(Task &t) { qDebug() << t.t_subject.Value; }
+            void read(Task &t) { qDebug() << t.t_subject; }
         } reader;
         dao.read_task_list(reader);
  */
@@ -247,17 +263,17 @@ public:
 
     // AI_values: the generated values, at most one; without them the DAO call execDML instead.
     // Returns the number of inserted rows or -1 on error.
-    int insert(DL_STR sql, int params_count, CValue *params[], int AI_values_count, CValue *AI_values[]);
+    int insert(DL_STR sql, int params_count, const CRef params[], int AI_values_count, const CRef AI_values[]);
 
     // Returns the number of affected rows or -1 on error.
-    int execDML(DL_STR sql, int params_count, CValue *params[]);
+    int execDML(DL_STR sql, int params_count, const CRef params[]);
 
     // No params: params_count == 0 and params == 0. Returns the number of fetched rows or -1 on error;
     // more than 1 row is an error too (getLastErrors), ret_values have the last one.
-    int queryRow(DL_STR sql, int params_count, CValue *params[], int ret_values_count, CValue *ret_values[], DL_STR col_names[]);
+    int queryRow(DL_STR sql, int params_count, const CRef params[], int ret_values_count, const CRef ret_values[], DL_STR col_names[]);
 
     // No params: params_count == 0 and params == 0. Returns the number of fetched rows or -1 on error.
-    int queryRowList(DL_STR sql, int params_count, CValue *params[], int ret_values_count, CValue *ret_values[], DL_STR col_names[], CRowProcessor *rowProcessor);
+    int queryRowList(DL_STR sql, int params_count, const CRef params[], int ret_values_count, const CRef ret_values[], DL_STR col_names[], CRowProcessor *rowProcessor);
 
 private:
 
@@ -265,8 +281,8 @@ private:
     QString errors;
     bool transaction;
 
-    bool exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *params[]);
-    bool readRow(QSqlQuery &query, int ret_values_count, CValue *ret_values[], DL_STR col_names[]);
+    bool exec(DL_STR sql, QSqlQuery &query, int params_count, const CRef params[]);
+    bool readRow(QSqlQuery &query, int ret_values_count, const CRef ret_values[], DL_STR col_names[]);
 };
 
 #endif // SDM_DATA_STORE_H

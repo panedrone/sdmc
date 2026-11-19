@@ -31,7 +31,7 @@ order by b.b_dt_created, b.b_id");
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *res_values[] = {&rp.buff.b_id, &rp.buff.b_dt_created, &rp.buff.b_dt_updated, &rp.buff.b_name, &rp.buff.b_tasks_count};
+        CRef res_values[] = {rp.buff.b_id, rp.buff.b_dt_created, rp.buff.b_dt_updated, rp.buff.b_name, rp.buff.b_tasks_count};
         DL_STR col_names[] = {DL_T("b_id"), DL_T("b_dt_created"), DL_T("b_dt_updated"), DL_T("b_name"), DL_T("b_tasks_count")};
         return m_ds.queryRowList(sql, 0, 0, 5, res_values, col_names, &rp);
     }
@@ -43,8 +43,8 @@ order by b.b_dt_created, b.b_id");
     */
     int create_board(Board &p) {
         DL_STR sql = DL_T("insert into boards (b_dt_created, b_dt_updated, b_name) values (?, ?, ?)");
-        CValue *params[] = {&p.b_dt_created, &p.b_dt_updated, &p.b_name};
-        CValue *ai_values[]= {&p.b_id};
+        CRef params[] = {p.b_dt_created, p.b_dt_updated, p.b_name};
+        CRef ai_values[] = {p.b_id};
         return m_ds.insert(sql,	3, params, 1, ai_values);
     }
 	
@@ -60,7 +60,7 @@ order by b.b_dt_created, b.b_id");
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *res_values[] = {&rp.buff.b_id, &rp.buff.b_dt_created, &rp.buff.b_dt_updated, &rp.buff.b_name};
+        CRef res_values[] = {rp.buff.b_id, rp.buff.b_dt_created, rp.buff.b_dt_updated, rp.buff.b_name};
         DL_STR col_names[] = {DL_T("b_id"), DL_T("b_dt_created"), DL_T("b_dt_updated"), DL_T("b_name")};
         return m_ds.queryRowList(sql, 0, 0, 4, res_values, col_names, &rp);
     }
@@ -69,10 +69,10 @@ order by b.b_dt_created, b.b_id");
        C(R)UD: boards
        Returns the number of fetched rows or -1 on error.
      */
-    int read_board(CInteger &b_id, Board &res) {
+    int read_board(const qint64 &b_id, Board &res) {
         DL_STR sql = DL_T("select * from boards where b_id=?");
-        CValue *params[] = {&b_id};
-        CValue *res_values[] = {&res.b_id, &res.b_dt_created, &res.b_dt_updated, &res.b_name};
+        CRef params[] = {b_id};
+        CRef res_values[] = {res.b_id, res.b_dt_created, res.b_dt_updated, res.b_name};
         DL_STR col_names[] = {DL_T("b_id"), DL_T("b_dt_created"), DL_T("b_dt_updated"), DL_T("b_name")};
         return m_ds.queryRow(sql, 1, params, 4, res_values, col_names);
     }
@@ -83,7 +83,7 @@ order by b.b_dt_created, b.b_id");
     */
     int update_board(Board &p) {
         DL_STR sql = DL_T("update boards set b_dt_created=?, b_dt_updated=?, b_name=? where b_id=?");
-        CValue *params[] = {&p.b_dt_created, &p.b_dt_updated, &p.b_name, &p.b_id};
+        CRef params[] = {p.b_dt_created, p.b_dt_updated, p.b_name, p.b_id};
         return m_ds.execDML(sql, 4, params);
     }
 	
@@ -91,18 +91,18 @@ order by b.b_dt_created, b.b_id");
        CRU(D): boards
        Returns the number of affected rows or -1 on error.
     */
-    int delete_board(CInteger &b_id) {
+    int delete_board(const qint64 &b_id) {
         DL_STR sql = DL_T("delete from boards where b_id=?");
-        CValue *params[] = {&b_id};
+        CRef params[] = {b_id};
         return m_ds.execDML(sql, 1, params);
     }
 	
     /*
        Returns the number of affected rows or -1 on error.
     */
-    int del_by_range(CValue &b_id1, CValue &b_id2) {
+    int del_by_range(const CVariant &b_id1, const CVariant &b_id2) {
         DL_STR sql = DL_T("delete from boards where b_id between ? and ?");
-        CValue *params[] = {&b_id1, &b_id2};
+        CRef params[] = {b_id1, b_id2};
         return m_ds.execDML(sql, 2, params);
     }
 };

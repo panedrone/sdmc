@@ -58,14 +58,14 @@ bool CDataStore::rollback() {
 }
 
 // exec prepares the query, binds the parameters by position and runs it.
-bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *params[]) {
+bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, const CRef params[]) {
     errors.clear();
     if (!query.prepare(QString::fromUtf8(sql))) {
         errors = query.lastError().text();
         return false;
     }
     for (int i = 0; i < params_count; i++) {
-        query.addBindValue(params[i]->toVariant());
+        query.addBindValue(params[i].toVariant());
     }
     if (!query.exec()) {
         errors = query.lastError().text();
@@ -74,7 +74,7 @@ bool CDataStore::exec(DL_STR sql, QSqlQuery &query, int params_count, CValue *pa
     return true;
 }
 
-bool CDataStore::readRow(QSqlQuery &query, int ret_values_count, CValue *ret_values[], DL_STR col_names[]) {
+bool CDataStore::readRow(QSqlQuery &query, int ret_values_count, const CRef ret_values[], DL_STR col_names[]) {
     for (int i = 0; i < ret_values_count; i++) {
         int index = query.record().indexOf(QString::fromUtf8(col_names[i]));
         if (index < 0 && i < query.record().count() && query.record().fieldName(i).isEmpty()) {
@@ -84,12 +84,12 @@ bool CDataStore::readRow(QSqlQuery &query, int ret_values_count, CValue *ret_val
             errors = QString("no column %1 in the result").arg(col_names[i]);
             return false;
         }
-        ret_values[i]->fromVariant(query.value(index));
+        ret_values[i].fromVariant(query.value(index));
     }
     return true;
 }
 
-int CDataStore::insert(DL_STR sql, int params_count, CValue *params[], int AI_values_count, CValue *AI_values[]) {
+int CDataStore::insert(DL_STR sql, int params_count, const CRef params[], int AI_values_count, const CRef AI_values[]) {
     QSqlQuery query(QSqlDatabase::database(connectionName, false));
     if (!exec(sql, query, params_count, params)) {
         return -1;
@@ -99,11 +99,11 @@ int CDataStore::insert(DL_STR sql, int params_count, CValue *params[], int AI_va
         return rows;
     }
     QVariant id = query.lastInsertId();
-    AI_values[0]->fromVariant(id);
+    AI_values[0].fromVariant(id);
     return rows;
 }
 
-int CDataStore::execDML(DL_STR sql, int params_count, CValue *params[]) {
+int CDataStore::execDML(DL_STR sql, int params_count, const CRef params[]) {
     QSqlQuery query(QSqlDatabase::database(connectionName, false));
     if (!exec(sql, query, params_count, params)) {
         return -1;
@@ -111,7 +111,7 @@ int CDataStore::execDML(DL_STR sql, int params_count, CValue *params[]) {
     return query.numRowsAffected();
 }
 
-int CDataStore::queryRow(DL_STR sql, int params_count, CValue *params[], int ret_values_count, CValue *ret_values[], DL_STR col_names[]) {
+int CDataStore::queryRow(DL_STR sql, int params_count, const CRef params[], int ret_values_count, const CRef ret_values[], DL_STR col_names[]) {
     QSqlQuery query(QSqlDatabase::database(connectionName, false));
     query.setForwardOnly(true);
     if (!exec(sql, query, params_count, params)) {
@@ -130,7 +130,7 @@ int CDataStore::queryRow(DL_STR sql, int params_count, CValue *params[], int ret
     return rows;
 }
 
-int CDataStore::queryRowList(DL_STR sql, int params_count, CValue *params[], int ret_values_count, CValue *ret_values[], DL_STR col_names[], CRowProcessor *rowProcessor) {
+int CDataStore::queryRowList(DL_STR sql, int params_count, const CRef params[], int ret_values_count, const CRef ret_values[], DL_STR col_names[], CRowProcessor *rowProcessor) {
     QSqlQuery query(QSqlDatabase::database(connectionName, false));
     query.setForwardOnly(true);
     if (!exec(sql, query, params_count, params)) {

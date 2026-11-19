@@ -9,10 +9,10 @@
 class TaskUser {
 public:
 
-    CInteger t_id; // t
-    CInteger u_id; // t
-    CText tu_comment; // t
-    CText tu_date; // t
+    qint64 t_id; // t
+    qint64 u_id; // t
+    CTextN tu_comment; // t
+    CTextN tu_date; // t
 };
 
 #endif // !defined(_TaskUser_)

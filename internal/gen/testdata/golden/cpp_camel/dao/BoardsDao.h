@@ -24,8 +24,8 @@ public:
     */
     int createBoard(Board &p) {
         DL_STR sql = DL_T("insert into boards (b_dt_created, b_dt_updated, b_name) values (?, ?, ?)");
-        CValue *params[] = {&p.bDtCreated, &p.bDtUpdated, &p.bName};
-        CValue *ai_values[]= {&p.bID};
+        CRef params[] = {p.bDtCreated, p.bDtUpdated, p.bName};
+        CRef ai_values[] = {p.bID};
         return m_ds.insert(sql,	3, params, 1, ai_values);
     }
 	
@@ -33,10 +33,10 @@ public:
        C(R)UD: boards
        Returns the number of fetched rows or -1 on error.
      */
-    int readBoard(CInteger &bID, Board &res) {
+    int readBoard(const qint64 &bID, Board &res) {
         DL_STR sql = DL_T("select * from boards where b_id=?");
-        CValue *params[] = {&bID};
-        CValue *res_values[] = {&res.bID, &res.bDtCreated, &res.bDtUpdated, &res.bName};
+        CRef params[] = {bID};
+        CRef res_values[] = {res.bID, res.bDtCreated, res.bDtUpdated, res.bName};
         DL_STR col_names[] = {DL_T("b_id"), DL_T("b_dt_created"), DL_T("b_dt_updated"), DL_T("b_name")};
         return m_ds.queryRow(sql, 1, params, 4, res_values, col_names);
     }
@@ -48,8 +48,8 @@ public:
     */
     int insertBoard(Board &p) {
         DL_STR sql = DL_T("insert into boards (b_dt_created, b_dt_updated, b_name) values (?, ?, ?)");
-        CValue *params[] = {&p.bDtCreated, &p.bDtUpdated, &p.bName};
-        CValue *ai_values[]= {&p.bID};
+        CRef params[] = {p.bDtCreated, p.bDtUpdated, p.bName};
+        CRef ai_values[] = {p.bID};
         return m_ds.insert(sql,	3, params, 1, ai_values);
     }
 };

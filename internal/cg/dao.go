@@ -151,6 +151,8 @@ func (c *Core) refineDaoFieldsByDtoFields(dto *sdmxml.DtoClass, daoFields []Fiel
 		// the DTO field type takes precedence if it is not Object or its target type is not "object"
 		if dtoFi.originalType != meta.JavaObject || (objectTarget != "" && objectTarget != dtoFi.renderedType) {
 			fi = fi.WithRenderedType(dtoFi.renderedType).WithAssignFunc(dtoFi.assignFunc)
+		} else if fi, err = c.columnTarget(fi); err != nil {
+			return nil, err
 		}
 		res = append(res, fi.WithComment(dtoFi.comment+" <- "+daoFi.comment))
 	}
@@ -386,6 +388,16 @@ func (c *Core) CrudDeleteInfo(table string, dto *sdmxml.DtoClass, explicitPK str
 	return res, nil
 }
 
+// columnTarget: the type of a table column that the DTO does not give is the target of the type map
+// with its macros (${nullable}|0:qint64|1:CInt64N), as for a DTO field.
+func (c *Core) columnTarget(fi FieldInfo) (FieldInfo, error) {
+	t, err := c.mc.ParseTargetType(fi.renderedType, fi)
+	if err != nil {
+		return fi, err
+	}
+	return fi.WithRenderedType(t), nil
+}
+
 func (c *Core) crudTable(dto *sdmxml.DtoClass, table, explicitPK string) (*tableFields, error) {
 	key := dto.Name + "|" + table + "|" + explicitPK
 	if t, ok := c.crud[key]; ok {
@@ -406,13 +418,17 @@ func (c *Core) crudTable(dto *sdmxml.DtoClass, table, explicitPK string) (*table
 		for i, fi := range fields {
 			if r, ok := refined[fi.columnName]; ok {
 				res[i] = r
-			} else {
-				res[i] = fi
+			} else if res[i], err = c.columnTarget(fi); err != nil {
+				return nil
 			}
 		}
 		return res
 	}
-	res := &tableFields{all: all, pk: take(t.pk), notPK: take(t.notPK)}
+	pk, notPK := take(t.pk), take(t.notPK)
+	if err != nil {
+		return nil, err
+	}
+	res := &tableFields{all: all, pk: pk, notPK: notPK}
 	c.crud[key] = res
 	return res, nil
 }

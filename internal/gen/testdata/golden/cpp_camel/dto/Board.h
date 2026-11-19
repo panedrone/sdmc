@@ -9,10 +9,10 @@
 class Board {
 public:
 
-    CInteger bID; // t
-    CText bDtCreated; // t
-    CText bDtUpdated; // t
-    CText bName; // t
+    qint64 bID; // t
+    QString bDtCreated; // t
+    QString bDtUpdated; // t
+    QString bName; // t
 };
 
 #endif // !defined(_Board_)

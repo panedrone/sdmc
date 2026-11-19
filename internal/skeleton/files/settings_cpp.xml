@@ -14,7 +14,7 @@
             0 - as is: the column names (create + Task: createTask)
             1 - lowerCamelCase (taskId, createTask)
             2 - snake_case (task_id, create_task)
-         scope, field-assign-mode: the IDE plug-in only; sdmc ignores them for C++. -->
+         scope, field-assign-mode: not for C++. -->
 
     <dto scope="" inheritance="" field-names-mode="0" macro=""/>
 
@@ -22,10 +22,10 @@
 
     <ide event-log="true"/>
 
-    <!-- One "settings.xml" for the IDE plug-in and for sdmc:
-            jdbc  - the IDE plug-in (jar, class and url of JDBC); sdmc does not read it.
-            db    - sdmc (url: postgres://host:port/db, mysql://host:port/db or sqlite:<file>);
-                    the IDE plug-in ignores it. SDM_PWD, if set, overrides "pwd" of db. -->
+    <!-- C++ is sdmc only, the IDE plug-ins have no C++:
+            jdbc  - required by settings.xsd; sdmc does not read it.
+            db    - the database (url: postgres://host:port/db, mysql://host:port/db or sqlite:<file>);
+                    SDM_PWD, if set, overrides "pwd" of db. -->
 
     <jdbc jar="{{jdbc-jar}}" class="{{jdbc-class}}"
           url="{{jdbc-url}}" user="{{user}}" pwd=""/>
@@ -37,12 +37,11 @@
          MySQL says INT, VARCHAR, DATETIME, UNSIGNED BIGINT, ...;
          SQLite says what the column is declared with: INTEGER, VARCHAR, ...
 
-         target: a value class of DataStore.h (Qt, the driver {{driver}}): CInt16, CInt32,
-         CInt64, CFloat, CDouble, CBool, CText (QString), CBlob (QByteArray), CDate, CTime, CDateTime
-         for NOT NULL columns, the same with N (CInt32N, CTextN: Value and IsNull) for nullable ones;
-         CVariant holds anything in a QVariant.
-         "CText${N}" is CTextN for a nullable column of a table and CText otherwise (the macro ${N}
-         below). Add your own classes to DataStore.h and use them here.
+         target: a NOT NULL column is the value itself: qint16, qint32, qint64, float, double, bool,
+         QString, QByteArray, QDate, QTime, QDateTime; a nullable one is a value class of DataStore.h
+         with Value and IsNull: CInt32N, CTextN, ...; CVariant holds anything in a QVariant.
+         "${nullable}|0:QString|1:CTextN" is CTextN for a nullable column of a table and QString
+         otherwise (the macro ${nullable} below). Add your own classes to DataStore.h and use them here.
 
          To see which names your database gives, empty the type-map: <type-map default=""/>
          and generate. The code then has the raw names of the driver instead of C++ classes.
@@ -52,12 +51,15 @@
 
     <macros>
 
-        <!-- ${N}: "N" for a nullable column of a table (CTextN), nothing for NOT NULL and PK (CText);
-             SQLite reports "integer primary key" as nullable -->
-        <macro name="${N}">
+        <!-- ${nullable}: picks 1 of "|0:...|1:..." for a nullable column of a table (CTextN), 0 for
+             NOT NULL and PK (QString); SQLite reports "integer primary key" as nullable -->
+        <macro name="${nullable}">
             <vm-xml>
                 <if var="$fi.Nullable &amp;&amp; !$fi.PK">
-                    <print var="N"/>
+                    <print var="${1}"/>
+                    <else>
+                        <print var="${0}"/>
+                    </else>
                 </if>
             </vm-xml>
         </macro>

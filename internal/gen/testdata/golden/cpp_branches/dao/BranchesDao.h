@@ -24,23 +24,23 @@ public:
     */
     int createNoAiPk(NoAiPk &p) {
         DL_STR sql = DL_T("insert into _no_ai_pk (id, name) values (?, ?)");
-        CValue *params[] = {&p.id, &p.name};
+        CRef params[] = {p.id, p.name};
         return m_ds.execDML(sql, 2, params);
     }
 	
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_subjects(CValue &b_id, CListReader<CValue> &reader) {
+    int get_subjects(const CVariant &b_id, CListReader<CVariant> &reader) {
         DL_STR sql = DL_T("select t_subject from tasks where b_id = ?");
         struct : public CRowProcessor {
-            CValue buff;
-            CListReader<CValue> *pReader;
+            CVariant buff;
+            CListReader<CVariant> *pReader;
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *params[] = {&b_id};
-        CValue *res_values[] = {&rp.buff};
+        CRef params[] = {b_id};
+        CRef res_values[] = {rp.buff};
         DL_STR col_names[] = {DL_T("t_subject")};
         return m_ds.queryRowList(sql, 1, params, 1, res_values, col_names, &rp);
     }
@@ -48,15 +48,15 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_subjects_ext(DL_STR sql, CValue &b_id, CListReader<CValue> &reader) {
+    int get_subjects_ext(DL_STR sql, const CVariant &b_id, CListReader<CVariant> &reader) {
         struct : public CRowProcessor {
-            CValue buff;
-            CListReader<CValue> *pReader;
+            CVariant buff;
+            CListReader<CVariant> *pReader;
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *params[] = {&b_id};
-        CValue *res_values[] = {&rp.buff};
+        CRef params[] = {b_id};
+        CRef res_values[] = {rp.buff};
         DL_STR col_names[] = {DL_T("t_subject")};
         return m_ds.queryRowList(sql, 1, params, 1, res_values, col_names, &rp);
     }
@@ -64,9 +64,9 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_count(CValue &res) {
+    int get_count(CVariant &res) {
         DL_STR sql = DL_T("select count(*) from tasks");
-        CValue *res_values[] = {&res};
+        CRef res_values[] = {res};
         DL_STR col_names[] = {DL_T("count(*)")};
         return m_ds.queryRow(sql, 0, 0, 1, res_values, col_names);
     }
@@ -74,10 +74,10 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_count_by_board(CValue &b_id, CValue &res) {
+    int get_count_by_board(const CVariant &b_id, CVariant &res) {
         DL_STR sql = DL_T("select count(*) from tasks where b_id = ?");
-        CValue *params[] = {&b_id};
-        CValue *res_values[] = {&res};
+        CRef params[] = {b_id};
+        CRef res_values[] = {res};
         DL_STR col_names[] = {DL_T("count(*)")};
         return m_ds.queryRow(sql, 1, params, 1, res_values, col_names);
     }
@@ -85,10 +85,10 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_task(CValue &t_id, Task &res) {
+    int get_task(const CVariant &t_id, Task &res) {
         DL_STR sql = DL_T("select * from tasks where t_id = ?");
-        CValue *params[] = {&t_id};
-        CValue *res_values[] = {&res.t_id, &res.t_dt_created, &res.t_dt_updated, &res.t_subject, &res.t_comments, &res.t_status, &res.b_id};
+        CRef params[] = {t_id};
+        CRef res_values[] = {res.t_id, res.t_dt_created, res.t_dt_updated, res.t_subject, res.t_comments, res.t_status, res.b_id};
         DL_STR col_names[] = {DL_T("t_id"), DL_T("t_dt_created"), DL_T("t_dt_updated"), DL_T("t_subject"), DL_T("t_comments"), DL_T("t_status"), DL_T("b_id")};
         return m_ds.queryRow(sql, 1, params, 7, res_values, col_names);
     }
@@ -96,9 +96,9 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_task_ext(DL_STR sql, CValue &t_id, Task &res) {
-        CValue *params[] = {&t_id};
-        CValue *res_values[] = {&res.t_id, &res.t_dt_created, &res.t_dt_updated, &res.t_subject, &res.t_comments, &res.t_status, &res.b_id};
+    int get_task_ext(DL_STR sql, const CVariant &t_id, Task &res) {
+        CRef params[] = {t_id};
+        CRef res_values[] = {res.t_id, res.t_dt_created, res.t_dt_updated, res.t_subject, res.t_comments, res.t_status, res.b_id};
         DL_STR col_names[] = {DL_T("t_id"), DL_T("t_dt_created"), DL_T("t_dt_updated"), DL_T("t_subject"), DL_T("t_comments"), DL_T("t_status"), DL_T("b_id")};
         return m_ds.queryRow(sql, 1, params, 7, res_values, col_names);
     }
@@ -106,9 +106,9 @@ public:
     /* 
        Returns the number of fetched rows or -1 on error.
      */
-    int get_odd(CValue &res) {
+    int get_odd(CVariant &res) {
         DL_STR sql = DL_T("select 'a\\c \"q\" \u00E9 \u2211' as v from tasks");
-        CValue *res_values[] = {&res};
+        CRef res_values[] = {res};
         DL_STR col_names[] = {DL_T("v")};
         return m_ds.queryRow(sql, 0, 0, 1, res_values, col_names);
     }
@@ -116,17 +116,17 @@ public:
     /*
        Returns the number of affected rows or -1 on error.
     */
-    int set_status(CValue &t_id, CValue &t_status) {
+    int set_status(const CVariant &t_id, const CVariant &t_status) {
         DL_STR sql = DL_T("update tasks set t_status = ? where t_id = ?");
-        CValue *params[] = {&t_id, &t_status};
+        CRef params[] = {t_id, t_status};
         return m_ds.execDML(sql, 2, params);
     }
 	
     /*
        Returns the number of affected rows or -1 on error.
     */
-    int set_status_ext(DL_STR sql, CValue &t_id, CValue &t_status) {
-        CValue *params[] = {&t_id, &t_status};
+    int set_status_ext(DL_STR sql, const CVariant &t_id, const CVariant &t_status) {
+        CRef params[] = {t_id, t_status};
         return m_ds.execDML(sql, 2, params);
     }
 	

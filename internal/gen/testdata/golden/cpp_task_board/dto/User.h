@@ -9,8 +9,8 @@
 class User {
 public:
 
-    CInteger u_id; // t
-    CText u_name; // t
+    qint64 u_id; // t
+    QString u_name; // t
 };
 
 #endif // !defined(_User_)

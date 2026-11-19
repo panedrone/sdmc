@@ -24,8 +24,8 @@ public:
     */
     int createUser(User &p) {
         DL_STR sql = DL_T("insert into users (u_name) values (?)");
-        CValue *params[] = {&p.u_name};
-        CValue *ai_values[]= {&p.u_id};
+        CRef params[] = {p.u_name};
+        CRef ai_values[] = {p.u_id};
         return m_ds.insert(sql,	1, params, 1, ai_values);
     }
 	
@@ -41,7 +41,7 @@ public:
             void processRow() { pReader->read(buff); }
         } rp;
         rp.pReader = &reader;
-        CValue *res_values[] = {&rp.buff.u_id, &rp.buff.u_name};
+        CRef res_values[] = {rp.buff.u_id, rp.buff.u_name};
         DL_STR col_names[] = {DL_T("u_id"), DL_T("u_name")};
         return m_ds.queryRowList(sql, 0, 0, 2, res_values, col_names, &rp);
     }
@@ -50,10 +50,10 @@ public:
        C(R)UD: users
        Returns the number of fetched rows or -1 on error.
      */
-    int readUser(CInteger &u_id, User &res) {
+    int readUser(const qint64 &u_id, User &res) {
         DL_STR sql = DL_T("select * from users where u_id=?");
-        CValue *params[] = {&u_id};
-        CValue *res_values[] = {&res.u_id, &res.u_name};
+        CRef params[] = {u_id};
+        CRef res_values[] = {res.u_id, res.u_name};
         DL_STR col_names[] = {DL_T("u_id"), DL_T("u_name")};
         return m_ds.queryRow(sql, 1, params, 2, res_values, col_names);
     }
@@ -64,7 +64,7 @@ public:
     */
     int updateUser(User &p) {
         DL_STR sql = DL_T("update users set u_name=? where u_id=?");
-        CValue *params[] = {&p.u_name, &p.u_id};
+        CRef params[] = {p.u_name, p.u_id};
         return m_ds.execDML(sql, 2, params);
     }
 	
@@ -72,9 +72,9 @@ public:
        CRU(D): users
        Returns the number of affected rows or -1 on error.
     */
-    int deleteUser(CInteger &u_id) {
+    int deleteUser(const qint64 &u_id) {
         DL_STR sql = DL_T("delete from users where u_id=?");
-        CValue *params[] = {&u_id};
+        CRef params[] = {u_id};
         return m_ds.execDML(sql, 1, params);
     }
 };

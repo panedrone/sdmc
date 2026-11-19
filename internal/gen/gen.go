@@ -37,11 +37,10 @@ const (
 // Langs are the languages; the first is the default.
 var Langs = []Lang{Go, Python, Cpp}
 
-// RootFile is the root file of the IDE plug-in in the sdm folder: go.dal, python.dal, cpp.dal.
+// RootFile is the root file of the sdm folder: go.dal, python.dal (as in the IDE plug-ins), cpp.dal (sdmc only).
 func (l Lang) RootFile() string { return string(l) + ".dal" }
 
-// LangOf is the language of the sdm folder by its root file, as in the IDE plug-ins: python.dal is
-// Python, cpp.dal is C++. Without them the folder is Go: sdmc never needed go.dal.
+// LangOf is the language of the sdm folder by its root file: python.dal is Python, cpp.dal is C++. Without them the folder is Go: sdmc never needed go.dal.
 func LangOf(sdmDir string) (Lang, error) {
 	var found []string
 	res := Go

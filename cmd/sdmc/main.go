@@ -25,7 +25,7 @@ import (
 )
 
 // version: a release build sets it from the tag (goreleaser, -ldflags "-X main.version=...")
-var version = "1.3.3"
+var version = "1.4.0"
 
 const usage = `sdmc %s — SQL DAL Maker CLI for Go, Python and C++
 
@@ -147,7 +147,7 @@ all options are required, but -lang (go by default); Python and C++ have no -orm
 		"  option\tvalue\tmeaning",
 		"  -lang\t" + strings.Join(skeleton.Langs, " | ") + "\tthe language of the generated code",
 		"  -dir\t<folder>\tthe folder of sdm.xml and settings.xml, relative to the project (go.mod);",
-		"  \t\tits line in .sdm (IDE plug-ins, sdmc -c N): <folder>/go.dal, python.dal, cpp.dal",
+		"  \t\tits line in .sdm (IDE plug-ins, sdmc -c N): <folder>/go.dal, python.dal, cpp.dal (sdmc only)",
 		"  -dao\t<folder>\tthe folder of the generated DAO, relative to the project; Go: models go to",
 		"  \t\t<folder>/models, the last element is the Go package name; Python: models",
 		"  \t\tgo there too, the folder is the package (dbal/x -> from dbal.x.task import Task);",
@@ -242,7 +242,11 @@ func runInit(o skeleton.Options, stdout, stderr io.Writer) int {
 	if lang == "" {
 		lang = gen.Go
 	}
-	fmt.Fprintf(stdout, "%s (IDE plug-ins, sdmc -c N): the line %s/%s\n", sdmFile, o.SdmDir, lang.RootFile())
+	users := "IDE plug-ins, sdmc -c N"
+	if lang == gen.Cpp {
+		users = "sdmc -c N; the IDE plug-ins have no C++"
+	}
+	fmt.Fprintf(stdout, "%s (%s): the line %s/%s\n", sdmFile, users, o.SdmDir, lang.RootFile())
 	return 0
 }
 
