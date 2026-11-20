@@ -1,4 +1,4 @@
-# sdmc
+# <img src="docs/img/gopher.svg" alt="Go gopher" height="44" align="absmiddle"> sdmc
 
 [![CI](https://github.com/panedrone/sdmc/actions/workflows/ci.yml/badge.svg)](https://github.com/panedrone/sdmc/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/panedrone/sdmc.svg)](https://pkg.go.dev/github.com/panedrone/sdmc)
